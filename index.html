@@ -388,30 +388,73 @@ button#who:focus-visible{outline:3px solid var(--sky);outline-offset:2px}
 .mmenu.down{bottom:auto;top:calc(100% + 4px)}
 .card2.rq{border:2px solid var(--r1);background:var(--r1s)}.rqrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:8px 0;border-top:1px solid var(--line)}.rqrow>div:nth-child(2){flex:1;min-width:180px}.rqrow strong{display:block;font-size:14px}.rqrow small{font-size:12px;color:var(--mute)}.who2 svg{width:22px;height:22px;color:var(--r2);flex:none}
 /* ===== Učebna ===== */
-#vr{display:flex;flex-direction:column;gap:16px}#vr[hidden]{display:none}
-.meet{display:flex;flex-direction:column;gap:12px;border:1.5px solid color-mix(in srgb,var(--brand) 25%,var(--line))}
-.meet-h{display:flex;gap:12px;align-items:center}.meet-h h3{margin:0}.meet-h .note{margin:2px 0 0}
-.meet-i{display:grid;place-items:center;width:44px;height:44px;border-radius:14px;background:var(--brand);color:#fff;flex:none}.meet-i svg{width:22px;height:22px}
-.meet-row{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;padding-top:12px;border-top:1px solid var(--line)}
-.meet-who{display:flex;gap:10px;align-items:center;min-width:0}.meet-who small{display:block;color:var(--mute);overflow-wrap:anywhere}
-.btn.bigb{padding:12px 20px;font-size:16px}
-.btn svg{width:16px;height:16px;margin-left:6px;vertical-align:-3px}
-.secth{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-top:4px}.secth h3{margin:0}
-.secth .btn svg{margin:0 6px 0 0}
-.room{display:flex;flex-direction:column;gap:12px;transition:transform .2s ease,box-shadow .2s ease}
-.room:hover{transform:translateY(-2px);box-shadow:var(--sh)}
-.room.none{border-style:dashed}
-.room-h{display:flex;gap:10px;align-items:center}.room-h strong{display:block;font-size:16px}.room-h small{color:var(--mute)}
-.room-h .chip{flex:none}
-.room-go{align-self:flex-start;padding:11px 18px}
-.kvc{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.mono{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.04em}
-.ct .hw b{white-space:pre-wrap}
+#vr{display:flex;flex-direction:column;gap:18px}#vr[hidden]{display:none}
+.rhead{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px}
+.rhead h2{margin:0;font-size:20px}.rhead p{margin:2px 0 0;color:var(--mute);font-size:14px}
+.rhead .btn svg,.cr-add svg{width:16px;height:16px;margin-right:6px;vertical-align:-3px}
+/* hovor */
+.lives{display:flex;flex-direction:column;gap:12px}
+.live{position:relative;overflow:hidden;display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding:20px 22px;border-radius:22px;color:#fff;
+ background:radial-gradient(120% 140% at 100% 0%,rgba(255,255,255,.18) 0,rgba(255,255,255,0) 55%),linear-gradient(135deg,#1D4ED8 0%,#2563EB 45%,#0EA5E9 100%);box-shadow:0 14px 30px -12px rgba(29,78,216,.55)}
+.live.off{background:var(--card);color:var(--ink);border:1.5px dashed var(--line);box-shadow:none}
+.live-ico{position:relative;display:grid;place-items:center;width:56px;height:56px;border-radius:18px;background:rgba(255,255,255,.18);flex:none}
+.live.off .live-ico{background:var(--soft);color:var(--brand)}
+.live-ico svg{width:26px;height:26px}
+.live-pulse{position:absolute;top:-3px;right:-3px;width:14px;height:14px;border-radius:50%;background:#34D399;border:3px solid #1D4ED8;animation:lpulse 2s ease-out infinite}
+@keyframes lpulse{0%{box-shadow:0 0 0 0 rgba(52,211,153,.7)}70%{box-shadow:0 0 0 10px rgba(52,211,153,0)}100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.live-t{flex:1;min-width:180px;display:flex;flex-direction:column;gap:2px}
+.live-k{font-size:12px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;opacity:.85}
+.live-t strong{font-size:20px;line-height:1.25}.live-t small{font-size:14px;opacity:.9;overflow-wrap:anywhere}
+.live.off .live-k,.live.off small{color:var(--mute);opacity:1}
+.live-a{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.live-join{display:inline-flex;align-items:center;gap:10px;padding:14px 24px;border-radius:999px;background:#fff;color:#1D4ED8;font-weight:700;font-size:16px;text-decoration:none;box-shadow:0 6px 16px rgba(0,0,0,.18);transition:transform .15s ease,box-shadow .15s ease}
+.live-join svg{width:20px;height:20px}
+.live-join:hover{transform:translateY(-1px);box-shadow:0 10px 22px rgba(0,0,0,.22)}.live-join:active{transform:translateY(0)}
+.live-join:focus-visible,.live-copy:focus-visible,.cr-open:focus-visible,.cr-ib:focus-visible,.cr-edit:focus-visible,.cr-cp:focus-visible,.cr-add:focus-visible,.gcl:focus-visible{outline:3px solid var(--sun);outline-offset:2px}
+.live-join.sm{padding:8px 16px;font-size:14px;background:var(--brand);color:#fff;box-shadow:none}.live-join.sm svg{width:16px;height:16px}
+.live-copy{display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border-radius:999px;border:1.5px solid rgba(255,255,255,.55);background:rgba(255,255,255,.12);color:#fff;font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+.live-copy:hover{background:rgba(255,255,255,.22)}
+.live-copy svg,.cr-cp svg{width:16px;height:16px}
+.i1,.i2{display:inline-flex}.i2{display:none}.ok .i1{display:none}.ok .i2{display:inline-flex}
+/* karty Google Učeben */
+.crgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,280px),1fr));gap:16px}
+.cr{display:flex;flex-direction:column;background:var(--card);border:1px solid var(--line);border-radius:20px;overflow:hidden;transition:transform .2s ease,box-shadow .2s ease}
+.cr:hover{transform:translateY(-3px);box-shadow:0 16px 30px -18px rgba(15,23,42,.45)}
+.cr-top{position:relative;min-height:112px;padding:16px 18px;display:flex;flex-direction:column;justify-content:flex-end;gap:2px;color:#fff;background:linear-gradient(135deg,var(--a),var(--b))}
+.cr.none .cr-top{background:repeating-linear-gradient(135deg,var(--soft) 0 12px,var(--card) 12px 24px);color:var(--ink)}
+.cr-code{position:absolute;top:14px;left:18px;padding:3px 10px;border-radius:999px;background:rgba(255,255,255,.22);font-size:12px;font-weight:700;letter-spacing:.04em}
+.cr.none .cr-code{background:var(--card);border:1px solid var(--line);color:var(--brand)}
+.cr-name{font-size:18px;line-height:1.25;padding-right:44px;position:relative}
+.cr-sub{font-size:13px;opacity:.9;position:relative}.cr.none .cr-sub{color:var(--mute);opacity:1}
+.cr-art{position:absolute;right:-8px;bottom:-14px;opacity:.2;pointer-events:none}.cr-art svg{width:96px;height:96px}
+.cr.none .cr-art{opacity:.08}
+.cr-edit{position:absolute;top:10px;right:10px;width:36px;height:36px;display:grid;place-items:center;border-radius:12px;border:0;background:rgba(255,255,255,.2);color:#fff;cursor:pointer}
+.cr-edit:hover{background:rgba(255,255,255,.32)}.cr-edit svg{width:18px;height:18px}
+.cr.none .cr-edit{background:var(--card);color:var(--brand);border:1px solid var(--line)}
+.cr-body{flex:1;display:flex;flex-direction:column;gap:10px;padding:14px 18px}
+.cr-row{display:flex;gap:10px;align-items:flex-start}
+.cr-row>div{flex:1;min-width:0;display:flex;flex-direction:column}.cr-row>div>span{font-size:12px;color:var(--mute)}.cr-row b{font-size:14px;font-weight:600;overflow-wrap:anywhere}
+.cr-row.hw b{white-space:pre-wrap;font-weight:500}.cr-row.code b{font-family:ui-monospace,Menlo,Consolas,monospace;letter-spacing:.06em}
+.cr-ri{display:grid;place-items:center;width:30px;height:30px;border-radius:10px;background:var(--soft);color:var(--brand);flex:none}.cr-ri svg{width:16px;height:16px}
+.cr-cp{align-self:center;display:grid;place-items:center;width:34px;height:34px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--brand);cursor:pointer}
+.cr-cp.ok{color:var(--ok);border-color:var(--ok)}
+.cr-empty{margin:0;color:var(--mute);font-size:14px}
+.cr-foot{display:flex;gap:8px;align-items:center;padding:0 18px 16px}
+.cr-open{flex:1;display:inline-flex;justify-content:center;align-items:center;gap:8px;padding:12px 16px;border-radius:14px;background:var(--a,var(--brand));color:#fff;font-weight:700;text-decoration:none;transition:filter .15s ease,transform .15s ease}
+.cr-open:hover{filter:brightness(1.08);transform:translateY(-1px)}.cr-open svg{width:16px;height:16px}
+.cr-add{flex:1;display:inline-flex;justify-content:center;align-items:center;padding:12px 16px;border-radius:14px;border:1.5px dashed var(--brand);background:var(--soft);color:var(--brand);font:inherit;font-weight:700;cursor:pointer}
+.cr-add:hover{background:var(--card)}
+.cr-wait{flex:1;text-align:center;padding:11px;border-radius:14px;background:var(--bg);color:var(--mute);font-size:14px}
+.cr-ib{display:grid;place-items:center;width:46px;height:46px;border-radius:14px;border:1px solid var(--line);background:var(--card);color:var(--brand);cursor:pointer;flex:none}
+.cr-ib:hover{background:var(--soft)}.cr-ib svg{width:20px;height:20px}
 .hwlist{display:flex;flex-direction:column}.hwi{padding:10px 0;border-top:1px solid var(--line)}.hwi:first-child{border-top:0}
 .hwd{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.hwi p{margin:4px 0;white-space:pre-wrap}.hwi small{color:var(--mute)}
-.rlinks{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}.rlinks .note{margin:2px 0 0}
+.gcl{display:flex;align-items:center;gap:14px;padding:14px 18px;border-radius:18px;border:1px solid var(--line);background:var(--card);color:var(--ink);text-decoration:none;transition:background .15s ease}
+.gcl:hover{background:var(--soft)}.gcl>div{flex:1;display:flex;flex-direction:column}.gcl small{color:var(--mute)}.gcl>svg{width:18px;height:18px;color:var(--brand)}
+.gcl-i{display:grid;place-items:center;width:40px;height:40px;border-radius:12px;background:#0F9D58;color:#fff;flex:none}.gcl-i svg{width:20px;height:20px}
 .aroom{display:flex;flex-direction:column;gap:14px}.aroom-h{display:flex;gap:10px;align-items:center}.aroom-h>div{flex:1;min-width:0}.aroom-h small{display:block;color:var(--mute);overflow-wrap:anywhere}
-.aroom .room{background:var(--bg)}
-@media (prefers-reduced-motion:reduce){.room,.room:hover{transition:none;transform:none}}
+@media (max-width:560px){.live{padding:18px}.live-a{width:100%}.live-join{flex:1;justify-content:center}}
+@media (prefers-reduced-motion:reduce){.cr,.cr:hover,.live-join,.live-join:hover,.cr-open,.cr-open:hover{transition:none;transform:none}.live-pulse{animation:none}}
 /* ===== úvodní a načítací animace (jen transform a opacity = plynulé i při zatížení) ===== */
 #splash{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:radial-gradient(900px 520px at 50% 38%,var(--soft),var(--bg) 70%);transition:opacity .4s .08s,visibility 0s .5s}
 #splash.out{opacity:0;visibility:hidden;pointer-events:none}
@@ -481,7 +524,7 @@ html.nointro #splash .sx-mini,html.nointro #splash .sx-tr{display:none}html.noin
 <main id="lg" hidden></main>
 <script></script>
 <script>
-var DATA={"mesice": [], "built": 1794085417524};
+var DATA={"mesice": [], "built": 1794086347568};
 var C={brand:"#1D4ED8",royal:"#3D6BFF",sky:"#2FA4F6",sun:"#FFD23F",ink:"#10224F",mute:"#5A6B8F",band:"#F1F5FF",line:"#DCE6F7"};
 var NB=" ";
 function fmt(x){return String(Math.round(x*100)/100).replace(".",",")}
@@ -702,7 +745,7 @@ async function refresh(){
    if(k)sf.push({n:k,e:e.indexOf("@")>0?e:"",p:nn(r[2]),x:z.zkouska,s:z.predmet,dz:nn(r[5]),g:z.garant,st:z.stav,r:ix+2})});
   try{var tAC=await rd(mcp,TEACH_ID,"'Seznam učitelů'!A1:C200"),tEF=await rd(mcp,TEACH_ID,"'Seznam učitelů'!E1:F200"),tML=await rdLinks(mcp,TEACH_ID,"'Seznam učitelů'!F1:F200");tch=[];
    tAC.forEach(function(r,i){if(i===0)return;var n=nn(r[0]);if(!n)return;var x=tEF[i]||[];var e=nn(r[1]);
-    tch.push({ucitel:n,predmety:nn(x[0])});var ml=tML[i]||"";if(!meetOk(ml)&&meetOk(x[1]))ml=nn(x[1]);tf.push({n:n,e:e.indexOf("@")>0?e:"",p:nn(r[2]),s:nn(x[0]),m:nn(x[1]),ml:meetOk(ml)?ml:"",r:i+1})})}
+    tch.push({ucitel:n,predmety:nn(x[0])});var ml=tML[i]||"";if(!meetOk(ml)&&meetOk(x[1]))ml=nn(x[1]);tf.push({n:n,e:e.indexOf("@")>0?e:"",p:nn(r[2]),s:nn(x[0]),m:/^#/.test(nn(x[1]))?"":nn(x[1]),ml:meetOk(ml)?ml:"",r:i+1})})}
   catch(e){if(isAuth(e))throw e;tch=null;tf=[]}
   var now=new Date(),cy=now.getFullYear(),cm=now.getMonth();
   var want=DATA.mesice.map(function(m){return m.id}),found=null;
@@ -1379,9 +1422,13 @@ async function dirRow(role,d){var id=role==="teacher"?TEACH_ID:STUD_ID,tab=role=
  if(d.r){var v=await rdf(H.mcp,id,tab+"!A"+d.r);if(normN((v[0]||[])[0])===normN(d.n))return d.r}
  var col=await rdf(H.mcp,id,tab+"!A1:A600");for(var i=1;i<col.length;i++)if(normN((col[i]||[])[0])===normN(d.n)){d.r=i+1;return d.r}return 0}
 /* buňka Google Meet: popisek s odkazem schovaným pod ním (=HYPERLINK) */
-function meetCell(d){var u=meetOk(d.ml)?nn(d.ml):meetOk(d.m)?nn(d.m):"",lab=d.m&&!meetOk(d.m)?nn(d.m):(u?"Google Meet":"");d.m=lab;d.ml=u;
- return u?{f:'=HYPERLINK("'+u.replace(/"/g,"%22")+'","'+lab.replace(/"/g,"'")+'")'}:{v:lab}}
+function meetLab(m){m=nn(m);return /^#/.test(m)||meetOk(m)?"":m}
+function meetCell(d){var u=meetOk(d.ml)?nn(d.ml):meetOk(d.m)?nn(d.m):"",lab=meetLab(d.m)||(u?"Google Meet":"");d.m=lab;d.ml=u;
+ return u?{u:u,lab:lab,f:'=HYPERLINK("'+u.replace(/"/g,"%22")+'","'+lab.replace(/"/g,"'")+'")'}:{v:lab}}
+/* buňku přepíše jen při změně; v IS na GitHub Pages zapíše odkaz jako vložený odkaz (bez vzorce, nezávisle na jazyku tabulky) */
 async function meetWrite(r,d){var c=meetCell(d),rg="'Seznam učitelů'!F"+r;
+ try{var cur=(await rdf(H.mcp,TEACH_ID,rg))[0]||[],cl=(await rdLinks(H.mcp,TEACH_ID,rg))[0]||"";if(nn(cur[0])===(c.u?c.lab:c.v)&&cl===(c.u||""))return}catch(e){}
+ if(c.u&&typeof PMCP!=="undefined"&&H.mcp===PMCP){await H.mcp.callTool(SRV,"set_link",{spreadsheetId:TEACH_ID,range:rg,text:c.lab,url:c.u});return}
  if(c.f)await H.mcp.callTool(SRV,"update_formulas",{spreadsheetId:TEACH_ID,range:rg,formulas:[[c.f]]});
  else await H.mcp.callTool(SRV,"update_values",{spreadsheetId:TEACH_ID,range:rg,values:[[c.v]]})}
 async function dirWrite(role,d,isNew){await mcpReady();
@@ -2027,39 +2074,53 @@ function subjName(k){var r=ROOMS.filter(function(x){return x.k===k&&x.n})[0];ret
 function shortUrl(u){return String(u||"").replace(/^https?:\/\//,"").replace(/[?#].*$/,"").replace(/\/$/,"")}
 function lessonsIn(k,t){return LES.filter(function(l){return normN(l.t)===normN(t)&&splitC(l.sj).indexOf(k)>=0})}
 function meetOf(t){var d=dirFind(TDIRL,t)||(ME.role==="admin"?dirFind(DIRS.t,t):null);if(!d)return{u:"",lab:""};
- var u=meetOk(d.ml)?d.ml:meetOk(d.m)?d.m:"";return{u:u,lab:d.m&&!meetOk(d.m)?d.m:"Google Meet"}}
+ var u=meetOk(d.ml)?d.ml:meetOk(d.m)?d.m:"";return{u:u,lab:meetLab(d.m)||"Google Meet"}}
 function copyBtn(t,txt){var b=E("button",{type:"button",class:"btn ghost mini",text:txt||"Kopírovat",onclick:function(){copyText(t,b)}});return b}
 function extA(href,txt,cls){var a=E("a",{class:"btn"+(cls?" "+cls:""),href:href,target:"_blank",rel:"noopener noreferrer"},[E("span",{text:txt})]);a.appendChild(ico("ext"));return a}
 
-/* hovor: učitel vidí svůj, student hovory svých učitelů */
-function meetCard(teachers){var c=E("section",{class:"card2 meet"});
- c.appendChild(E("div",{class:"meet-h"},[E("span",{class:"meet-i"},[ico("video")]),E("div",{},[E("h3",{text:"Online hodina"}),E("p",{class:"note",text:"Hovor běží v Google Meet a otevře se v nové kartě."})])]));
- if(!teachers.length){c.appendChild(E("p",{class:"note",text:"Odkaz na hovor se zobrazí, jakmile ti správce přiřadí učitele."}));return c}
- teachers.forEach(function(t){var m=meetOf(t),row=E("div",{class:"meet-row"});
-  var who=ME.role==="teacher"?E("div",{class:"meet-who"},[E("div",{},[E("strong",{text:m.lab||"Google Meet"}),E("small",{text:m.u?shortUrl(m.u):"Odkaz zatím chybí"})])])
-   :E("div",{class:"meet-who"},[avatar(t),E("div",{},[E("strong",{text:flip(t)}),E("small",{text:m.u?m.lab:"Odkaz zatím chybí"})])]);
-  row.appendChild(who);
-  if(m.u)row.appendChild(E("div",{class:"btns"},[extA(m.u,"Připojit se k hovoru","bigb"),copyBtn(m.u,"Kopírovat odkaz")]));
-  else row.appendChild(E("p",{class:"note",text:ME.role==="teacher"?"Odkaz na hovor ve sloupci Google Meet v seznamu učitelů chybí. Správce ho doplní v Lidé → Upravit údaje.":ME.role==="admin"?"Doplň odkaz v Lidé → Upravit údaje.":"Učitel zatím nemá odkaz na hovor."}));
-  c.appendChild(row)});
- return c}
+/* kopírování s potvrzením přímo na tlačítku */
+function fbCopy(t){var a=document.createElement("textarea");a.value=t;a.style.cssText="position:fixed;opacity:0";document.body.appendChild(a);a.select();var ok=false;try{ok=document.execCommand("copy")}catch(e){}a.remove();return ok}
+function copyI(t,b){var l=b.querySelector(".lbl"),o=l?l.textContent:"";function done(ok){b.classList.add(ok?"ok":"bad");if(l)l.textContent=ok?"Zkopírováno":"Nejde zkopírovat";clearTimeout(b._t);b._t=setTimeout(function(){b.classList.remove("ok","bad");if(l)l.textContent=o},1600)}
+ try{navigator.clipboard.writeText(t).then(function(){done(true)},function(){done(fbCopy(t))})}catch(e){done(fbCopy(t))}}
+function cpBtn(t,cls,label,aria){var b=E("button",{type:"button",class:cls,title:aria||label||"Kopírovat","aria-label":aria||label||"Kopírovat"},[E("span",{class:"i1"},[ico("copy")]),E("span",{class:"i2"},[ico("check")]),label?E("span",{class:"lbl",text:label}):null]);b.addEventListener("click",function(){copyI(t,b)});return b}
+function meetCode(u){var m=/([a-z]{3}-[a-z]{4}-[a-z]{3})/i.exec(String(u||""));return m?m[1]:shortUrl(u)}
 
-/* karta jedné Google Učebny */
-function roomCard(k,t,o){var r=roomFind(k,t),name=(r&&r.n)||subjName(k),c=E("section",{class:"card2 room"+(r&&r.url?"":" none")});
- c.appendChild(E("div",{class:"room-h"},[E("span",{class:"chip sub",text:k}),E("div",{},[E("strong",{text:name||"Předmět "+k}),o.showT?E("small",{text:flip(t)}):null])]));
- if(r&&r.url)c.appendChild(extA(r.url,"Vstoupit do učebny","room-go"));
- else c.appendChild(E("p",{class:"note",text:o.edit?"Učebna zatím nemá odkaz. Přidej ho, ať se do ní studenti dostanou jedním kliknutím.":"Učitel tuto učebnu zatím nepřidal."}));
- var kv=E("div",{class:"ct"});
- if(r&&r.code)kv.appendChild(E("div",{class:"kvc"},[E("span",{text:"Kód kurzu"}),E("b",{class:"mono",text:r.code}),copyBtn(r.code)]));
- if(o.studs&&o.studs.length)kv.appendChild(E("div",{},[E("span",{text:cap(plw(o.studs.length,["student","studenti","studentů"]))}),E("b",{text:o.studs.map(flip).join(", ")})]));
- var ls=lessonsSorted(lessonsIn(k,t),true),last=ls[0],hw=ls.filter(function(l){return l.hw})[0];
- if(last)kv.appendChild(E("div",{},[E("span",{text:"Poslední hodina"}),E("b",{text:dFull(last.d)+(last.c?" · "+last.c:"")})]));
- if(hw)kv.appendChild(E("div",{class:"hw"},[E("span",{text:"Úkol ("+dFull(hw.d)+")"}),E("b",{text:hw.hw})]));
- if(kv.childNodes.length)c.appendChild(kv);
- var acts=E("div",{class:"btns"});
- if(o.edit)acts.appendChild(E("button",{type:"button",class:"btn ghost mini",text:r?"Upravit":"Přidat odkaz",onclick:function(){openRoomEdit(k,t,r)}}));
- if(o.msg){var ta=accByName("teacher",t);if(ta)acts.appendChild(E("button",{type:"button",class:"btn ghost mini",text:"Napsat učiteli",onclick:function(){chatOpenWith(ta.u)}}))}
- if(acts.childNodes.length)c.appendChild(acts);
+/* hovor Google Meet: velká karta s tlačítkem Připojit se */
+function liveCard(t,isMe){var m=meetOf(t),ok=!!m.u,c=E("section",{class:"live"+(ok?"":" off")});
+ c.appendChild(E("span",{class:"live-ico"},[ico("video"),ok?E("i",{class:"live-pulse","aria-hidden":"true"}):null]));
+ var sub=ok?(isMe?(m.lab||"Google Meet")+" · "+meetCode(m.u):(m.lab||"Google Meet")+" · Google Meet")
+  :(isMe?"Odkaz na hovor zatím chybí v seznamu učitelů. Doplní ho správce v Lidé → Upravit údaje.":ME.role==="admin"?"Bez odkazu na hovor. Doplň ho v Lidé → Upravit údaje.":"Učitel zatím nemá odkaz na hovor.");
+ c.appendChild(E("div",{class:"live-t"},[E("span",{class:"live-k",text:"Online hodina"}),E("strong",{text:isMe?"Tvůj hovor":flip(t)}),E("small",{text:sub})]));
+ if(ok){var join=E("a",{class:"live-join",href:m.u,target:"_blank",rel:"noopener noreferrer"},[ico("video"),E("span",{text:"Připojit se"})]);
+  c.appendChild(E("div",{class:"live-a"},[join,cpBtn(m.u,"live-copy","Kopírovat odkaz","Kopírovat odkaz na hovor")]))}
+ return c}
+function meetCard(teachers){var w=E("div",{class:"lives"});
+ if(!teachers.length){w.appendChild(E("section",{class:"live off"},[E("span",{class:"live-ico"},[ico("video")]),E("div",{class:"live-t"},[E("span",{class:"live-k",text:"Online hodina"}),E("strong",{text:"Zatím bez učitele"}),E("small",{text:"Odkaz na hovor se zobrazí, jakmile ti správce přiřadí učitele."})])]));return w}
+ teachers.forEach(function(t){w.appendChild(liveCard(t,ME.role==="teacher"))});return w}
+
+/* karta jedné Google Učebny (barevná hlavička podle předmětu) */
+var CRC=[["#1D4ED8","#3B82F6"],["#6D28D9","#8B5CF6"],["#047857","#10B981"],["#C2410C","#F97316"],["#A21CAF","#D946EF"],["#0E7490","#06B6D4"],["#B45309","#F59E0B"],["#BE123C","#F43F5E"]];
+function crColor(k){var h=0,s=String(k||"");for(var i=0;i<s.length;i++)h=(h*31+s.charCodeAt(i))>>>0;return CRC[h%CRC.length]}
+function crRow(ic,lab,val,cls){return E("div",{class:"cr-row"+(cls?" "+cls:"")},[E("span",{class:"cr-ri"},[ico(ic)]),E("div",{},[E("span",{text:lab}),E("b",{text:val})])])}
+function roomCard(k,t,o){var r=roomFind(k,t),name=(r&&r.n)||subjName(k)||"Předmět "+k,has=!!(r&&r.url),col=crColor(k),c=E("section",{class:"cr"+(has?"":" none")});
+ var top=E("div",{class:"cr-top"});top.style.setProperty("--a",col[0]);top.style.setProperty("--b",col[1]);
+ var subl=o.showT?flip(t):o.studs?(o.studs.length?cnt(o.studs.length,"student"):"Zatím bez studentů"):"";
+ top.append(E("span",{class:"cr-code",text:k}),E("strong",{class:"cr-name",text:name}),subl?E("small",{class:"cr-sub",text:subl}):null,E("span",{class:"cr-art","aria-hidden":"true"},[ico("board")]));
+ if(o.edit&&r)top.appendChild(E("button",{type:"button",class:"cr-edit",title:"Upravit učebnu","aria-label":"Upravit učebnu "+k,onclick:function(){openRoomEdit(k,t,r)}},[ico("gear")]));
+ c.appendChild(top);
+ var body=E("div",{class:"cr-body"}),ls=lessonsSorted(lessonsIn(k,t),true),last=ls[0],hw=ls.filter(function(l){return l.hw})[0];
+ if(last)body.appendChild(crRow("clock","Poslední hodina",dFull(last.d)+(last.c?" · "+last.c:"")));
+ if(hw)body.appendChild(crRow("file","Úkol z "+dFull(hw.d),hw.hw,"hw"));
+ if(o.studs&&o.studs.length)body.appendChild(crRow("people",cap(plw(o.studs.length,["student","studenti","studentů"])),o.studs.map(flip).join(", ")));
+ if(r&&r.code){var cr=crRow("cap","Kód kurzu",r.code,"code");cr.appendChild(cpBtn(r.code,"cr-cp",null,"Kopírovat kód kurzu"));body.appendChild(cr)}
+ if(!body.childNodes.length)body.appendChild(E("p",{class:"cr-empty",text:has?"Až proběhne první hodina, uvidíš tu její náplň a úkol.":o.edit?"Učebna zatím nemá odkaz. Přidej ho a studenti se do ní dostanou jedním kliknutím.":"Učitel tuto učebnu zatím nepřidal."}));
+ c.appendChild(body);
+ var foot=E("div",{class:"cr-foot"});
+ if(has){var go=E("a",{class:"cr-open",href:r.url,target:"_blank",rel:"noopener noreferrer"},[E("span",{text:"Vstoupit do učebny"}),ico("ext")]);go.style.setProperty("--a",col[0]);foot.appendChild(go)}
+ else if(o.edit)foot.appendChild(E("button",{type:"button",class:"cr-add",onclick:function(){openRoomEdit(k,t,r)}},[ico("plus"),E("span",{text:"Přidat odkaz na učebnu"})]));
+ else foot.appendChild(E("span",{class:"cr-wait",text:"Čeká na odkaz od učitele"}));
+ if(o.msg){var ta=accByName("teacher",t);if(ta)foot.appendChild(E("button",{type:"button",class:"cr-ib",title:"Napsat učiteli","aria-label":"Napsat učiteli "+flip(t),onclick:function(){chatOpenWith(ta.u)}},[ico("chat")]))}
+ c.appendChild(foot);
  return c}
 
 /* úkoly z posledních hodin */
@@ -2068,7 +2129,9 @@ function hwCard(list,showT){var items=lessonsSorted(list.filter(function(l){retu
  items.forEach(function(l){ul.appendChild(E("div",{class:"hwi"},[E("div",{class:"hwd"},[E("b",{text:dFull(l.d)}),l.sj?subjChips(l.sj):null]),E("p",{text:l.hw}),E("small",{text:(showT?flip(l.t)+" · ":ME.role==="teacher"?flip(l.s)+" · ":"")+(l.c||"")})]))});
  c.appendChild(ul);return c}
 
-function roomLinks(){return E("section",{class:"card2 rlinks"},[E("div",{},[E("strong",{text:"Všechny kurzy v Google Učebně"}),E("p",{class:"note",text:"Přihlas se stejným účtem Google, kterým jsi v kurzu. Učebna se otevře v nové kartě."})]),extA(CLASSROOM_HOME,"Otevřít Google Učebnu","ghost")])}
+function roomLinks(){var a=E("a",{class:"gcl",href:CLASSROOM_HOME,target:"_blank",rel:"noopener noreferrer"},[E("span",{class:"gcl-i"},[ico("board")]),E("div",{},[E("strong",{text:"Všechny kurzy v Google Učebně"}),E("small",{text:"Přihlas se stejným účtem Google, kterým jsi v kurzu."})]),ico("ext")]);return a}
+function roomHead(t,sub,btn){return E("div",{class:"rhead"},[E("div",{},[E("h2",{text:t}),sub?E("p",{text:sub}):null]),btn||null])}
+function addBtn(fn){return E("button",{type:"button",class:"btn mini",onclick:fn},[ico("plus"),E("span",{text:"Přidat učebnu"})])}
 
 function drawRoom(){var box=$("vr");if(!box||view!=="r")return;box.textContent="";if(srvOld())box.appendChild(E("p",{class:"info bad",text:ME.role==="admin"?"Učebny uložené tady učitelé a studenti neuvidí, dokud na Apps Scriptu nenasadíš novou verzi serveru (viz upozornění nahoře).":"Učebny se nenačtou, dokud správce neaktualizuje server IS."}));
  if(ME.role==="teacher")return drawRoomT(box);if(ME.role==="student")return drawRoomS(box);if(ME.role==="admin")return drawRoomA(box)}
@@ -2079,10 +2142,9 @@ function tCodes(t){var s={},d=dirFind(TDIRL,t)||dirFind(DIRS.t,t);if(d)splitC(d.
 function tStuds(k,t){var mine=LINKS.filter(function(l){return normN(l.t)===normN(t)}).map(function(l){return l.s});
  var sl=SDIRL.length?SDIRL:DIRS.s;return uniq(mine.filter(function(s){var d=dirFind(sl,s);return d&&splitC(d.s).indexOf(k)>=0}).concat(LES.filter(function(l){return normN(l.t)===normN(t)&&splitC(l.sj).indexOf(k)>=0}).map(function(l){return l.s}))).sort(cs)}
 function drawRoomT(box){var me=myName(),codes=tCodes(me);
- box.appendChild(E("section",{class:"hero"},[E("h2",{text:"Učebna"}),E("p",{text:codes.length?"Tvoje předměty: "+codes.join(", ")+". Studenti tu vidí stejná tlačítka jako ty.":"Až budeš mít předměty, objeví se tu jejich učebny."})]));
  box.appendChild(meetCard([me]));
- var hd=E("div",{class:"secth"},[E("h3",{text:"Google Učebny podle předmětů"}),E("button",{type:"button",class:"btn mini",onclick:function(){openRoomEdit("",me,null)}},[ico("plus"),E("span",{text:"Přidat učebnu"})])]);box.appendChild(hd);
- var g=E("div",{class:"grid2"});codes.forEach(function(k){g.appendChild(roomCard(k,me,{edit:true,studs:tStuds(k,me)}))});
+ box.appendChild(roomHead("Google Učebny",codes.length?"Tvoje předměty. Studenti vidí stejné karty a vstoupí jedním kliknutím.":"Až budeš mít předměty, objeví se tu jejich učebny.",addBtn(function(){openRoomEdit("",me,null)})));
+ var g=E("div",{class:"crgrid"});codes.forEach(function(k){g.appendChild(roomCard(k,me,{edit:true,studs:tStuds(k,me)}))});
  if(!codes.length)g.appendChild(E("section",{class:"card2"},[E("p",{class:"note",text:"Zatím tu nejsou žádné předměty. Přidej učebnu tlačítkem výše."})]));
  box.appendChild(g);var hw=hwCard(LES,false);if(hw)box.appendChild(hw);box.appendChild(roomLinks())}
 
@@ -2093,21 +2155,21 @@ function drawRoomS(box){var me=ME.acct.name,mine=dirFind(SDIRL,me),codes=mine?sp
  codes.forEach(function(k){var who=ts.filter(function(t){var d=dirFind(TDIRL,t);return d&&splitC(d.s).indexOf(k)>=0});if(!who.length&&ts.length===1)who=ts;who.forEach(function(t){add(k,t)})});
  LES.forEach(function(l){splitC(l.sj).forEach(function(k){if(!codes.length||codes.indexOf(k)>=0)add(k,l.t)})});
  pairs.sort(function(a,b){return cs(a[0],b[0])||cs(a[1],b[1])});
- box.appendChild(E("section",{class:"hero"},[E("h2",{text:"Učebna"}),E("p",{text:pairs.length?"Připoj se k hovoru nebo vstup do učebny svého předmětu.":"Tvoje učebny se objeví, jakmile ti učitel přidá první kurz."})]));
  box.appendChild(meetCard(ts));
- box.appendChild(E("div",{class:"secth"},[E("h3",{text:"Moje Google Učebny"})]));
- var g=E("div",{class:"grid2"});pairs.forEach(function(p){g.appendChild(roomCard(p[0],p[1],{showT:true,msg:true}))});
+ box.appendChild(roomHead("Moje Google Učebny",pairs.length?"Vyber předmět a vstup do jeho učebny.":"Tvoje učebny se objeví, jakmile ti učitel přidá první kurz."));
+ var g=E("div",{class:"crgrid"});pairs.forEach(function(p){g.appendChild(roomCard(p[0],p[1],{showT:true,msg:true}))});
  if(!pairs.length)g.appendChild(E("section",{class:"card2"},[E("p",{class:"note",text:"Zatím tu nejsou žádné učebny."})]));
  box.appendChild(g);var hw=hwCard(LES,ts.length>1);if(hw)box.appendChild(hw);box.appendChild(roomLinks())}
 
 /* správce: přehled všech učeben a odkazů na hovory */
 function drawRoomA(box){var tl=uniq(DIRS.t.map(function(d){return d.n}).concat(ROOMS.map(function(r){return r.t}))).filter(Boolean).sort(cs);
  var nr=ROOMS.filter(function(r){return r.url}).length,nm=tl.filter(function(t){return meetOf(t).u}).length;
- box.appendChild(E("section",{class:"hero"},[E("h2",{text:"Učebny"}),E("p",{text:"Google Učebny učitelů podle předmětů a odkazy na hovory. "+cnt(nr,"ucebna")+", hovor má "+nm+" z "+tl.length+" "+(tl.length===1?"učitele":"učitelů")+"."})]));
- box.appendChild(E("div",{class:"secth"},[E("h3",{text:"Podle učitelů"}),E("button",{type:"button",class:"btn mini",onclick:function(){openRoomEdit("","",null)}},[ico("plus"),E("span",{text:"Přidat učebnu"})])]));
+ box.appendChild(roomHead("Učebny",cnt(nr,"ucebna")+" s odkazem · hovor má "+nm+" z "+tl.length+" "+(tl.length===1?"učitele":"učitelů"),addBtn(function(){openRoomEdit("","",null)})));
  tl.forEach(function(t){var m=meetOf(t),codes=tCodes(t),sec=E("section",{class:"card2 aroom"});
-  sec.appendChild(E("div",{class:"aroom-h"},[avatar(t),E("div",{},[E("strong",{text:flip(t)}),E("small",{text:m.u?m.lab+" · "+shortUrl(m.u):"Bez odkazu na hovor"})]),m.u?extA(m.u,"Hovor","ghost mini"):null]));
-  var g=E("div",{class:"grid2"});codes.forEach(function(k){g.appendChild(roomCard(k,t,{edit:true,studs:tStuds(k,t)}))});
+  var hd=E("div",{class:"aroom-h"},[avatar(t),E("div",{},[E("strong",{text:flip(t)}),E("small",{text:m.u?(m.lab||"Google Meet")+" · "+meetCode(m.u):"Bez odkazu na hovor"})])]);
+  if(m.u)hd.appendChild(E("a",{class:"live-join sm",href:m.u,target:"_blank",rel:"noopener noreferrer"},[ico("video"),E("span",{text:"Hovor"})]));
+  sec.appendChild(hd);
+  var g=E("div",{class:"crgrid"});codes.forEach(function(k){g.appendChild(roomCard(k,t,{edit:true,studs:tStuds(k,t)}))});
   if(!codes.length)g.appendChild(E("p",{class:"note",text:"Učitel nemá v seznamu žádné předměty."}));
   sec.appendChild(g);box.appendChild(sec)});
  if(!tl.length)box.appendChild(E("section",{class:"card2"},[E("p",{class:"note",text:"Zatím tu nejsou žádní učitelé."})]))}
@@ -2144,7 +2206,7 @@ function openRoomEdit(k,t,r){var err=E("p",{class:"err",role:"alert"}),admin=ME.
  openModal(r?"Upravit učebnu":"Nová učebna",[f]);(k?fu:fk).focus()}
 
 /* kontrola, že na Apps Scriptu běží nová verze serveru (jen varianta GitHub Pages) */
-var SRV_NEED="2026-11-07-ucebna",SRV_V=null;
+var SRV_NEED="2026-11-07-odkaz",SRV_V=null;
 function srvOld(){return SRV_V!==null&&SRV_V<SRV_NEED}
 async function checkSrv(){if(typeof api!=="function"||typeof API==="undefined")return;
  try{var j=await api("ver");SRV_V=String(j&&j.v||"")}catch(e){SRV_V=e&&e.code==="bad_action"?"":SRV_V}
