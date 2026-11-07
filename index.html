@@ -481,7 +481,7 @@ html.nointro #splash .sx-mini,html.nointro #splash .sx-tr{display:none}html.noin
 <main id="lg" hidden></main>
 <script></script>
 <script>
-var DATA={"mesice": [], "built": 1794084334762};
+var DATA={"mesice": [], "built": 1794085417524};
 var C={brand:"#1D4ED8",royal:"#3D6BFF",sky:"#2FA4F6",sun:"#FFD23F",ink:"#10224F",mute:"#5A6B8F",band:"#F1F5FF",line:"#DCE6F7"};
 var NB=" ";
 function fmt(x){return String(Math.round(x*100)/100).replace(".",",")}
@@ -1039,7 +1039,7 @@ async function startTeacher(){
   sub("tdir",null,function(a){TDIRL=a},"dir"),
   sub("accounts",null,function(a){ACC=a.map(function(d){d.u=d.id;return d})},"accounts"),
   sub("links",function(c){return c.where("t","==",n)},function(a){LINKS=a},"links"),
-  sub("rooms",function(c){return c.where("t","==",n)},function(a){ROOMS=a},"rooms"),chatStart()];
+  sub("rooms",null,function(a){ROOMS=a},"rooms"),chatStart()];
  render();tSheetInit();
  await Promise.race([Promise.all(ps),delay(10000)]);
  render()}
@@ -1066,7 +1066,7 @@ window.addEventListener("hashchange",function(){if(ME.role==="admin"){fromHash()
 /* ===== zápis hodin do tabulky, hodiny (admin) a společné karty hodin ===== */
 var NOMU=NOM.map(function(x){return x.toUpperCase()});
 var H={mcp:null,meta:[],mid:null,rows:[],tname:null,busy:false,msg:"",err:""};
-function normN(s){return nn(s).toLowerCase()}
+function normN(s){s=nn(s);try{s=s.normalize("NFC")}catch(e){}return s.toLowerCase()}
 function coded(c,m){var e=new Error(m||c);e.code=c;return e}
 function errText(e){var c=e&&e.code,m=e&&e.message;
  return c==="locked"?"Období je zamčené, hodiny nejde měnit.":c==="moved"?"Řádek studenta se v tabulce změnil. Načti data znovu.":c==="no_mcp"?"Zápis do tabulky vyžaduje připojený Google (konektor Google Sheets v claude.ai).":c==="nosheet"?"Pro tento měsíc není v tabulce list. Správce ho vytvoří v Hodiny, Nový měsíc.":c==="nostudent"?"Student není v tabulce u tohoto učitele. Správce ho přidá v záložce Hodiny.":c==="server_not_connected"||c==="needs_reauth"?"Připoj konektor Google Sheets v nastavení claude.ai.":(c==="not_in_manifest"||c==="approval_required"||c==="consent_required"||c==="blocked_by_policy"||c==="not_granted")?"Zápis do tabulky není povolen.":"Zápis do Google tabulky se nepovedl"+(m?": "+String(m).slice(0,160):".")}
@@ -1726,7 +1726,8 @@ function chatStart(){var m=me();if(!m)return Promise.resolve();CH.first=true;
 function chatBadge(){var b=$("tab-c");if(!b)return;var n=unreadTotal(),e=b.querySelector(".badge");if(!n){if(e)e.remove();return}if(!e){e=E("span",{class:"badge"});b.appendChild(e)}e.textContent=n>99?"99+":String(n);b.setAttribute("aria-label","Zprávy, nepřečtené: "+n)}
 function toastMsg(title,text,fn){var t=E("button",{type:"button",class:"toast",onclick:function(){t.remove();fn()}},[avatar(title),E("div",{},[E("strong",{text:title}),E("span",{text:text})])]);
  var w=$("toasts");if(!w){w=E("div",{id:"toasts","aria-live":"polite"});document.body.appendChild(w)}w.appendChild(t);setTimeout(function(){t.classList.add("out");setTimeout(function(){t.remove()},400)},6000)}
-function chatToast(c){var o=convOther(c);toastMsg(uName(o,c),c.lt||"Nová zpráva",function(){chatOpenWith(o)})}
+/* bez vyskakovacích oznámení: nové zprávy ukazuje jen odznak u záložky Zprávy */
+function chatToast(c){}
 /* okno */
 function mountChat(){var box=$("vc");if(!box.dataset.built){box.dataset.built="1";box.textContent="";
   var q=E("input",{type:"search",placeholder:"Hledat","aria-label":"Hledat konverzaci",value:CH.q});q.addEventListener("input",function(){CH.q=q.value;drawConvList()});
@@ -2069,7 +2070,7 @@ function hwCard(list,showT){var items=lessonsSorted(list.filter(function(l){retu
 
 function roomLinks(){return E("section",{class:"card2 rlinks"},[E("div",{},[E("strong",{text:"Všechny kurzy v Google Učebně"}),E("p",{class:"note",text:"Přihlas se stejným účtem Google, kterým jsi v kurzu. Učebna se otevře v nové kartě."})]),extA(CLASSROOM_HOME,"Otevřít Google Učebnu","ghost")])}
 
-function drawRoom(){var box=$("vr");if(!box||view!=="r")return;box.textContent="";
+function drawRoom(){var box=$("vr");if(!box||view!=="r")return;box.textContent="";if(srvOld())box.appendChild(E("p",{class:"info bad",text:ME.role==="admin"?"Učebny uložené tady učitelé a studenti neuvidí, dokud na Apps Scriptu nenasadíš novou verzi serveru (viz upozornění nahoře).":"Učebny se nenačtou, dokud správce neaktualizuje server IS."}));
  if(ME.role==="teacher")return drawRoomT(box);if(ME.role==="student")return drawRoomS(box);if(ME.role==="admin")return drawRoomA(box)}
 
 /* učitel: svůj hovor a učebny svých předmětů */
@@ -2139,7 +2140,18 @@ function openRoomEdit(k,t,r){var err=E("p",{class:"err",role:"alert"}),admin=ME.
   var id=roomId(kk,tt),doc={k:kk,n:nn(fn.value),url:u,code:nn(fc.value),t:tt,by:ME.acct.u,at:Date.now()},done=btnBusy(btn,"Ukládám…");
   try{if(r&&r.id!==id){await CTX.db.doc("rooms/"+r.id).delete();ROOMS=ROOMS.filter(function(x){return x.id!==r.id})}
    await CTX.db.doc("rooms/"+id).set(doc);ROOMS=ROOMS.filter(function(x){return x.id!==id}).concat([Object.assign({id:id},doc)]);
-   closeModal();drawRoom()}catch(e){err.textContent="Nepodařilo se uložit: "+errText(e)}finally{done()}});
+   closeModal();drawRoom()}catch(e){err.textContent=e&&e.code==="forbidden"?(ME.role==="admin"?"Server odmítl zápis.":"Server zápis nepovolil. Buď jde o učebnu jiného učitele, nebo server IS ještě neběží v nové verzi (dej vědět správci)."):"Nepodařilo se uložit: "+errText(e)}finally{done()}});
  openModal(r?"Upravit učebnu":"Nová učebna",[f]);(k?fu:fk).focus()}
+
+/* kontrola, že na Apps Scriptu běží nová verze serveru (jen varianta GitHub Pages) */
+var SRV_NEED="2026-11-07-ucebna",SRV_V=null;
+function srvOld(){return SRV_V!==null&&SRV_V<SRV_NEED}
+async function checkSrv(){if(typeof api!=="function"||typeof API==="undefined")return;
+ try{var j=await api("ver");SRV_V=String(j&&j.v||"")}catch(e){SRV_V=e&&e.code==="bad_action"?"":SRV_V}
+ srvBanner();if(view==="r")drawRoom()}
+function srvBanner(){var old=$("srvold");if(old)old.remove();if(!srvOld()||!ME.role)return;
+ var t=ME.role==="admin"?"Server IS (Google Apps Script) běží ve starší verzi, proto se Učebny a odkazy na hovory neukazují učitelům a studentům. V Apps Script vlož nový Code.gs, ulož a dej Nasadit → Spravovat nasazení → tužka → Verze: Nová verze → Nasadit.":"Učebny teď nejdou načíst, protože server IS ještě čeká na aktualizaci. Dej prosím vědět správci.";
+ var b=E("p",{class:"info bad",id:"srvold",role:"status",text:t});var tabs=$("tabs");if(tabs&&tabs.parentNode)tabs.parentNode.insertBefore(b,tabs.nextSibling)}
+var _enterR=enter;enter=async function(acc){var r=await _enterR(acc);checkSrv();return r};
 boot();
 </script></body></html>
