@@ -1,0 +1,1150 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Učebna – Leernio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--b9:#0b2a6f;--b8:#1e3a8a;--b7:#1d4ed8;--b6:#2563eb;--b5:#3b82f6;--b2:#bfdbfe;--b1:#dbeafe;--b0:#eff6ff;--ink:#0f172a;--mut:#64748b;--line:#e2e8f0;--bg:#f4f7fd;--r:12px}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{font-family:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;color:var(--ink);background:var(--bg);font-size:14px;line-height:1.45}
+h1,h2,h3,h4{margin:0;font-weight:600;letter-spacing:-.01em}
+h1{font-size:24px}h2{font-size:20px}h3{font-size:16px}h4{font-size:14px;margin-bottom:10px}
+hr{border:0;border-top:1px solid var(--line);margin:16px 0}
+a{color:var(--b7)}
+.mut{color:var(--mut)}.xs{font-size:12px}.sm{font-size:13px}
+.grow{flex:1;min-width:0}.ell{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.row{display:flex;align-items:center;gap:10px}.row.sp{justify-content:space-between}.row.end{justify-content:flex-end}.spacer{flex:1}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+/* top */
+.top{height:60px;display:flex;align-items:center;gap:10px;padding:0 14px;background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:19px;color:var(--b8);cursor:pointer;line-height:1.05}
+.brand small{display:block;font-size:10px;font-weight:600;color:var(--b5);letter-spacing:.14em}
+.crumb{display:flex;align-items:center;gap:6px;color:var(--mut);min-width:0}
+.crumb b{color:var(--ink);font-weight:600;cursor:pointer;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.iconbtn{width:38px;height:38px;border-radius:50%;border:0;background:transparent;display:grid;place-items:center;cursor:pointer;color:#334155;flex:none}
+.iconbtn:hover{background:var(--b0);color:var(--b7)}
+.iconbtn.s{width:30px;height:30px}
+.who{display:flex;align-items:center;gap:8px}.who b{display:block;font-size:13px}.who small{color:var(--mut);font-size:11px}
+.demo{display:flex;align-items:center;gap:6px;background:#fef3c7;border:1px solid #fde68a;color:#92400e;border-radius:8px;padding:3px 4px 3px 8px;font-size:12px;font-weight:600}
+.demo select{padding:3px 6px;font-size:12px;width:auto;max-width:200px;border-color:#fde68a}
+/* layout */
+.layout{display:grid;grid-template-columns:264px 1fr;min-height:calc(100vh - 60px)}
+.layout.collapsed{grid-template-columns:76px 1fr}
+.side{background:#fff;border-right:1px solid var(--line);padding:10px 12px 24px 0;overflow:auto;position:sticky;top:60px;height:calc(100vh - 60px)}
+.nav{display:flex;align-items:center;gap:14px;padding:9px 16px 9px 24px;border-radius:0 24px 24px 0;cursor:pointer;color:#334155;font-weight:500;white-space:nowrap;overflow:hidden}
+.nav:hover{background:#f1f5f9}.nav.on{background:var(--b1);color:var(--b8)}
+.nav .t{overflow:hidden;text-overflow:ellipsis}
+.dot{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:12px;font-weight:600;flex:none}
+.side h6{margin:16px 0 4px 24px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--mut);font-weight:600}
+.collapsed .side .t,.collapsed .side h6,.collapsed .side .sidenote{display:none}
+.main{padding:24px;min-width:0}
+.wrap{max-width:1000px;margin:0 auto}.wrap.wide{max-width:1200px}
+@media (max-width:860px){
+ .layout,.layout.collapsed{grid-template-columns:1fr}
+ .side{position:fixed;left:0;top:60px;width:270px;z-index:35;box-shadow:0 10px 40px rgba(0,0,0,.15);transition:transform .2s}
+ .layout.collapsed .side{transform:translateX(-105%)}
+ .collapsed .side .t,.collapsed .side h6{display:initial}
+ .hide-sm{display:none!important}
+ .main{padding:16px}
+}
+/* buttons, inputs */
+.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);background:#fff;color:var(--b7);padding:8px 14px;border-radius:8px;font:inherit;font-weight:600;cursor:pointer;white-space:nowrap;text-decoration:none}
+.btn:hover{background:var(--b0)}
+.btn.pri{background:var(--b6);border-color:var(--b6);color:#fff}.btn.pri:hover{background:var(--b7)}
+.btn.sm{padding:5px 10px;font-size:13px}.btn.ghost{border-color:transparent;background:transparent}
+.btn.danger{color:#b91c1c}.btn.dangerbg{background:#dc2626;border-color:#dc2626}
+.btn.full{width:100%;justify-content:center}
+input,select,textarea{width:100%;font:inherit;padding:9px 11px;border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:var(--ink)}
+textarea{min-height:90px;resize:vertical}
+input:focus,select:focus,textarea:focus{outline:2px solid var(--b5);outline-offset:-1px}
+input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--b6)}
+.field label{display:block;font-size:12px;font-weight:600;color:#475569;margin-bottom:6px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:560px){.g2{grid-template-columns:1fr}}
+.checks{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:4px 10px;max-height:220px;overflow:auto;border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.checks label{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--ink);font-weight:400;margin:0;padding:3px 0;cursor:pointer}
+.radios{display:flex;gap:16px;flex-wrap:wrap}.radios label{display:flex;gap:6px;align-items:center;font-weight:500;font-size:14px;color:var(--ink);margin:0;cursor:pointer}
+/* cards */
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r)}
+.pad{padding:18px 20px}
+.phead{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;margin-bottom:20px;flex-wrap:wrap}
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:999px;font-size:12px;font-weight:600;background:#f1f5f9;color:#475569;white-space:nowrap}
+.chip.blue{background:var(--b1);color:var(--b8)}.chip.green{background:#dcfce7;color:#166534}.chip.red{background:#fee2e2;color:#991b1b}.chip.amber{background:#fef3c7;color:#92400e}.chip.violet{background:#ede9fe;color:#5b21b6}
+.av{border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:600;font-size:12px;flex:none;width:32px;height:32px}
+.empty{text-align:center;padding:48px 20px;color:var(--mut)}
+.empty .eic{width:72px;height:72px;border-radius:50%;background:var(--b0);color:var(--b6);display:grid;place-items:center;margin:0 auto 14px}
+.empty h3{color:var(--ink);margin-bottom:6px}
+.lnk{display:block;color:var(--b7);cursor:pointer;text-decoration:none;padding:4px 0;font-weight:500}
+.lnk:hover{text-decoration:underline}
+.back{display:inline-flex;align-items:center;gap:6px;margin-bottom:14px}
+/* room cards */
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(270px,1fr));gap:20px}
+.rcard{overflow:hidden;cursor:pointer;display:flex;flex-direction:column;min-height:260px;transition:box-shadow .15s}
+.rcard:hover{box-shadow:0 6px 24px rgba(30,58,138,.14)}
+.pat{background-color:var(--c)}
+.swatches{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.sw{margin:0!important;cursor:pointer;position:relative}
+.sw input{position:absolute;opacity:0;pointer-events:none}
+.sw span{display:grid;place-items:center;width:30px;height:30px;border-radius:50%;box-shadow:inset 0 0 0 2px rgba(255,255,255,.35);transition:transform .1s}
+.sw:hover span{transform:scale(1.08)}
+.sw input:checked+span{box-shadow:0 0 0 2px #fff,0 0 0 4px var(--ink)}
+.sw input:checked+span::after{content:"";width:9px;height:5px;border:2.5px solid #fff;border-top:0;border-right:0;transform:rotate(-45deg) translate(1px,-1px)}
+.sw.custom span{background:conic-gradient(#ef4444,#f59e0b,#22c55e,#06b6d4,#3b82f6,#a855f7,#ef4444)}
+.sw.custom input[type=color]{position:absolute;inset:0;opacity:0;width:30px;height:30px;padding:0;border:0;cursor:pointer;pointer-events:auto}
+.motifs{display:grid;grid-template-columns:repeat(auto-fill,minmax(112px,1fr));gap:10px}
+.motif{margin:0!important;cursor:pointer;position:relative}
+.motif input{position:absolute;opacity:0;pointer-events:none}
+.motif .mt{display:block;height:58px;border-radius:10px;border:2px solid transparent;transition:border-color .1s}
+.motif input:checked~.mt{border-color:var(--ink);box-shadow:0 0 0 2px #fff inset}
+.motif b{display:block;font-size:12px;font-weight:500;color:#475569;margin-top:4px;text-align:center}
+.motif input:checked~b{color:var(--ink);font-weight:600}
+.tprev{height:110px;border-radius:12px;padding:16px 18px;color:#fff;display:flex;flex-direction:column;justify-content:flex-end}
+.tprev h3{font-size:22px}
+.rcard .bn{min-height:112px;padding:16px 18px;color:#fff;position:relative}
+.rcard .bn h3{font-size:19px;line-height:1.2;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;margin-bottom:2px}
+.rcard .bn .sub{opacity:.9;font-size:13px}
+.rcard .bav{position:absolute;right:16px;bottom:-30px;border:3px solid #fff;border-radius:50%}
+.rcard .rb{padding:20px 96px 10px 18px;flex:1;display:grid;gap:8px;align-content:start}
+.rcard .rf{border-top:1px solid var(--line);padding:8px 12px;display:flex;justify-content:flex-end;gap:4px;color:var(--mut)}
+.mini{font-size:13px}
+/* room */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin:-24px -24px 24px;padding:0 24px;background:#fff;position:sticky;top:60px;z-index:20;overflow-x:auto}
+@media (max-width:860px){.tabs{margin:-16px -16px 16px;padding:0 12px}}
+.tab{padding:16px 16px 13px;border-bottom:3px solid transparent;cursor:pointer;font-weight:500;color:#475569;white-space:nowrap}
+.tab:hover{color:var(--b7);background:var(--b0)}.tab.on{color:var(--b7);border-color:var(--b6)}
+.banner{min-height:190px;border-radius:var(--r);padding:24px;display:flex;flex-direction:column;justify-content:flex-end;color:#fff;margin-bottom:20px;position:relative}
+.banner h1{font-size:32px}.banner .bset{position:absolute;top:16px;right:16px;background:rgba(255,255,255,.92)}
+.cols{display:grid;grid-template-columns:230px 1fr;gap:20px;align-items:start}
+.cols.s{grid-template-columns:200px 1fr}
+.icols{display:grid;grid-template-columns:1fr 310px;gap:20px;align-items:start}
+@media (max-width:820px){.cols,.cols.s,.icols{grid-template-columns:1fr}}
+.composer textarea{min-height:56px}
+.composer .row{align-items:flex-start;margin-bottom:10px}
+.feed>*{margin-bottom:14px}
+.post .ptext{margin-top:10px;white-space:normal}
+.annc{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer}
+.annc:hover{background:#fafcff}
+.lesson{border-left:4px solid #059669}
+.lbody{margin:12px 0 0;padding:12px 14px;background:#f8fafc;border-radius:8px}
+.hwlink{margin-top:10px;display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px dashed #fdba74;border-radius:8px;color:#9a3412;cursor:pointer;background:#fff7ed}
+/* classwork */
+.scope{padding:8px 0;position:sticky;top:130px}
+.scope h4{padding:8px 16px 0}
+.sitem{display:flex;align-items:center;gap:10px;padding:8px 16px;cursor:pointer;font-weight:500}
+.sitem:hover{background:#f8fafc}.sitem.on{background:var(--b1);color:var(--b8)}
+.scope p{padding:8px 16px 4px;margin:0}
+.chap{margin-bottom:16px;overflow:hidden}
+.chh{display:flex;align-items:center;gap:8px;padding:12px 10px 12px 14px;border-bottom:2px solid var(--b6)}
+.cht{display:flex;align-items:center;gap:8px;cursor:pointer;flex:1;min-width:0;flex-wrap:wrap}
+.cht h3{font-size:18px;color:var(--b8)}
+.acts{display:flex;gap:2px;flex:none}
+.irow{display:flex;align-items:center;gap:14px;padding:11px 14px;border-top:1px solid var(--line);cursor:pointer}
+.chh+.irow{border-top:0}
+.irow:hover{background:#f8fbff}
+.irow .it{font-weight:500}
+.irow.noitem{cursor:default;color:var(--mut);font-size:13px}
+.ic{width:38px;height:38px;border-radius:50%;display:grid;place-items:center;color:#fff;flex:none}
+/* menu */
+details.menu{position:relative}
+details.menu summary{list-style:none}details.menu summary::-webkit-details-marker{display:none}
+.mlist{position:absolute;top:calc(100% + 6px);left:0;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 12px 32px rgba(15,23,42,.14);padding:6px;min-width:210px;z-index:25}
+.mlist button{display:flex;gap:10px;align-items:center;width:100%;border:0;background:none;padding:8px 10px;border-radius:6px;font:inherit;font-weight:500;cursor:pointer;text-align:left;color:var(--ink)}
+.mlist button:hover{background:var(--b0)}.mlist hr{margin:6px 0}
+/* item */
+.ihead{display:flex;gap:16px;align-items:flex-start}
+.ihead h1{color:var(--b8);font-size:26px}
+.body{white-space:normal;margin-bottom:16px}
+.atts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:12px 0}
+.att{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;background:#fff;min-width:0;text-decoration:none;color:var(--ink)}
+.att:hover{border-color:var(--b2);background:#fafcff}
+.ext{width:42px;height:42px;border-radius:8px;display:grid;place-items:center;font-size:10px;font-weight:700;color:#fff;flex:none;letter-spacing:.03em}
+.testbox{border:1px solid #ddd6fe;background:#faf5ff;border-radius:10px;padding:14px;margin:12px 0}
+.graded{background:var(--b0);border-radius:10px;padding:14px;margin:12px 0}
+.graded .big{font-size:28px;font-weight:700;color:var(--b8)}.graded .big small{font-size:15px;color:var(--mut);font-weight:500}
+.cm{margin-top:8px;font-style:italic;color:#334155}
+.thread{margin-top:16px}
+.msg{display:flex;gap:10px;margin:10px 0}.msg .bub{background:#f1f5f9;border-radius:10px;padding:8px 12px;flex:1}
+.stats{gap:12px;margin-bottom:16px;flex-wrap:wrap}
+.stat{background:#fff;border:1px solid var(--line);border-radius:10px;padding:10px 16px;min-width:120px}
+.stat b{display:block;font-size:24px;color:var(--b8)}.stat span{font-size:12px;color:var(--mut)}
+/* tables */
+.tblw{overflow:auto;border:1px solid var(--line);border-radius:var(--r);background:#fff}
+.tbl{width:100%;border-collapse:collapse}
+.tbl th,.tbl td{padding:10px 12px;border-bottom:1px solid var(--line);text-align:left;vertical-align:middle}
+.tbl th{font-size:12px;color:var(--mut);font-weight:600;background:#f8fafc;white-space:nowrap}
+.tbl tr:last-child td{border-bottom:0}
+.gb th.col{min-width:120px;white-space:normal;vertical-align:bottom}
+.gb td.c{text-align:center;cursor:pointer}.gb td.c:hover{background:var(--b0)}
+.gb td.na{background:repeating-linear-gradient(45deg,#f8fafc,#f8fafc 6px,#f1f5f9 6px,#f1f5f9 12px)}
+.gb td:first-child,.gb th:first-child{position:sticky;left:0;background:#fff;z-index:1;min-width:190px}
+.gb th:first-child{background:#f8fafc}
+.gb .pts{font-weight:600}.gb .gr{display:block;font-size:12px;color:var(--b7);font-weight:600}
+.people{margin-bottom:32px}.people .ph{border-bottom:2px solid var(--b6);padding-bottom:10px;margin-bottom:6px}
+.people h2{color:var(--b8)}
+.prow{display:flex;align-items:center;gap:14px;padding:10px 6px;border-bottom:1px solid var(--line)}
+/* modal */
+.mback{position:fixed;inset:0;background:rgba(15,23,42,.45);display:flex;align-items:flex-start;justify-content:center;padding:40px 16px;overflow:auto;z-index:100}
+.modal{background:#fff;border-radius:16px;width:100%;max-width:640px;box-shadow:0 24px 64px rgba(0,0,0,.25)}
+.modal.wide{max-width:820px}
+.mh{padding:16px 20px;border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;gap:10px}
+.mh h3{display:flex;align-items:center;gap:10px}
+.mb{padding:18px 20px;display:grid;gap:14px}
+.mf{padding:14px 20px;border-top:1px solid var(--line);display:flex;justify-content:flex-end;gap:8px}
+.modal[data-k="material"] .k-due,.modal[data-k="material"] .k-pts,.modal[data-k="material"] .k-test,.modal[data-k="material"] .k-lesson,
+.modal[data-k="task"] .k-test,.modal[data-k="task"] .k-lesson,
+.modal[data-k="test"] .k-lesson,
+.modal[data-k="lesson"] .k-due,.modal[data-k="lesson"] .k-pts,.modal[data-k="lesson"] .k-test{display:none}
+.prev img,.prev video{max-width:100%;max-height:70vh;display:block;margin:0 auto;border-radius:8px}
+.prev audio{width:100%}
+.prev iframe{width:100%;height:70vh;border:0;border-radius:8px}
+pre.code{background:#0f172a;color:#e2e8f0;padding:14px;border-radius:10px;overflow:auto;font-size:12px;line-height:1.5}
+.log{max-height:320px;overflow:auto;font-family:ui-monospace,Menlo,monospace;font-size:12px;background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:10px}
+#toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(10px);background:#0f172a;color:#fff;padding:10px 18px;border-radius:10px;opacity:0;transition:.2s;pointer-events:none;z-index:200;font-weight:500}
+#toast.on{opacity:1;transform:translateX(-50%)}
+.subtabs{display:flex;gap:6px;margin-bottom:16px}
+</style>
+</head>
+<body>
+<div id="app"></div>
+<div id="modal-root"></div>
+<div id="toast"></div>
+<script src="config.js"></script>
+<script>
+/* =========================================================
+   UČEBNA – vnější aplikace pro IS Leernio
+   Data: lokální stav (demo). Napojení na IS přes postMessage
+   (viz Správa učeben → Integrace s IS).
+   ========================================================= */
+const UC = window.UCEBNA_CONFIG || {};
+const CONFIG = {
+  api: /^https:\/\/script\.google(usercontent)?\.com\//.test(UC.api||'') || /^http:\/\/localhost(:\d+)?\//.test(UC.api||'') ? UC.api : '',
+  isOrigin: UC.isOrigin || 'https://leernio-cz.github.io',   // jediný povolený rodič (IS Leernio)
+  isUrl: UC.isUrl || 'https://leernio-cz.github.io/#ucebna',
+  maxFile: 10 * 1024 * 1024,
+  pollMs: 30000
+};
+/* Předměty, které Leernio vyučuje (kód = kód v Seznamu studentů / učitelů) */
+const SUBJECTS = [
+  {id:'B01',name:'Maturita – ČJL CERMAT',color:'#1d4ed8',theme:'knihy'},
+  {id:'B02',name:'Maturita – AJ CERMAT',color:'#0e7490',theme:'vlny'},
+  {id:'B03',name:'Maturita – M CERMAT',color:'#4338ca',theme:'matika'},
+  {id:'C01',name:'Klavír',color:'#7c3aed',theme:'noty'},
+  {id:'C02',name:'Certifikát – AJ',color:'#0f766e',theme:'geometrie'}
+];
+const COLORS = ['#1d4ed8','#0e7490','#7c3aed','#0f766e','#b45309','#be185d','#4338ca','#15803d','#0369a1'];
+const KIND = {
+  material:{l:'Materiál',c:'#2563eb',i:'book'},
+  task:{l:'Úkol',c:'#ea580c',i:'task'},
+  test:{l:'Test',c:'#7c3aed',i:'quiz'},
+  lesson:{l:'Zápis hodiny',c:'#059669',i:'cal'}
+};
+const ROLE = {admin:'Správce',teacher:'Učitel',student:'Student'};
+const GRADES = ['1','1−','2','2−','3','3−','4','4−','5','N'];
+
+const IC = {
+ home:'<path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/>',
+ book:'<path d="M5 4.5A1.5 1.5 0 0 1 6.5 3H19v15H6.5A1.5 1.5 0 0 0 5 19.5z"/><path d="M5 19.5A1.5 1.5 0 0 0 6.5 21H19v-3"/><path d="M9 7h6"/>',
+ task:'<rect x="5" y="4" width="14" height="17" rx="2"/><path d="M9 3h6v3H9z"/><path d="M9 13l2 2 4-4"/>',
+ quiz:'<path d="M5 7h9M5 12h9M5 17h5"/><path d="M15 16l2 2 4-4"/>',
+ cal:'<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M3 10h18M8 3v4M16 3v4"/>',
+ users:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M16 4.5a3 3 0 0 1 0 6M18 14.8c1.9.6 3 2.3 3 5.2"/>',
+ useradd:'<circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-5.5 6-5.5s6 2.2 6 5.5"/><path d="M19 8v6M16 11h6"/>',
+ award:'<circle cx="12" cy="9" r="6"/><path d="M8.5 14L7 22l5-3 5 3-1.5-8"/>',
+ plus:'<path d="M12 5v14M5 12h14"/>',
+ menu:'<path d="M4 6h16M4 12h16M4 18h16"/>',
+ settings:'<path d="M4 7h9M17 7h3M4 17h3M11 17h9"/><circle cx="15" cy="7" r="2"/><circle cx="9" cy="17" r="2"/>',
+ link:'<path d="M10 14a4 4 0 0 0 5.7 0l3-3a4 4 0 0 0-5.7-5.7l-1 1"/><path d="M14 10a4 4 0 0 0-5.7 0l-3 3a4 4 0 0 0 5.7 5.7l1-1"/>',
+ edit:'<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="M13.5 6.5l4 4"/>',
+ trash:'<path d="M4 7h16M9 7V4h6v3M6 7l1 13h10l1-13"/>',
+ chev:'<path d="M9 6l6 6-6 6"/>',
+ chevd:'<path d="M6 9l6 6 6-6"/>',
+ back:'<path d="M15 6l-6 6 6 6"/>',
+ up:'<path d="M12 19V5M6 11l6-6 6 6"/>',
+ down:'<path d="M12 5v14M6 13l6 6 6-6"/>',
+ upload:'<path d="M12 16V4M7 9l5-5 5 5M4 20h16"/>',
+ check:'<path d="M5 12l5 5 9-10"/>',
+ x:'<path d="M6 6l12 12M18 6L6 18"/>',
+ folder:'<path d="M3 6.5A1.5 1.5 0 0 1 4.5 5H9l2 2h8.5A1.5 1.5 0 0 1 21 8.5v9a1.5 1.5 0 0 1-1.5 1.5h-15A1.5 1.5 0 0 1 3 17.5z"/>',
+ play:'<path d="M7 4l13 8-13 8z"/>',
+ bolt:'<path d="M13 3L4 14h7l-1 7 9-11h-7z"/>',
+ plug:'<path d="M9 3v5M15 3v5M6 8h12v3a6 6 0 0 1-12 0z"/><path d="M12 17v4"/>',
+ chat:'<path d="M4 5h16v11H9l-5 4z"/>',
+ mega:'<path d="M3 11v2a1 1 0 0 0 1 1h2l5 4V6L6 10H4a1 1 0 0 0-1 1z"/><path d="M15 9a4 4 0 0 1 0 6M18 6a8 8 0 0 1 0 12"/>',
+ inbox:'<path d="M3 13l3-8h12l3 8v6H3z"/><path d="M3 13h5l1 3h6l1-3h5"/>',
+ reset:'<path d="M4 4v6h6"/><path d="M5.5 15a7 7 0 1 0 1.6-7.3L4 10"/>'
+};
+const ic = (n,s) => `<svg class="i" viewBox="0 0 24 24"${s?` style="width:${s}px;height:${s}px"`:''}>${IC[n]||''}</svg>`;
+const LOGO = `<svg width="38" height="38" viewBox="0 0 48 48" aria-label="Učebna"><defs><linearGradient id="lgU" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#lgU)"/><rect x="8" y="10" width="32" height="21" rx="3.5" fill="#fff"/><path d="M17 14.5v6a7 7 0 0 0 14 0v-6" fill="none" stroke="#1d4ed8" stroke-width="3.2" stroke-linecap="round"/><path d="M18 31.5l-3.2 7.5M30 31.5l3.2 7.5" stroke="#fff" stroke-width="3" stroke-linecap="round"/><circle cx="36.5" cy="11.5" r="4.3" fill="#fbbf24" stroke="#1e3a8a" stroke-width="1.6"/></svg>`;
+
+/* ---------- motivy záhlaví ---------- */
+const PALETTE = ['#1d4ed8','#2563eb','#0369a1','#0e7490','#0f766e','#15803d','#4d7c0f','#b45309','#c2410c','#b91c1c','#be185d','#7c3aed','#4338ca','#334155'];
+const svgU = (w,h,inner) => `url("data:image/svg+xml,${encodeURIComponent(`<svg xmlns='http://www.w3.org/2000/svg' width='${w}' height='${h}' viewBox='0 0 ${w} ${h}'>${inner}</svg>`)}")`;
+const W = a => `rgba(255,255,255,${a})`;
+const THEMES = {
+  kruhy:{l:'Kruhy',bg:`radial-gradient(circle at 88% 18%,${W(.18)} 0 34px,transparent 35px),radial-gradient(circle at 70% 130%,${W(.14)} 0 70px,transparent 71px),radial-gradient(circle at 104% 92%,${W(.10)} 0 50px,transparent 51px)`},
+  vlny:{l:'Vlny',bg:svgU(160,48,`<path d='M0 24 Q20 8 40 24 T80 24 T120 24 T160 24' fill='none' stroke='white' stroke-opacity='.18' stroke-width='3'/><path d='M0 40 Q20 26 40 40 T80 40 T120 40 T160 40' fill='none' stroke='white' stroke-opacity='.1' stroke-width='3'/>`),size:'160px 48px'},
+  mrizka:{l:'Mřížka',bg:svgU(26,26,`<path d='M26 0H0V26' fill='none' stroke='white' stroke-opacity='.16'/>`),size:'26px 26px'},
+  tecky:{l:'Tečky',bg:`radial-gradient(${W(.22)} 1.6px,transparent 2px)`,size:'18px 18px'},
+  prouzky:{l:'Proužky',bg:`repeating-linear-gradient(-45deg,${W(.09)} 0 14px,transparent 14px 28px)`},
+  geometrie:{l:'Geometrie',bg:svgU(120,120,`<path d='M0 120L60 60 120 120z' fill='white' fill-opacity='.08'/><path d='M60 0l60 60H60z' fill='white' fill-opacity='.12'/><circle cx='22' cy='30' r='14' fill='none' stroke='white' stroke-opacity='.18' stroke-width='3'/>`),size:'120px 120px'},
+  noty:{l:'Noty',bg:svgU(240,90,`<g stroke='white' stroke-opacity='.16' stroke-width='1.5'><path d='M0 20H240M0 32H240M0 44H240M0 56H240M0 68H240'/></g><g fill='white' fill-opacity='.24'><ellipse cx='40' cy='50' rx='7' ry='5' transform='rotate(-20 40 50)'/><ellipse cx='110' cy='38' rx='7' ry='5' transform='rotate(-20 110 38)'/><ellipse cx='136' cy='62' rx='7' ry='5' transform='rotate(-20 136 62)'/><ellipse cx='200' cy='26' rx='7' ry='5' transform='rotate(-20 200 26)'/></g><g stroke='white' stroke-opacity='.24' stroke-width='2'><path d='M46 48V18M116 36V6M142 60V30M206 24V-6M116 6L142 30'/></g>`),size:'240px 90px'},
+  matika:{l:'Matematika',bg:svgU(150,110,`<g fill='white' fill-opacity='.17' font-family='Georgia,serif' font-size='26'><text x='12' y='34'>π</text><text x='70' y='26'>+</text><text x='112' y='48'>√</text><text x='36' y='84'>×</text><text x='92' y='98'>÷</text><text x='132' y='96' font-size='18'>x²</text></g>`),size:'150px 110px'},
+  knihy:{l:'Knihy',bg:svgU(180,100,`<g fill='white' fill-opacity='.14'><rect x='20' y='40' width='14' height='60' rx='2'/><rect x='38' y='28' width='18' height='72' rx='2'/><rect x='60' y='46' width='12' height='54' rx='2'/><rect x='80' y='36' width='16' height='64' rx='2' transform='rotate(12 88 100)'/></g><path d='M120 30q15-8 30 0v34q-15-8-30 0zM150 30q15-8 30 0v34q-15-8-30 0z' fill='none' stroke='white' stroke-opacity='.2' stroke-width='2'/>`),size:'180px 100px'},
+  hory:{l:'Krajina',bg:svgU(400,120,`<path d='M0 120L70 50l40 35 60-70 80 105z' fill='white' fill-opacity='.10'/><path d='M180 120l90-80 60 50 40-30 30 60z' fill='white' fill-opacity='.14'/><circle cx='330' cy='30' r='14' fill='white' fill-opacity='.2'/>`),size:'auto 100%',pos:'right bottom',rep:'no-repeat'},
+  zadny:{l:'Bez motivu',bg:''}
+};
+function themeStyle(color,motif){
+  const t = THEMES[motif] || THEMES.kruhy;
+  const grad = `linear-gradient(135deg,${color},color-mix(in srgb,${color} 68%,#0b1b4d))`;
+  const layers = t.bg ? `${t.bg},${grad}` : grad;
+  const size = t.bg ? `${t.size||'auto'},auto` : 'auto';
+  const pos = t.bg ? `${t.pos||'0 0'},0 0` : '0 0';
+  const rep = t.bg ? `${t.rep||'repeat'},no-repeat` : 'no-repeat';
+  return `--c:${color};background-image:${layers};background-size:${size};background-position:${pos};background-repeat:${rep}`;
+}
+const roomStyle = r => esc(themeStyle(r.color, r.theme||'kruhy'));
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+const uid = p => p + Math.random().toString(36).slice(2,9);
+const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const nl = s => esc(s).replace(/\n/g,'<br>');
+const U = id => S.users.find(u => u.id === id);
+const R = id => S.rooms.find(r => r.id === id);
+const I = id => S.items.find(i => i.id === id);
+const CHP = id => S.chapters.find(c => c.id === id);
+const subj = id => (S.subjects.find(s => s.id === id) || {}).name || '—';
+const cur = () => U(me);
+const uname = id => (U(id)||{}).name || 'Neznámý';
+const initials = n => (n||'?').split(/\s+/).filter(w => w && !/\./.test(w)).map(w => w[0]).slice(0,2).join('').toUpperCase();
+const av = (u,s=32) => u ? `<div class="av" style="width:${s}px;height:${s}px;font-size:${Math.round(s*.36)}px;background:${u.color||'#64748b'}">${esc(initials(u.name))}</div>` : '';
+const fmtD = t => t ? new Date(t).toLocaleDateString('cs-CZ',{day:'numeric',month:'numeric',year:'numeric'}) : '';
+const fmtDT = t => t ? new Date(t).toLocaleString('cs-CZ',{day:'numeric',month:'numeric',year:'numeric',hour:'2-digit',minute:'2-digit'}) : '';
+const toLocalInput = t => { if(!t) return ''; const d = new Date(t); d.setMinutes(d.getMinutes() - d.getTimezoneOffset()); return d.toISOString().slice(0,16); };
+const toDateInput = t => toLocalInput(t).slice(0,10);
+const fsize = b => !b ? '' : b < 1024 ? b+' B' : b < 1048576 ? Math.round(b/1024)+' kB' : (b/1048576).toFixed(1).replace('.',',')+' MB';
+const D = (days,h=18,m=0) => { const d = new Date(); d.setDate(d.getDate()+days); d.setHours(h,m,0,0); return d.getTime(); };
+const gradeVal = g => { if(!g || g==='N') return null; const n = parseInt(g,10); return isNaN(n) ? null : n + (g.includes('−') ? .5 : 0); };
+const fmtNum = n => (Math.round(n*100)/100).toString().replace('.',',');
+const empty = (t,s,icon='inbox') => `<div class="empty"><div class="eic">${ic(icon,34)}</div><h3>${esc(t)}</h3>${s?`<p>${esc(s)}</p>`:''}</div>`;
+const wrap = h => `<div class="wrap">${h}</div>`;
+function toast(t){ const el=$('#toast'); el.textContent=t; el.classList.add('on'); clearTimeout(toast._t); toast._t=setTimeout(()=>el.classList.remove('on'),2600); }
+
+function extInfo(name){
+  const e = (String(name).split('.').pop()||'').toLowerCase();
+  const map = [
+    [['pdf'],'#dc2626'],[['doc','docx','odt','rtf'],'#2563eb'],[['ppt','pptx','odp','key'],'#ea580c'],
+    [['xls','xlsx','ods','csv'],'#16a34a'],[['mp3','wav','m4a','ogg','flac','aac'],'#7c3aed'],
+    [['jpg','jpeg','png','gif','webp','heic','svg'],'#0d9488'],[['mp4','mov','avi','mkv','webm'],'#db2777'],
+    [['zip','rar','7z'],'#475569'],[['mid','midi','mscz','sib','musicxml'],'#9333ea']
+  ];
+  for(const [list,c] of map) if(list.includes(e)) return {l:e.toUpperCase().slice(0,4),c,e};
+  return {l:(e||'FILE').toUpperCase().slice(0,4),c:'#64748b',e};
+}
+function linkInfo(url){
+  const u = String(url).toLowerCase();
+  if(/youtu\.?be|vimeo|stream\./.test(u)) return {l:'VIDEO',c:'#dc2626'};
+  if(/forms\.gle|docs\.google\.com\/forms|forms\.office|survey|dotaznik|typeform/.test(u)) return {l:'FORM',c:'#7c3aed'};
+  if(/docs\.google|drive\.google|onedrive|sharepoint/.test(u)) return {l:'DOC',c:'#2563eb'};
+  return {l:'WEB',c:'#0e7490'};
+}
+const safeUrl = u => { u = String(u||'').trim(); if(!/^https?:\/\//i.test(u)) u = 'https://' + u; return u; };
+const host = u => { try { return new URL(safeUrl(u)).hostname.replace(/^www\./,''); } catch(e){ return u; } };
+function parseLinks(text){
+  return String(text||'').split('\n').map(l=>l.trim()).filter(Boolean).map(l=>{
+    const p = l.split('|'); return p.length>1 ? {title:p[0].trim(), url:safeUrl(p.slice(1).join('|').trim())} : {title:'', url:safeUrl(l)};
+  });
+}
+
+/* ---------- state ---------- */
+const emptyState = () => ({subjects:SUBJECTS.map(x=>({id:x.id,name:x.name})),users:[],rooms:[],chapters:[],items:[],submissions:[],grades:[],posts:[],testResults:[],tests:[],log:[]});
+let S = emptyState();
+let me = null;   // přihlášení výhradně přes IS
+let ui = { view:'home', roomId:null, tab:'stream', itemId:null, scope:'all', subTab:'zadani', subStudent:null, studentId:null, adminTab:'rooms', closed:{}, sidebar: window.innerWidth > 860 };
+let PEND = [];        // přílohy v otevřeném formuláři
+let M = null;         // otevřený modal
+const bridge = { authed:false, state: window.parent!==window ? 'wait' : 'outside', err:'' };
+
+/* ---------- permissions & logic ---------- */
+const isAdmin = u => !!u && u.role === 'admin';
+const canEdit = (r,u) => !!r && !!u && (isAdmin(u) || (u.role==='teacher' && r.teacherIds.includes(u.id)));
+const roomsFor = u => !u ? [] : isAdmin(u) ? S.rooms : S.rooms.filter(r => r.teacherIds.includes(u.id) || r.studentIds.includes(u.id));
+function seesAsStudent(it,sid){
+  const r = R(it.roomId); if(!r || !r.studentIds.includes(sid)) return false;
+  if(it.studentIds && it.studentIds.length && !it.studentIds.includes(sid)) return false;
+  const c = CHP(it.chapterId); if(c && c.studentId && c.studentId !== sid) return false;
+  return true;
+}
+function canSee(it,u){ const r = R(it.roomId); if(!r) return false; if(canEdit(r,u)) return true; return seesAsStudent(it,u.id); }
+const assignees = it => { const r = R(it.roomId); return r ? r.studentIds.filter(s => seesAsStudent(it,s)) : []; };
+const subOf = (itId,sid) => S.submissions.find(s => s.itemId===itId && s.studentId===sid);
+const testRes = (itId,sid) => S.testResults.find(t => t.itemId===itId && t.studentId===sid);
+function getSub(itId,sid){ let s = subOf(itId,sid); if(!s){ s = {id:uid('s'),itemId:itId,studentId:sid,status:'draft',attachments:[],text:'',thread:[]}; S.submissions.push(s); } s.thread = s.thread||[]; return s; }
+function status(it,sid){
+  const past = it.due && Date.now() > it.due;
+  if(it.kind==='test'){ const tr = testRes(it.id,sid); return tr ? {t:'Splněno',c:'green',done:true} : past ? {t:'Chybí',c:'red'} : {t:'Přiřazeno',c:''}; }
+  const s = subOf(it.id,sid);
+  if(s && s.status==='returned') return {t:'Ohodnoceno',c:'green',done:true};
+  if(s && s.status==='submitted') return {t:(it.due && s.submittedAt > it.due) ? 'Odevzdáno pozdě' : 'Odevzdáno', c:'blue', done:true};
+  return past ? {t:'Chybí',c:'red'} : {t:'Přiřazeno',c:''};
+}
+function resultOf(it,sid){
+  if(it.kind==='task'){ const s = subOf(it.id,sid); return s && s.status==='returned' ? {p:s.points,g:s.grade,c:s.comment,max:it.maxPoints} : null; }
+  const tr = testRes(it.id,sid); return tr ? {p:tr.score,g:tr.grade,c:tr.comment,max:tr.max||it.maxPoints} : null;
+}
+function summary(r,sid){
+  const its = S.items.filter(i => i.roomId===r.id && (i.kind==='task'||i.kind==='test') && seesAsStudent(i,sid));
+  let p=0,max=0; const gs=[];
+  its.forEach(i => { const x = resultOf(i,sid); if(x){ if(x.p!=null){ p+= +x.p; max += +(x.max||0); } if(gradeVal(x.g)!=null) gs.push(gradeVal(x.g)); } });
+  S.grades.filter(g => g.roomId===r.id && g.studentId===sid).forEach(g => { if(g.points!=null && g.points!==''){ p += +g.points; max += +(g.maxPoints||0); } if(gradeVal(g.grade)!=null) gs.push(gradeVal(g.grade)); });
+  const done = its.filter(i => status(i,sid).done).length, missing = its.filter(i => status(i,sid).c==='red').length;
+  return {its,p,max,avg: gs.length ? gs.reduce((a,b)=>a+b,0)/gs.length : null, done, missing, total:its.length};
+}
+function upcoming(r,u){
+  const ed = canEdit(r,u);
+  return S.items.filter(i => i.roomId===r.id && (i.kind==='task'||i.kind==='test') && i.due && i.due > Date.now() - 864e5 && canSee(i,u) && (ed || !status(i,u.id).done)).sort((a,b)=>a.due-b.due);
+}
+
+/* ---------- auto přiřazení ---------- */
+function newRoom(s,subjectId,teacherId){
+  const t = s.users.find(u=>u.id===teacherId);
+  const r = {id:uid('r'),name:(s.subjects.find(x=>x.id===subjectId)||{}).name||'Učebna',section:t?t.name:'',subjectId,teacherIds:teacherId?[teacherId]:[],studentIds:[],manual:[],auto:true,color:COLORS[s.rooms.length % COLORS.length],createdAt:Date.now()};
+  s.rooms.push(r); return r;
+}
+function autoAssign(s){
+  s = s || S; const log = []; const want = new Set();
+  const sname = id => (s.subjects.find(x=>x.id===id)||{}).name || id;
+  const teachersOf = sid => s.users.filter(u => u.role==='teacher' && (u.subjects||[]).includes(sid));
+  for(const st of s.users.filter(u=>u.role==='student')){
+    for(const en of (st.enroll||[])){
+      let tId = en.teacherId && s.users.some(u=>u.id===en.teacherId) ? en.teacherId : null;
+      let r = null;
+      if(!tId){
+        r = s.rooms.find(x => x.auto!==false && x.subjectId===en.subjectId && x.studentIds.includes(st.id));
+        if(!r){
+          const ts = teachersOf(en.subjectId);
+          if(!ts.length){ log.push(`⚠ ${st.name}: předmět „${sname(en.subjectId)}“ nemá žádného učitele`); continue; }
+          const load = t => s.rooms.filter(x=>x.subjectId===en.subjectId && x.teacherIds.includes(t.id)).reduce((a,x)=>a+x.studentIds.length,0);
+          ts.sort((a,b)=>load(a)-load(b)); tId = ts[0].id;
+        }
+      }
+      if(!r){
+        r = s.rooms.find(x => x.auto!==false && x.subjectId===en.subjectId && x.teacherIds.includes(tId));
+        if(!r){ r = newRoom(s,en.subjectId,tId); log.push(`+ Vytvořena učebna ${r.name} (${r.section})`); }
+      }
+      want.add(r.id+'|'+st.id);
+      if(!r.studentIds.includes(st.id)){ r.studentIds.push(st.id); log.push(`→ ${st.name} přiřazen(a) do ${r.name} (${r.section})`); }
+    }
+  }
+  for(const t of s.users.filter(u=>u.role==='teacher'))
+    for(const sid of (t.subjects||[]))
+      if(!s.rooms.some(r=>r.subjectId===sid && r.teacherIds.includes(t.id))){ const r = newRoom(s,sid,t.id); log.push(`+ Vytvořena učebna ${r.name} (${r.section})`); }
+  for(const r of s.rooms) if(r.auto!==false){
+    r.studentIds = r.studentIds.filter(sid => {
+      const keep = want.has(r.id+'|'+sid) || (r.manual||[]).includes(sid) || !s.users.some(u=>u.id===sid && u.role==='student');
+      if(!keep) log.push(`− ${(s.users.find(u=>u.id===sid)||{}).name||sid} odebrán(a) z ${r.name} (${r.section}) – předmět už nemá zapsaný`);
+      return keep;
+    });
+  }
+  return log;
+}
+function logPush(){}
+function logPushOld(lines,src){ if(!lines.length) return; S.log = S.log||[]; S.log.unshift({at:Date.now(),src,lines}); S.log = S.log.slice(0,30); }
+
+/* ---------- seed ---------- */
+/* ---------- render ---------- */
+function render(){
+  const u = cur();
+  if(!u){ $('#app').innerHTML = lockScreen(); return; }
+  $('#app').innerHTML = topbar(u) + `<div class="layout ${ui.sidebar?'':'collapsed'}">${sidebar(u)}<main class="main">${mainView(u)}</main></div>`;
+}
+function lockScreen(){
+  const st = !CONFIG.api ? (window.parent!==window ? 'noconfig' : 'outside') : bridge.state;
+  const t = st==='checking' ? 'Ověřuji přihlášení…' : st==='error' ? 'Přihlášení se nepodařilo ověřit' : st==='wait' ? 'Čekám na přihlášení z IS Leernio…' : st==='noconfig' ? 'Učebna není nastavená' : st==='loading' ? 'Načítám učebny…' : 'Do Učebny se přihlásíš přes IS Leernio';
+  const d = st==='error' ? (bridge.err || 'Zkus Učebnu v IS zavřít a otevřít znovu.') : st==='outside' ? 'Učebna funguje jen v okně IS Leernio. Přihlas se do IS a otevři Aplikace → Učebna.' : st==='noconfig' ? 'Chybí adresa serveru Učebny v souboru config.js.' : 'Přihlášení se převezme z IS automaticky.';
+  return `<div style="min-height:100vh;display:grid;place-items:center;padding:24px"><div class="card pad" style="max-width:420px;text-align:center;padding:36px 28px"><div style="display:flex;justify-content:center;margin-bottom:14px">${LOGO.replace('width="38" height="38"','width="64" height="64"')}</div><h2 style="color:var(--b8)">${t}</h2><p class="mut">${esc(d)}</p>${st==='outside'||st==='error'?`<a class="btn pri" href="${CONFIG.isUrl}" target="_top" rel="noopener">Otevřít IS Leernio</a>`:''}</div></div>`;
+}
+function topbar(u){
+  let crumb = '';
+  if(['room','item','studentcard'].includes(ui.view) && R(ui.roomId)){ const r = R(ui.roomId); crumb = `<div class="crumb">${ic('chev',16)}<b data-act="open-room" data-id="${r.id}">${esc(r.name)}</b><span class="hide-sm ell">${esc(r.section||'')}</span></div>`; }
+  const demo = '';
+  return `<header class="top"><button class="iconbtn" data-act="toggle-side" title="Menu">${ic('menu')}</button><div class="brand" data-act="home">${LOGO}<div>Učebna<small>LEERNIO</small></div></div>${crumb}<div class="spacer"></div><span id="savest" class="mut xs"></span>${demo}<div class="who">${av(u,34)}<div class="hide-sm"><b>${esc(u.name)}</b><small>${ROLE[u.role]}</small></div></div></header>`;
+}
+function sidebar(u){
+  const nav = (act,icon,t,on,id='') => `<div class="nav ${on?'on':''}" data-act="${act}" data-id="${id}" title="${esc(t)}">${icon}<span class="t">${esc(t)}</span></div>`;
+  let h = nav('home',ic('home'),'Domů',ui.view==='home');
+  h += nav('todo',ic(u.role==='student'?'task':'inbox'),u.role==='student'?'Moje úkoly':'K ohodnocení',ui.view==='todo');
+  if(isAdmin(u)) h += nav('admin',ic('settings'),'Správa učeben',ui.view==='admin');
+  h += `<h6>${u.role==='student'?'Moje učebny':'Učebny'}</h6>`;
+  const rs = roomsFor(u);
+  h += rs.map(r => nav('open-room',`<div class="dot" style="background:${r.color}">${esc((r.name||'?')[0])}</div>`,r.name + (isAdmin(u)||u.role==='student' ? ' · '+(r.section||'') : ''),ui.roomId===r.id && ['room','item','studentcard'].includes(ui.view),r.id)).join('') || `<p class="mut xs sidenote" style="padding:0 24px">Zatím žádné učebny</p>`;
+  return `<aside class="side">${h}</aside>`;
+}
+function mainView(u){
+  switch(ui.view){
+    case 'room': return vRoom(u);
+    case 'item': return vItem(u);
+    case 'todo': return vTodo(u);
+    case 'admin': return isAdmin(u) ? vAdmin(u) : vHome(u);
+    case 'studentcard': { const r = R(ui.roomId); if(!r || !canEdit(r,u)) return vHome(u);
+      return wrap(`<a class="lnk back" data-act="tab" data-id="grades">${ic('back',16)} Zpět na hodnocení</a>` + studentCard(r,ui.studentId,true)); }
+    default: return vHome(u);
+  }
+}
+
+/* ---------- home ---------- */
+function vHome(u){
+  const rs = roomsFor(u);
+  const hello = u.role==='student' ? 'Tady najdete materiály, úkoly a testy ze všech svých předmětů.' : u.role==='teacher' ? 'Vaše učebny – studenti se přiřazují automaticky podle zápisu předmětů v IS.' : 'Přehled všech učeben v Leerniu. Správu najdete v sekci Správa učeben.';
+  const head = `<div class="phead"><div><h1>${u.role==='student'?'Moje učebny':'Učebny'}</h1><p class="mut" style="margin:4px 0 0">${hello}</p></div>${isAdmin(u)?`<div class="row"><button class="btn" data-act="auto-run">${ic('bolt',16)}Synchronizovat přiřazení</button><button class="btn pri" data-act="room-new">${ic('plus',16)}Nová učebna</button></div>`:''}</div>`;
+  if(!rs.length) return `<div class="wrap wide">${head}${empty('Zatím nemáte žádnou učebnu','Učebny se vytvářejí automaticky podle zapsaných předmětů v IS Leernio.')}</div>`;
+  return `<div class="wrap wide">${head}<div class="grid">${rs.map(r => roomCard(r,u)).join('')}</div></div>`;
+}
+function roomCard(r,u){
+  const t = r.teacherIds.map(U).filter(Boolean);
+  let body = '';
+  if(u.role==='student'){
+    const due = upcoming(r,u).slice(0,2);
+    body = due.length ? `<div class="mut xs">Blíží se termín</div>` + due.map(i => `<div class="mini"><span class="mut">${fmtD(i.due)}</span> · ${esc(i.title)}</div>`).join('') : `<div class="mut mini">Žádné úkoly k odevzdání</div>`;
+  } else {
+    const toGrade = S.submissions.filter(s => s.status==='submitted' && (I(s.itemId)||{}).roomId===r.id).length;
+    const nItems = S.items.filter(i=>i.roomId===r.id).length;
+    body = `<div class="row" style="flex-wrap:wrap;gap:6px"><span class="chip">${r.studentIds.length} ${r.studentIds.length===1?'student':r.studentIds.length<5&&r.studentIds.length>0?'studenti':'studentů'}</span><span class="chip">${nItems} položek</span>${toGrade?`<span class="chip amber">${toGrade} k ohodnocení</span>`:''}${r.auto!==false?`<span class="chip blue" title="Členové se synchronizují z IS">${ic('bolt',12)}auto</span>`:''}</div>`;
+  }
+  return `<div class="card rcard" data-act="open-room" data-id="${r.id}"><div class="bn pat" style="${roomStyle(r)}"><h3>${esc(r.name)}</h3><div class="sub">${esc(r.subjectId||'')} · ${esc(r.section||'')}</div>${t[0]?`<div class="bav">${av(t[0],62)}</div>`:''}</div><div class="rb">${body}</div><div class="rf"><span class="iconbtn s" title="Výuka">${ic('folder',18)}</span><span class="iconbtn s" title="Hodnocení">${ic('award',18)}</span></div></div>`;
+}
+
+/* ---------- room ---------- */
+function vRoom(u){
+  const r = R(ui.roomId);
+  if(!r || !(canEdit(r,u) || r.studentIds.includes(u.id))) return wrap(empty('Učebna není dostupná','Do této učebny nemáte přístup.'));
+  const ed = canEdit(r,u);
+  const tabs = [['stream','Nástěnka'],['work','Výuka'],['people','Lidé'],['grades',ed?'Hodnocení':'Moje hodnocení']];
+  const body = {stream:tStream,work:tWork,people:tPeople,grades:tGrades}[ui.tab] || tStream;
+  return `<nav class="tabs">${tabs.map(([k,l])=>`<div class="tab ${ui.tab===k?'on':''}" data-act="tab" data-id="${k}">${l}</div>`).join('')}</nav><div class="wrap">${body(r,u,ed)}</div>`;
+}
+const audienceOpts = (r,sel) => `<option value="">Celá učebna</option>` + r.studentIds.map(s=>`<option value="${s}" ${sel===s?'selected':''}>Jen: ${esc(uname(s))}</option>`).join('');
+const targetChip = it => it.studentIds && it.studentIds.length ? `<span class="chip violet">${it.studentIds.length===1?esc(uname(it.studentIds[0])):it.studentIds.length+' studenti'}</span>` : '';
+const kIcon = (k,s=38) => `<div class="ic" style="background:${KIND[k].c};width:${s}px;height:${s}px">${ic(KIND[k].i,Math.round(s*.52))}</div>`;
+
+function tStream(r,u,ed){
+  const banner = `<div class="banner pat" style="${roomStyle(r)}"><h1>${esc(r.name)}</h1><div>${esc(r.subjectId||'')} · ${esc(r.section||'')}</div>${ed?`<button class="btn sm bset" data-act="room-edit" data-id="${r.id}">${ic('edit',16)}Přizpůsobit</button>`:''}</div>`;
+  const up = upcoming(r,u).slice(0,4);
+  const left = `<div class="card pad"><h4>Nadcházející</h4>${up.length?up.map(i=>`<a class="lnk sm" data-act="open-item" data-id="${i.id}"><span class="mut xs">Termín ${fmtD(i.due)}</span><br>${esc(i.title)}</a>`).join(''):'<p class="mut sm" style="margin:0">Žádné blížící se termíny</p>'}<div style="text-align:right;margin-top:6px"><a class="lnk sm" data-act="tab" data-id="work">Zobrazit vše</a></div></div>`
+    + (ed ? `<div class="card pad" style="margin-top:16px"><h4>Zápis hodiny</h4><p class="mut xs" style="margin:0">Zápisy z kalendáře v IS se sem propisují automaticky (náplň hodiny + domácí úkol).</p></div>` : '');
+  const comp = ed ? `<form class="card pad composer" data-form="post" data-id="${r.id}" style="margin-bottom:14px"><div class="row">${av(u,36)}<textarea name="text" placeholder="Oznamte něco své učebně…" required></textarea></div><div class="row end"><select name="to" style="width:auto;max-width:220px">${audienceOpts(r)}</select><button class="btn pri sm">${ic('mega',16)}Zveřejnit</button></div></form>` : '';
+  const entries = [];
+  S.posts.filter(p => p.roomId===r.id && (ed || !p.studentId || p.studentId===u.id)).forEach(p => entries.push({t:p.createdAt,h:postCard(p,ed)}));
+  S.items.filter(i => i.roomId===r.id && canSee(i,u)).forEach(i => entries.push({t:i.createdAt,h: i.kind==='lesson' ? lessonCard(i,ed) : annCard(i,ed)}));
+  entries.sort((a,b)=>b.t-a.t);
+  return banner + `<div class="cols s"><div>${left}</div><div>${comp}<div class="feed">${entries.length?entries.map(e=>e.h).join(''):`<div class="card">${empty('Zatím tu nic není','Oznámení, nové materiály a zápisy z hodin se zobrazí zde.','mega')}</div>`}</div></div></div>`;
+}
+function postCard(p,ed){
+  const a = U(p.authorId);
+  return `<div class="card pad post"><div class="row">${av(a,36)}<div class="grow"><b>${esc(a?a.name:'')}</b><div class="mut xs">${fmtDT(p.createdAt)} ${p.studentId&&ed?`· <span class="chip violet">jen ${esc(uname(p.studentId))}</span>`:''}</div></div>${ed?`<button class="iconbtn s" data-act="post-del" data-id="${p.id}" title="Smazat">${ic('trash',16)}</button>`:''}</div><div class="ptext">${nl(p.text)}</div></div>`;
+}
+function annCard(i,ed){
+  const a = U(i.authorId);
+  const verb = {material:'nový materiál',task:'nový úkol',test:'nový test'}[i.kind];
+  return `<div class="card annc" data-act="open-item" data-id="${i.id}">${kIcon(i.kind,40)}<div class="grow"><div>${esc(a?a.name:'Učitel')} zveřejnil(a) ${verb}: <b>${esc(i.title)}</b></div><div class="mut xs">${fmtD(i.createdAt)}${i.due?' · termín '+fmtDT(i.due):''} ${ed?targetChip(i):''}</div></div></div>`;
+}
+function lessonCard(i,ed){
+  const hw = i.homeworkId && I(i.homeworkId);
+  return `<div class="card pad lesson"><div class="row">${kIcon('lesson',40)}<div class="grow"><b>${esc(i.title)}</b><div class="mut xs">Zápis z hodiny ${fmtD(i.lessonDate)} · ${esc(uname(i.authorId))} ${i.source==='is'?'<span class="chip blue">z kalendáře IS</span>':''} ${ed?targetChip(i):''}</div></div><button class="iconbtn s" data-act="open-item" data-id="${i.id}" title="Otevřít">${ic('chev',16)}</button></div>${i.body?`<div class="lbody">${nl(i.body)}</div>`:''}${attList(i.attachments)}${hw?`<div class="hwlink" data-act="open-item" data-id="${hw.id}">${ic('task',18)}<span>Domácí úkol: <b>${esc(hw.title)}</b>${hw.due?' · odevzdat do '+fmtDT(hw.due):''}</span></div>`:''}</div>`;
+}
+
+function tWork(r,u,ed){
+  const scope = ed ? (ui.scope==='all' || r.studentIds.includes(ui.scope) ? ui.scope : 'all') : u.id;
+  const chs = S.chapters.filter(c => c.roomId===r.id && (scope==='all' ? !c.studentId : (!c.studentId || c.studentId===scope))).sort((a,b)=>a.order-b.order);
+  const items = S.items.filter(i => i.roomId===r.id && (scope==='all' ? true : seesAsStudent(i,scope)));
+  const toolbar = ed ? `<div class="row" style="margin-bottom:16px;flex-wrap:wrap"><details class="menu"><summary class="btn pri">${ic('plus',18)}Vytvořit</summary><div class="mlist">${['material','task','test'].map(k=>`<button data-act="item-new" data-id="${k}">${kIcon(k,28)}${KIND[k].l}</button>`).join('')}<button data-act="item-new" data-id="lesson">${kIcon('lesson',28)}Zápis hodiny (ručně)</button><hr><button data-act="ch-new">${ic('folder')}Kapitola</button></div></details><div class="spacer"></div>${scope!=='all'?`<span class="chip violet">Pohled studenta: ${esc(uname(scope))}</span>`:''}</div>` : '';
+  let h = '';
+  const loose = items.filter(i => !i.chapterId || !CHP(i.chapterId));
+  if(loose.length) h += chapterBlock(null,loose,r,u,ed);
+  h += chs.map(c => chapterBlock(c,items.filter(i=>i.chapterId===c.id),r,u,ed)).join('');
+  if(!h) h = `<div class="card">${empty(ed?'Začněte vytvořením kapitoly':'Učitel sem zatím nic nepřidal', ed?(scope==='all'?'Kapitoly si pojmenujte podle sebe – např. „1. Zlomky“ nebo „Opakování před testem“. Do nich pak přidávejte materiály, úkoly a testy.':'Vytvořte individuální kapitolu jen pro tohoto studenta.'):'','folder')}</div>`;
+  if(!ed) return h;
+  const side = `<div class="card scope"><h4>Rozdělení podle studentů</h4>${[['all','Celá učebna',null],...r.studentIds.map(s=>[s,uname(s),U(s)])].map(([k,l,us])=>`<div class="sitem ${scope===k?'on':''}" data-act="scope" data-id="${k}">${us?av(us,26):`<div class="av" style="background:var(--b6);width:26px;height:26px">${ic('users',14)}</div>`}<span class="ell">${esc(l)}</span>${us?`<span class="spacer"></span><span class="mut xs">${S.chapters.filter(c=>c.roomId===r.id&&c.studentId===k).length||''}</span>`:''}</div>`).join('')}<p class="mut xs">„Celá učebna“ = společné kapitoly. U každého studenta vidíte jeho individuální kapitoly i to, co z celé učebny vidí.</p></div>`;
+  return `<div class="cols"><div>${side}</div><div>${toolbar}${h}</div></div>`;
+}
+function chapterBlock(c,its,r,u,ed){
+  its = its.filter(i => canSee(i,u)).sort((a,b)=>b.createdAt-a.createdAt);
+  const key = c ? c.id : 'none-'+r.id; const closed = ui.closed[key];
+  const badge = c && ed ? (c.studentId ? `<span class="chip violet">Individuální · ${esc(uname(c.studentId))}</span>` : `<span class="chip">Celá učebna</span>`) : '';
+  const acts = ed && c ? `<div class="acts"><button class="iconbtn s" data-act="ch-add" data-id="${c.id}" title="Přidat do kapitoly">${ic('plus',17)}</button><button class="iconbtn s hide-sm" data-act="ch-up" data-id="${c.id}" title="Posunout nahoru">${ic('up',16)}</button><button class="iconbtn s hide-sm" data-act="ch-down" data-id="${c.id}" title="Posunout dolů">${ic('down',16)}</button><button class="iconbtn s" data-act="ch-edit" data-id="${c.id}" title="Přejmenovat">${ic('edit',16)}</button><button class="iconbtn s" data-act="ch-del" data-id="${c.id}" title="Smazat kapitolu">${ic('trash',16)}</button></div>` : '';
+  const rows = closed ? '' : (its.length ? its.map(i => itemRow(i,u,ed)).join('') : `<div class="irow noitem">V kapitole zatím nic není.</div>`);
+  return `<section class="card chap"><div class="chh"><div class="cht" data-act="ch-toggle" data-id="${key}">${ic(closed?'chev':'chevd',18)}<h3>${esc(c?c.title:'Bez kapitoly')}</h3>${badge}</div>${acts}</div>${rows}</section>`;
+}
+function itemRow(i,u,ed){
+  let right = '';
+  if(i.kind==='task' || i.kind==='test'){
+    if(ed){ const as = assignees(i); const done = as.filter(s => status(i,s).done).length; const tg = i.kind==='task' ? as.filter(s => (subOf(i.id,s)||{}).status==='submitted').length : 0;
+      right = `${tg?`<span class="chip amber hide-sm">${tg} k ohodnocení</span>`:''}<span class="chip">${done}/${as.length} ${i.kind==='task'?'odevzdáno':'splněno'}</span>`; }
+    else { const st = status(i,u.id); right = `<span class="chip ${st.c}">${st.t}</span>`; }
+  }
+  const meta = i.kind==='lesson' ? 'Hodina '+fmtD(i.lessonDate) : i.due ? 'Termín: '+fmtDT(i.due) : 'Zveřejněno '+fmtD(i.createdAt);
+  const extra = [(i.attachments||[]).length?`${i.attachments.length} soub.`:'',(i.links||[]).length?`${i.links.length} odkaz${i.links.length>1?'y':''}`:''].filter(Boolean).join(' · ');
+  return `<div class="irow" data-act="open-item" data-id="${i.id}">${kIcon(i.kind)}<div class="grow"><div class="it ell">${esc(i.title)}</div><div class="mut xs">${KIND[i.kind].l} · ${meta}${extra?' · '+extra:''} ${ed?targetChip(i):''}</div></div>${right}${ed?`<button class="iconbtn s" data-act="item-edit" data-id="${i.id}" title="Upravit">${ic('edit',16)}</button>`:''}</div>`;
+}
+
+function tPeople(r,u,ed){
+  const sec = (t,ids,role) => `<div class="people"><div class="row sp ph"><h2>${t}</h2>${isAdmin(u)?`<button class="iconbtn" data-act="room-edit" data-id="${r.id}" title="Upravit členy">${ic('useradd')}</button>`:`<span class="mut">${ids.length}</span>`}</div>${ids.map(U).filter(Boolean).map(p=>`<div class="prow">${av(p,36)}<div class="grow">${esc(p.name)}${p.id===u.id?' <span class="mut xs">(vy)</span>':''}</div>${ed&&role==='s'?`<button class="btn sm ghost" data-act="student-card" data-id="${p.id}">${ic('award',16)}Karta hodnocení</button>`:''}</div>`).join('')||'<p class="mut">Zatím nikdo</p>'}</div>`;
+  let h = sec('Učitelé',r.teacherIds,'t');
+  h += ed ? sec('Studenti',r.studentIds,'s') : sec('Studenti',[u.id],'s');
+  if(ed && r.auto!==false) h += `<p class="mut xs">${ic('bolt',12)} Studenti se do učebny přiřazují automaticky podle předmětů a učitelů zapsaných v IS Leernio.${isAdmin(u)?' Ručně přidané členy synchronizace nemaže.':' Změny členů provádí správce.'}</p>`;
+  return h;
+}
+
+function tGrades(r,u,ed){
+  if(!ed) return studentCard(r,u.id,false);
+  const cols = S.items.filter(i => i.roomId===r.id && (i.kind==='task'||i.kind==='test')).sort((a,b)=>(a.due||a.createdAt)-(b.due||b.createdAt));
+  if(!r.studentIds.length) return `<div class="card">${empty('V učebně nejsou žádní studenti','','users')}</div>`;
+  const head = `<tr><th>Student</th>${cols.map(c=>`<th class="col"><a class="lnk sm" data-act="open-item" data-id="${c.id}" style="padding:0">${esc(c.title)}</a><div class="mut xs">${KIND[c.kind].l}${c.due?' · '+fmtD(c.due):''}${c.maxPoints?' · z '+c.maxPoints:''}</div></th>`).join('')}<th>Body</th><th>Průměr</th></tr>`;
+  const rows = r.studentIds.map(sid => {
+    const sm = summary(r,sid);
+    return `<tr><td><div class="row" style="cursor:pointer" data-act="student-card" data-id="${sid}">${av(U(sid),28)}<a class="lnk" style="padding:0">${esc(uname(sid))}</a></div></td>${cols.map(c=>{
+      if(!seesAsStudent(c,sid)) return `<td class="na" title="Nepřiřazeno"></td>`;
+      const x = resultOf(c,sid), st = status(c,sid);
+      const inner = x ? `<span class="pts">${x.p!=null?fmtNum(x.p)+(x.max?'/'+x.max:''):''}</span>${x.g?`<span class="gr">${esc(x.g)}</span>`:''}` : `<span class="chip ${st.c} xs">${st.t}</span>`;
+      return `<td class="c" data-act="grade-cell" data-id="${c.id}|${sid}">${inner}</td>`;
+    }).join('')}<td><b>${fmtNum(sm.p)}</b>${sm.max?`<span class="mut xs">/${sm.max}</span>`:''}</td><td><b>${sm.avg!=null?fmtNum(sm.avg):'–'}</b></td></tr>`;
+  }).join('');
+  return `<div class="phead"><div><h2>Hodnocení</h2><p class="mut sm" style="margin:4px 0 0">Klikněte na buňku pro ohodnocení, na jméno pro kartu studenta (body, známky, komentáře).</p></div></div><div class="tblw"><table class="tbl gb">${head}${rows}</table></div>`;
+}
+function studentCard(r,sid,ed){
+  const st = U(sid); if(!st) return '';
+  const sm = summary(r,sid);
+  const manual = S.grades.filter(g => g.roomId===r.id && g.studentId===sid).sort((a,b)=>b.date-a.date);
+  const tile = (v,l) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`;
+  let h = `<div class="card pad" style="margin-bottom:16px"><div class="row">${av(st,52)}<div class="grow"><h2>${esc(st.name)}</h2><div class="mut">${esc(r.name)} · ${esc(r.section||'')}</div></div></div></div>`;
+  h += `<div class="row stats">${tile(fmtNum(sm.p)+(sm.max?`<small class="mut" style="font-size:14px">/${sm.max}</small>`:''),'Body celkem')}${tile(sm.avg!=null?fmtNum(sm.avg):'–','Průměrná známka')}${tile(sm.done+'/'+sm.total,'Splněno úkolů a testů')}${tile(sm.missing,'Chybí')}</div>`;
+  const rows = sm.its.sort((a,b)=>(b.due||b.createdAt)-(a.due||a.createdAt)).map(i => { const x = resultOf(i,sid), s = status(i,sid);
+    return `<tr data-act="${ed?'grade-cell':'open-item'}" data-id="${ed?i.id+'|'+sid:i.id}" style="cursor:pointer"><td><div class="row">${kIcon(i.kind,28)}<span>${esc(i.title)}</span></div></td><td class="hide-sm">${i.due?fmtD(i.due):'–'}</td><td><span class="chip ${s.c}">${s.t}</span></td><td><b>${x&&x.p!=null?fmtNum(x.p)+(x.max?'/'+x.max:''):'–'}</b></td><td><b>${x&&x.g?esc(x.g):'–'}</b></td><td class="sm">${x&&x.c?nl(x.c):'<span class="mut">–</span>'}</td></tr>`; }).join('');
+  h += `<h3 style="margin:8px 0 10px">Úkoly a testy</h3><div class="tblw" style="margin-bottom:24px"><table class="tbl"><tr><th>Položka</th><th class="hide-sm">Termín</th><th>Stav</th><th>Body</th><th>Známka</th><th>Komentář učitele</th></tr>${rows||`<tr><td colspan="6" class="mut">Zatím žádné úkoly ani testy</td></tr>`}</table></div>`;
+  h += `<div class="row sp" style="margin-bottom:10px"><h3>Další známky a komentáře</h3>${ed?`<button class="btn sm" data-act="grade-new" data-id="${sid}">${ic('plus',16)}Přidat hodnocení</button>`:''}</div>`;
+  h += manual.length ? manual.map(g => `<div class="card pad" style="margin-bottom:10px"><div class="row"><div class="ic" style="background:var(--b6)">${ic('award',18)}</div><div class="grow"><b>${esc(g.label||'Hodnocení')}</b><div class="mut xs">${fmtD(g.date)} · ${esc(uname(g.by))}</div></div>${g.points!=null&&g.points!==''?`<span class="chip blue">${fmtNum(+g.points)}${g.maxPoints?'/'+g.maxPoints:''} b.</span>`:''}${g.grade?`<span class="chip green" style="font-size:14px">${esc(g.grade)}</span>`:''}${ed?`<button class="iconbtn s" data-act="grade-edit" data-id="${g.id}">${ic('edit',16)}</button><button class="iconbtn s" data-act="grade-del" data-id="${g.id}">${ic('trash',16)}</button>`:''}</div>${g.comment?`<div class="cm" style="margin-left:48px">${nl(g.comment)}</div>`:''}</div>`).join('') : `<p class="mut">Zatím žádná další hodnocení.</p>`;
+  return h;
+}
+
+/* ---------- item detail ---------- */
+function vItem(u){
+  const it = I(ui.itemId);
+  if(!it || !canSee(it,u)) return wrap(empty('Položka není dostupná','Byla smazána nebo k ní nemáte přístup.'));
+  const r = R(it.roomId), ed = canEdit(r,u);
+  const back = `<a class="lnk back" data-act="back-room">${ic('back',16)} Zpět do učebny</a>`;
+  let sub = '';
+  if(ed && it.kind==='task'){
+    const n = assignees(it).filter(s=>status(it,s).done).length;
+    sub = `<nav class="tabs">${[['zadani','Zadání'],['prace',`Odevzdané práce (${n})`]].map(([a,l])=>`<div class="tab ${ui.subTab===a?'on':''}" data-act="subtab" data-id="${a}">${l}</div>`).join('')}</nav>`;
+    if(ui.subTab==='prace') return sub + wrap(back + submissionsView(it));
+  }
+  const auth = U(it.authorId);
+  const head = `<div class="ihead">${kIcon(it.kind,46)}<div class="grow"><h1>${esc(it.title)}</h1><div class="mut sm">${esc(auth?auth.name:'')} · ${it.kind==='lesson'?'hodina '+fmtD(it.lessonDate):fmtD(it.createdAt)}${it.editedAt?' (upraveno)':''} ${it.source==='is'?'<span class="chip blue">z kalendáře IS</span>':''}</div><div class="row sp" style="margin-top:10px;flex-wrap:wrap">${it.maxPoints?`<b>${it.maxPoints} bodů</b>`:'<span></span>'}${it.due?`<b>Termín: ${fmtDT(it.due)}</b>`:''}</div></div>${ed?`<div class="acts"><button class="iconbtn" data-act="item-edit" data-id="${it.id}" title="Upravit">${ic('edit',18)}</button><button class="iconbtn" data-act="item-del" data-id="${it.id}" title="Smazat">${ic('trash',18)}</button></div>`:''}</div>`;
+  const hw = it.kind==='lesson' && it.homeworkId && I(it.homeworkId);
+  const les = it.lessonId && I(it.lessonId);
+  let main = `<div class="card pad">${head}<hr>${it.body?`<div class="body">${nl(it.body)}</div>`:''}${attList(it.attachments)}${linkList(it.links)}${it.kind==='test'?testBox(it,u,ed):''}${hw?`<div class="hwlink" data-act="open-item" data-id="${hw.id}">${ic('task',18)}<span>Domácí úkol z hodiny: <b>${esc(hw.title)}</b></span></div>`:''}${les&&canSee(les,u)?`<p class="sm"><a class="lnk" data-act="open-item" data-id="${les.id}">${ic('cal',14)} Zadáno v hodině ${fmtD(les.lessonDate)}</a></p>`:''}${ed?`<hr><p class="mut xs" style="margin:0">Vidí: ${assignees(it).map(s=>esc(uname(s))).join(', ')||'zatím nikdo'}</p>`:''}</div>`;
+  const side = !ed && it.kind==='task' ? yourWork(it,u) : '';
+  return sub + `<div class="wrap">${back}<div class="${side?'icols':''}"><div>${main}</div>${side?`<div>${side}</div>`:''}</div></div>`;
+}
+function attList(a,delAct,ctx=''){
+  if(!a || !a.length) return '';
+  return `<div class="atts">${a.map((f,idx)=>{ const e = extInfo(f.name); return `<div class="att" data-act="preview" data-id="${f.id}" title="${esc(f.name)}"><div class="ext" style="background:${e.c}">${e.l}</div><div class="grow"><div class="ell">${esc(f.name)}</div><div class="mut xs">${fsize(f.size)}</div></div>${delAct?`<button type="button" class="iconbtn s" data-act="${delAct}" data-id="${ctx}${idx}" title="Odebrat">${ic('x',14)}</button>`:''}</div>`; }).join('')}</div>`;
+}
+function linkList(l){
+  if(!l || !l.length) return '';
+  return `<div class="atts">${l.map(x=>{ const k = linkInfo(x.url); return `<a class="att" href="${esc(safeUrl(x.url))}" target="_blank" rel="noopener"><div class="ext" style="background:${k.c}">${k.l}</div><div class="grow"><div class="ell">${esc(x.title||x.url)}</div><div class="mut xs ell">${esc(host(x.url))}</div></div>${ic('link',16)}</a>`; }).join('')}</div>`;
+}
+function testBox(it,u,ed){
+  const t = S.tests.find(x=>x.id===it.testId);
+  const tname = t ? t.name : (it.testId || 'Test v Opakovačce');
+  const head = `<div class="row">${kIcon('test',36)}<div class="grow"><b>${esc(tname)}</b><div class="mut xs">Aplikace Testy (Opakovačka) v IS${t&&t.questions?' · '+t.questions+' otázek':''}</div></div>${it.pin?`<span class="chip violet" style="font-size:14px">PIN ${esc(it.pin)}</span>`:''}</div>`;
+  const how = `<p class="sm" style="margin:10px 0 0">Test spustíš v IS: <b>Aplikace → Testy</b>${it.pin?` a zadej PIN <b>${esc(it.pin)}</b>`:', PIN ti dá učitel'}.</p>`;
+  if(ed){
+    const rows = assignees(it).map(s => { const tr = testRes(it.id,s); const max = tr&&tr.max || it.maxPoints || '';
+      return `<tr><td>${esc(uname(s))}</td><td><div class="row" style="gap:6px"><input type="number" step="0.5" min="0" style="width:84px;padding:5px 8px" value="${tr&&tr.score!=null?tr.score:''}" data-change="test-score" data-id="${it.id}|${s}" placeholder="body"><span class="mut sm">/ ${esc(max||'–')}</span></div></td><td><select data-change="test-grade" data-id="${it.id}|${s}" style="width:auto;padding:4px 8px"><option value="">—</option>${GRADES.map(g=>`<option ${tr&&tr.grade===g?'selected':''}>${g}</option>`).join('')}</select></td><td class="hide-sm mut xs">${tr?fmtDT(tr.at):''}</td></tr>`; }).join('');
+    return `<div class="testbox">${head}${how}</div><p class="mut xs" style="margin:6px 0">Výsledky z Opakovačky sem zapište ručně (body a známku). Student je uvidí ve svém hodnocení.</p><div class="tblw"><table class="tbl"><tr><th>Student</th><th>Body</th><th>Známka</th><th class="hide-sm">Zapsáno</th></tr>${rows||'<tr><td colspan="4" class="mut">Nikomu nepřiřazeno</td></tr>'}</table></div>`;
+  }
+  const tr = testRes(it.id,u.id);
+  return `<div class="testbox">${head}${tr?'':how}</div>${tr?`<div class="graded"><div class="big">${tr.score!=null?fmtNum(tr.score):'–'}<small>/${esc(tr.max||it.maxPoints||'–')} bodů</small></div>${tr.grade?`<div>Známka: <b>${esc(tr.grade)}</b></div>`:''}${tr.comment?`<div class="cm">${nl(tr.comment)}</div>`:''}</div>`:''}`;
+}
+function yourWork(it,u){
+  const s = subOf(it.id,u.id); const st = status(it,u.id);
+  const locked = s && (s.status==='submitted' || s.status==='returned');
+  let h = `<div class="card pad"><div class="row sp"><h3>Vaše práce</h3><span class="chip ${st.c}">${st.t}</span></div>`;
+  if(s && s.status==='returned') h += `<div class="graded">${s.points!=null?`<div class="big">${fmtNum(s.points)}<small>/${it.maxPoints||'–'} bodů</small></div>`:''}${s.grade?`<div>Známka: <b>${esc(s.grade)}</b></div>`:''}${s.comment?`<div class="cm">${nl(s.comment)}</div>`:''}</div>`;
+  h += attList(s ? s.attachments : [], locked ? null : 'sub-att-del', it.id+'|');
+  if(!locked){
+    h += `<label class="btn full" style="margin:8px 0">${ic('upload',16)}Přidat soubor<input type="file" multiple hidden data-change="sub-file" data-id="${it.id}"></label><textarea data-change="sub-text" data-id="${it.id}" placeholder="Odpověď nebo poznámka pro učitele (nepovinné)" style="min-height:70px;margin-bottom:10px">${esc(s?s.text:'')}</textarea><button class="btn pri full" data-act="sub-submit" data-id="${it.id}">${ic('check',16)}${s&&(s.attachments||[]).length?'Odevzdat':'Označit jako hotové'}</button>`;
+  } else {
+    if(s.text) h += `<div class="body sm" style="margin-top:10px">${nl(s.text)}</div>`;
+    h += `<p class="mut xs">Odevzdáno ${fmtDT(s.submittedAt)}</p><button class="btn full" data-act="sub-unsubmit" data-id="${it.id}">${s.status==='returned'?'Upravit a odevzdat znovu':'Zrušit odevzdání'}</button>`;
+  }
+  h += `</div>` + thread(it,u.id);
+  return h;
+}
+function thread(it,sid){
+  const s = subOf(it.id,sid); const msgs = (s && s.thread) || [];
+  return `<div class="card pad thread"><h4 class="row" style="gap:6px">${ic('chat',16)}Soukromé komentáře</h4>${msgs.map(m=>`<div class="msg">${av(U(m.by),28)}<div class="bub"><b class="sm">${esc(uname(m.by))}</b> <span class="mut xs">${fmtDT(m.at)}</span><div class="sm">${nl(m.text)}</div></div></div>`).join('')}<form data-form="thread" data-id="${it.id}|${sid}" class="row" style="margin-top:8px"><input name="text" placeholder="Přidat soukromý komentář…" required><button class="iconbtn" title="Odeslat">${ic('chev',18)}</button></form></div>`;
+}
+function submissionsView(it){
+  const as = assignees(it);
+  const cnt = k => as.filter(s => (subOf(it.id,s)||{}).status===k).length;
+  const sel = ui.subStudent && as.includes(ui.subStudent) ? ui.subStudent : (as.find(x => (subOf(it.id,x)||{}).status==='submitted') || as[0]);
+  const stat = (v,l) => `<div class="stat"><b>${v}</b><span>${l}</span></div>`;
+  const list = as.map(s => { const st = status(it,s), sb = subOf(it.id,s);
+    return `<div class="sitem ${s===sel?'on':''}" data-act="sub-sel" data-id="${s}">${av(U(s),28)}<div class="grow"><div class="ell">${esc(uname(s))}</div><span class="chip ${st.c}" style="font-size:11px">${st.t}</span></div><b class="sm">${sb&&sb.points!=null?fmtNum(sb.points)+(it.maxPoints?'/'+it.maxPoints:''):(sb&&sb.grade?esc(sb.grade):'')}</b></div>`; }).join('');
+  return `<h2 style="margin-bottom:12px">${esc(it.title)}</h2><div class="row stats">${stat(cnt('submitted')+cnt('returned'),'Odevzdáno')}${stat(as.length-cnt('submitted')-cnt('returned'),'Neodevzdáno')}${stat(cnt('submitted'),'Čeká na hodnocení')}${stat(cnt('returned'),'Ohodnoceno')}</div><div class="cols"><div class="card scope" style="top:190px">${list||'<p class="mut">Nikomu nepřiřazeno</p>'}</div><div>${sel?gradePanel(it,sel):''}</div></div>`;
+}
+function gradePanel(it,sid){
+  const s = subOf(it.id,sid), us = U(sid), st = status(it,sid);
+  let h = `<div class="card pad"><div class="row">${av(us,42)}<div class="grow"><h3>${esc(us.name)}</h3><span class="mut xs">${s&&s.submittedAt&&s.status!=='draft'?'Odevzdáno '+fmtDT(s.submittedAt):'Zatím neodevzdáno'}</span></div><span class="chip ${st.c}">${st.t}</span></div><hr>`;
+  const has = s && s.status!=='draft' && ((s.attachments||[]).length || s.text);
+  h += has ? attList(s.attachments) + (s.text?`<div class="body" style="padding:10px 12px;background:#f8fafc;border-radius:8px">${nl(s.text)}</div>`:'') : `<p class="mut">Student zatím nic neodevzdal. Hodnocení můžete zadat i tak (např. za práci v hodině).</p>`;
+  h += `<form data-form="grade" data-id="${it.id}|${sid}" style="display:grid;gap:12px;margin-top:12px"><div class="g2"><div class="field"><label>Body${it.maxPoints?' (max. '+it.maxPoints+')':''}</label><input type="number" name="points" step="0.5" min="0" ${it.maxPoints?`max="${it.maxPoints}"`:''} value="${s&&s.points!=null?s.points:''}"></div><div class="field"><label>Známka</label><select name="grade"><option value="">—</option>${GRADES.map(g=>`<option ${s&&s.grade===g?'selected':''}>${g}</option>`).join('')}</select></div></div><div class="field"><label>Komentář pro studenta</label><textarea name="comment" placeholder="Co se povedlo, na čem zapracovat…">${esc(s&&s.comment||'')}</textarea></div><div class="row end"><button class="btn pri">${ic('check',16)}Uložit a vrátit studentovi</button></div></form></div>`;
+  return h + thread(it,sid);
+}
+
+/* ---------- todo ---------- */
+function vTodo(u){
+  if(u.role==='student'){
+    const its = S.items.filter(i => (i.kind==='task'||i.kind==='test') && seesAsStudent(i,u.id));
+    const g = {Přiřazeno:[],Chybí:[],Hotovo:[]};
+    its.forEach(i => { const s = status(i,u.id); (s.done ? g.Hotovo : s.c==='red' ? g.Chybí : g.Přiřazeno).push(i); });
+    g.Přiřazeno.sort((a,b)=>(a.due||9e15)-(b.due||9e15));
+    const sec = (k,arr) => `<section class="card chap"><div class="chh"><div class="cht"><h3>${k}</h3><span class="chip ${k==='Chybí'?'red':k==='Hotovo'?'green':''}">${arr.length}</span></div></div>${arr.length?arr.map(i=>todoRow(i,u)).join(''):'<div class="irow noitem">Nic tu není</div>'}</section>`;
+    return wrap(`<div class="phead"><h1>Moje úkoly</h1></div>` + sec('Přiřazeno',g.Přiřazeno) + sec('Chybí',g.Chybí) + sec('Hotovo',g.Hotovo));
+  }
+  const rs = roomsFor(u).filter(r=>canEdit(r,u));
+  const its = S.items.filter(i => i.kind==='task' && rs.some(r=>r.id===i.roomId)).map(i => ({i,n:assignees(i).filter(s=>(subOf(i.id,s)||{}).status==='submitted').length})).filter(x=>x.n).sort((a,b)=>b.n-a.n);
+  return wrap(`<div class="phead"><div><h1>K ohodnocení</h1><p class="mut" style="margin:4px 0 0">Odevzdané práce, které čekají na vaše hodnocení.</p></div></div>` + (its.length ? `<section class="card chap">${its.map(({i,n})=>`<div class="irow" data-act="open-subs" data-id="${i.id}">${kIcon('task')}<div class="grow"><div class="it">${esc(i.title)}</div><div class="mut xs">${esc((R(i.roomId)||{}).name)} · ${esc((R(i.roomId)||{}).section||'')}${i.due?' · termín '+fmtD(i.due):''}</div></div><span class="chip amber">${n} k ohodnocení</span></div>`).join('')}</section>` : `<div class="card">${empty('Vše ohodnoceno','Žádné odevzdané práce nečekají na hodnocení.','check')}</div>`));
+}
+function todoRow(i,u){ const r = R(i.roomId), s = status(i,u.id);
+  return `<div class="irow" data-act="open-item" data-id="${i.id}">${kIcon(i.kind)}<div class="grow"><div class="it">${esc(i.title)}</div><div class="mut xs">${esc(r?r.name:'')} · ${i.due?'termín '+fmtDT(i.due):'bez termínu'}</div></div><span class="chip ${s.c}">${s.t}</span></div>`; }
+
+/* ---------- admin ---------- */
+function vAdmin(u){
+  const tabs = [['rooms','Učebny'],['users','Uživatelé a zápisy'],['auto','Automatické přiřazení'],['api','Integrace s IS']];
+  let body = '';
+  if(ui.adminTab==='rooms'){
+    body = `<div class="row sp" style="margin-bottom:14px"><p class="mut" style="margin:0">Správce vidí a může upravovat všechny učebny. Hlavní úkol: propojit studenty a učitele do správných učeben.</p><button class="btn pri" data-act="room-new">${ic('plus',16)}Nová učebna</button></div><div class="tblw"><table class="tbl"><tr><th>Učebna</th><th>Předmět</th><th>Učitelé</th><th>Studenti</th><th>Režim</th><th></th></tr>${S.rooms.map(r=>`<tr><td><div class="row"><div class="dot" style="background:${r.color}">${esc((r.name||'?')[0])}</div><a class="lnk" data-act="open-room" data-id="${r.id}">${esc(r.name)}</a></div></td><td>${esc(subj(r.subjectId))}</td><td>${r.teacherIds.map(uname).map(esc).join(', ')||'<span class="chip red">bez učitele</span>'}</td><td><span title="${esc(r.studentIds.map(uname).join(', '))}">${r.studentIds.length}</span></td><td>${r.auto!==false?`<span class="chip blue">${ic('bolt',12)}auto</span>`:'<span class="chip">ruční</span>'}</td><td style="white-space:nowrap"><button class="iconbtn s" data-act="room-edit" data-id="${r.id}" title="Upravit">${ic('edit',16)}</button><button class="iconbtn s" data-act="room-del" data-id="${r.id}" title="Smazat">${ic('trash',16)}</button></td></tr>`).join('')}</table></div>`;
+  } else if(ui.adminTab==='users'){
+    const rows = role => S.users.filter(x=>x.role===role).map(x=>`<tr><td><div class="row">${av(x,28)}${esc(x.name)}</div></td><td>${ROLE[x.role]}</td><td class="sm">${role==='teacher'?(x.subjects||[]).map(subj).map(esc).join(', ')||'–':role==='student'?(x.enroll||[]).map(e=>`${esc(subj(e.subjectId))} <span class="mut">(${e.teacherId?esc(uname(e.teacherId)):'auto'})</span>`).join(', ')||'–':'–'}</td><td><button class="iconbtn s" data-act="user-edit" data-id="${x.id}">${ic('edit',16)}</button>${x.id!==me?`<button class="iconbtn s" data-act="user-del" data-id="${x.id}">${ic('trash',16)}</button>`:''}</td></tr>`).join('');
+    body = `<div class="row sp" style="margin-bottom:14px"><p class="mut" style="margin:0">V provozu se uživatelé, předměty a zápisy synchronizují z IS. Zde je můžete upravit pro test.</p><button class="btn pri" data-act="user-new">${ic('plus',16)}Nový uživatel</button></div><div class="tblw"><table class="tbl"><tr><th>Jméno</th><th>Role</th><th>Předměty / zápisy (předmět – učitel)</th><th></th></tr>${rows('admin')}${rows('teacher')}${rows('student')}</table></div>`;
+  } else if(ui.adminTab==='auto'){
+    body = `<div class="card pad" style="margin-bottom:16px"><h3 style="margin-bottom:8px">Jak automatické přiřazení funguje</h3><ol class="sm" style="margin:0;padding-left:18px;line-height:1.7"><li>Pro každý zápis studenta (předmět + zapsaný učitel) se najde učebna daného předmětu a učitele. Když neexistuje, vytvoří se.</li><li>Pokud student nemá u předmětu zapsaného učitele, zařadí se k učiteli toho předmětu s nejmenším počtem studentů.</li><li>Každý učitel má učebnu pro každý svůj předmět.</li><li>Když student předmět v IS odhlásí, z automatické učebny se odebere. Ručně přidaní členové a učebny v ručním režimu zůstávají.</li></ol><div style="margin-top:14px"><button class="btn pri" data-act="auto-run">${ic('bolt',16)}Spustit synchronizaci</button></div></div><h3 style="margin-bottom:10px">Protokol</h3><div class="log">${(S.log||[]).map(l=>`<div style="margin-bottom:10px"><b>${fmtDT(l.at)} – ${esc(l.src)}</b>${l.lines.length?l.lines.map(x=>`<div>${esc(x)}</div>`).join(''):'<div class="mut">Beze změn</div>'}</div>`).join('')||'<span class="mut">Zatím prázdný</span>'}</div>`;
+  } else {
+    body = apiDoc();
+  }
+  return wrap(`<div class="phead"><h1>Správa učeben</h1></div><div class="subtabs">${tabs.map(([k,l])=>`<button class="btn sm ${ui.adminTab===k?'pri':''}" data-act="admin-tab" data-id="${k}">${l}</button>`).join('')}</div>${body}`);
+}
+function apiDoc(){
+  const ex = (title,desc,obj) => `<div class="card pad" style="margin-bottom:14px"><h3>${title}</h3><p class="mut sm">${desc}</p><pre class="code">${esc(JSON.stringify(obj,null,2))}</pre></div>`;
+  return `<div class="card pad" style="margin-bottom:14px"><h3>Napojení na IS Leernio</h3><p class="sm">Do Učebny se přihlašuje <b>jen přes IS</b>, stejně jako do Opakovačky. Učebna běží v okně (iframe) IS na <code>${CONFIG.isOrigin}</code>; zprávy přijímá jen od rodičovského okna z tohoto původu. Otevřená napřímo ukáže „Do Učebny se přihlásíš přes IS Leernio“. Data ukládá samostatný server Učebny (Google Apps Script), který klíč z IS ověřuje u serveru IS a hlídá práva podle role.</p><ol class="sm" style="padding-left:18px;line-height:1.7"><li>Učebna po načtení pošle <code>uceb:ready</code>.</li><li>IS si vyžádá omezený klíč akcí <code>appTok</code> s <code>{app:"ucebna"}</code> a pošle <code>{type:"is:auth", token:"ap1.…"}</code>.</li><li>Server Učebny klíč ověří u serveru IS (<code>{a:"me", t}</code> → <code>{acct:{u, role, name}}</code>) a spáruje účet podle uživatelského jména, případně podle jména.</li><li>Výsledek oznámí <code>uceb:auth-ok</code> nebo <code>uceb:auth-error</code> (IS jednou zkusí nový klíč). Při odhlášení z IS pošle IS <code>is:logout</code>.</li></ol><p class="sm" style="margin:0"><b>Z Učebny do IS</b> (<code>{src:"ucebna", v:1, type}</code>): <code>uceb:ready</code>, <code>uceb:auth-ok</code>, <code>uceb:auth-error</code>, <code>uceb:height</code>, <code>uceb:openTest</code>, <code>uceb:changed</code>.</p></div>`
+   + ex('is:auth – přihlášení','Jediný způsob přihlášení. Role z IS: admin, teacher (i lektor/ucitel), student. Jiné role přístup nemají.',{type:'is:auth',token:'ap1.…'})
+   + ex('is:sync – soupiska z IS (jen učitel/správce)','predmety = kódy z tabulky (B01, B02, B03, C01, C02). Po přijetí proběhne automatické přiřazení do učeben.',{type:'is:sync',users:[{u:'novak.jan',name:'Jan Novák',role:'student',predmety:'B01, B02'}],tests:[{id:'opk-101',name:'Literární směry',subjectId:'B01',questions:10}]})
+   + ex('is:lesson – zápis hodiny z kalendáře','Vytvoří nebo podle id aktualizuje zápis v kapitole „Zápisy z hodin“. S vyplněným homework vznikne i úkol s odevzdávárnou.',{type:'is:lesson',lesson:{id:'cal-5531',teacherId:'trkan.tobias',subjectId:'B01',studentIds:['musil.tomas'],date:'2026-11-10T15:00',topic:'Literární moderna',content:'Náplň hodiny…',homework:{title:'Rozbor – Krysař',description:'…',due:'2026-11-14T20:00',maxPoints:10}}})
+   + ex('is:testResult – výsledek z Opakovačky','',{type:'is:testResult',result:{itemId:'i…',testId:'opk-101',studentId:'musil.tomas',score:8,max:10}})
+   + ex('uceb:openTest – z Učebny do IS','Student nebo učitel klikl na test.',{src:'ucebna',v:1,type:'uceb:openTest',testId:'opk-101',itemId:'i…',u:'musil.tomas',role:'student'})
+   + `<button class="btn" data-act="copy-state">${ic('link',16)}Zkopírovat aktuální data (JSON)</button>`;
+}
+
+/* ---------- modals ---------- */
+function openModal(title,body,o={}){
+  M = {onSubmit:o.onSubmit};
+  $('#modal-root').innerHTML = `<div class="mback" data-act="modal-bg"><form class="modal ${o.wide?'wide':''}" data-form="modal" ${o.k?`data-k="${o.k}"`:''} novalidate><div class="mh"><h3>${title}</h3><button type="button" class="iconbtn" data-act="modal-close">${ic('x')}</button></div><div class="mb">${body}</div><div class="mf">${o.extra||''}<span class="spacer"></span><button type="button" class="btn" data-act="modal-close">${o.onSubmit?'Zrušit':'Zavřít'}</button>${o.onSubmit?`<button class="btn pri ${o.danger?'dangerbg':''}">${o.submit||'Uložit'}</button>`:''}</div></form></div>`;
+  const f = $('#modal-root input:not([type=hidden]):not([type=file]),#modal-root textarea'); if(f && !o.noFocus) setTimeout(()=>f.focus(),30);
+}
+function closeModal(){ $('#modal-root').innerHTML=''; M=null; PEND=[]; }
+function confirmBox(text,fn,btn='Smazat'){ openModal('Opravdu?',`<p style="margin:0">${text}</p>`,{submit:btn,danger:true,noFocus:true,onSubmit:()=>{fn();return true;}}); }
+const pendHtml = () => attList(PEND,'pend-del') || '<p class="mut xs" style="margin:0">Zatím žádné soubory</p>';
+
+function chapterOptions(r,selId){
+  const shared = S.chapters.filter(c=>c.roomId===r.id && !c.studentId).sort((a,b)=>a.order-b.order);
+  let h = `<option value="">Bez kapitoly</option>`;
+  if(shared.length) h += `<optgroup label="Celá učebna">${shared.map(c=>`<option value="${c.id}" ${c.id===selId?'selected':''}>${esc(c.title)}</option>`).join('')}</optgroup>`;
+  r.studentIds.forEach(s => { const cs = S.chapters.filter(c=>c.roomId===r.id && c.studentId===s).sort((a,b)=>a.order-b.order); if(cs.length) h += `<optgroup label="Individuální – ${esc(uname(s))}">${cs.map(c=>`<option value="${c.id}" ${c.id===selId?'selected':''}>${esc(c.title)}</option>`).join('')}</optgroup>`; });
+  return h;
+}
+function itemModal(kind,it,chapterId){
+  const r = R(it ? it.roomId : ui.roomId); if(!r) return;
+  const isNew = !it;
+  const scopeS = ui.scope!=='all' && r.studentIds.includes(ui.scope) ? ui.scope : null;
+  if(isNew){
+    const defCh = chapterId || (scopeS ? (S.chapters.find(c=>c.roomId===r.id && c.studentId===scopeS)||{}).id : null) || null;
+    it = {kind,attachments:[],links:[],studentIds:scopeS?[scopeS]:null,chapterId:defCh,maxPoints:kind==='task'||kind==='test'?10:null,lessonDate:Date.now()};
+  }
+  PEND = JSON.parse(JSON.stringify(it.attachments||[]));
+  const sel = it.studentIds && it.studentIds.length;
+  const tests = S.tests.filter(t=>!t.subjectId || t.subjectId===r.subjectId).concat(S.tests.filter(t=>t.subjectId && t.subjectId!==r.subjectId));
+  const body = `
+   ${isNew?`<div class="field"><label>Typ</label><select name="kind" data-change="kind-switch">${Object.entries(KIND).map(([k,v])=>`<option value="${k}" ${k===it.kind?'selected':''}>${v.l}</option>`).join('')}</select></div>`:''}
+   <div class="field"><label>Název *</label><input name="title" required value="${esc(it.title||'')}" placeholder="např. Pracovní list – zlomky"></div>
+   <div class="field"><label>Popis / pokyny</label><textarea name="body" placeholder="Instrukce pro studenty…">${esc(it.body||'')}</textarea></div>
+   <div class="g2"><div class="field"><label>Kapitola</label><select name="chapterId">${chapterOptions(r,it.chapterId)}</select></div>
+   <div class="field k-lesson"><label>Datum hodiny</label><input type="date" name="lessonDate" value="${toDateInput(it.lessonDate||Date.now())}"></div>
+   <div class="field k-due"><label>Termín odevzdání</label><input type="datetime-local" name="due" value="${toLocalInput(it.due)}"></div></div>
+   <div class="g2"><div class="field k-test"><label>Test v Opakovačce (název nebo ID)</label>${tests.length?`<select name="testId"><option value="">—</option>${tests.map(t=>`<option value="${t.id}" ${t.id===it.testId?'selected':''}>${esc(t.name)}</option>`).join('')}</select>`:`<input name="testId" value="${esc(it.testId||'')}" placeholder="např. Literární směry – test">`}</div><div class="field k-test"><label>PIN testu</label><input name="pin" value="${esc(it.pin||'')}" placeholder="6 číslic z Opakovačky" inputmode="numeric"></div>
+   <div class="field k-pts"><label>Body (max.)</label><input type="number" name="maxPoints" min="0" step="0.5" value="${it.maxPoints??''}" placeholder="bez bodů"></div></div>
+   <div class="field"><label>Pro koho</label><div class="radios"><label><input type="radio" name="aud" value="all" data-change="aud-switch" ${sel?'':'checked'}>Celá učebna</label><label><input type="radio" name="aud" value="sel" data-change="aud-switch" ${sel?'checked':''}>Vybraní studenti</label></div><div class="checks" id="audsel" style="margin-top:8px;${sel?'':'display:none'}">${r.studentIds.map(s=>`<label><input type="checkbox" name="sids" value="${s}" ${sel&&it.studentIds.includes(s)?'checked':''}>${esc(uname(s))}</label>`).join('')||'<span class="mut">V učebně nejsou studenti</span>'}</div></div>
+   <div class="field"><label>Soubory (PDF, Word, prezentace, zvuk, fotky, video…)</label><div id="pend">${pendHtml()}</div><label class="btn sm" style="margin-top:8px">${ic('upload',16)}Nahrát soubory<input type="file" multiple hidden data-change="pend-file"></label></div>
+   <div class="field"><label>Odkazy (videa, stránky, dotazníky…) – jeden na řádek, volitelně „Název | URL“</label><textarea name="links" style="min-height:64px" placeholder="Video k výkladu | https://youtube.com/…">${esc((it.links||[]).map(l=>l.title?`${l.title} | ${l.url}`:l.url).join('\n'))}</textarea></div>`;
+  const existing = isNew ? null : it;
+  openModal(`${kIcon(it.kind,30)}${isNew?'Nový: '+KIND[it.kind].l.toLowerCase():'Upravit: '+esc(it.title)}`, body, {wide:true,k:it.kind,submit:isNew?'Zveřejnit':'Uložit',onSubmit:(f)=>saveItem(f,existing,r)});
+}
+function saveItem(f,existing,r){
+  const fd = new FormData(f); const g = k => (fd.get(k)||'').toString();
+  const kind = existing ? existing.kind : g('kind');
+  if(!g('title').trim()){ toast('Vyplňte název'); return false; }
+  const sids = g('aud')==='sel' ? fd.getAll('sids') : null;
+  if(sids && !sids.length){ toast('Vyberte alespoň jednoho studenta'); return false; }
+  const o = existing || {id:uid('i'),roomId:r.id,createdAt:Date.now(),authorId:me};
+  Object.assign(o,{kind,title:g('title').trim(),body:g('body'),chapterId:g('chapterId')||null,studentIds:sids,attachments:PEND.slice(),links:parseLinks(g('links'))});
+  o.due = (kind==='task'||kind==='test') && g('due') ? new Date(g('due')).getTime() : null;
+  o.maxPoints = (kind==='task'||kind==='test') && g('maxPoints')!=='' ? +g('maxPoints') : null;
+  o.testId = kind==='test' ? g('testId') : null;
+  o.pin = kind==='test' ? g('pin').replace(/\s/g,'') : null;
+  if(kind==='lesson') o.lessonDate = g('lessonDate') ? new Date(g('lessonDate')+'T12:00').getTime() : Date.now();
+  if(existing) o.editedAt = Date.now(); else S.items.push(o);
+  changed(); toast(existing?'Uloženo':`${KIND[kind].l} zveřejněn${kind==='task'||kind==='test'?'':'o'}`.replace('Úkol zveřejněn','Úkol zveřejněn').replace('Materiál zveřejněno','Materiál zveřejněn').replace('Zápis hodiny zveřejněno','Zápis hodiny uložen'));
+  return true;
+}
+function chapterModal(c){
+  const r = R(c ? c.roomId : ui.roomId);
+  const def = c ? c.studentId : (ui.scope!=='all' && r.studentIds.includes(ui.scope) ? ui.scope : '');
+  openModal(c?'Upravit kapitolu':'Nová kapitola',`<div class="field"><label>Název kapitoly *</label><input name="title" required value="${esc(c?c.title:'')}" placeholder="např. 3. Procenta, Repertoár, Opakování před testem"></div><div class="field"><label>Kapitola pro</label><select name="studentId"><option value="">Celou učebnu (všichni studenti)</option>${r.studentIds.map(s=>`<option value="${s}" ${def===s?'selected':''}>Individuálně: ${esc(uname(s))}</option>`).join('')}</select></div>`,{submit:c?'Uložit':'Vytvořit',onSubmit:f=>{
+    const fd = new FormData(f); const title = (fd.get('title')||'').toString().trim(); if(!title){toast('Vyplňte název');return false;}
+    if(c){ c.title = title; c.studentId = fd.get('studentId')||null; }
+    else { const max = Math.max(0,...S.chapters.filter(x=>x.roomId===r.id).map(x=>x.order)); S.chapters.push({id:uid('c'),roomId:r.id,title,order:max+1,studentId:fd.get('studentId')||null}); }
+    changed(); return true; }});
+}
+function roomModal(r){
+  const u = cur(), adm = isAdmin(u), isNew = !r;
+  r = r || {name:'',section:'',subjectId:S.subjects[0]&&S.subjects[0].id,teacherIds:[],studentIds:[],auto:false,color:COLORS[S.rooms.length%COLORS.length],theme:'kruhy'};
+  const body = `<div class="g2"><div class="field"><label>Název *</label><input name="name" required value="${esc(r.name)}"></div><div class="field"><label>Sekce / popis</label><input name="section" value="${esc(r.section||'')}" placeholder="např. jméno učitele, skupina"></div></div>
+   <div class="tprev pat" id="tprev" style="${roomStyle(r)}"><h3>${esc(r.name||'Název učebny')}</h3><div class="sm" style="opacity:.9">${esc(r.section||'')}</div></div>
+   <div class="field"><label>Barva záhlaví</label><div class="swatches">${PALETTE.map(c=>`<label class="sw" title="${c}"><input type="radio" name="color" value="${c}" data-change="theme-prev" ${c===r.color?'checked':''}><span style="background:${c}"></span></label>`).join('')}<label class="sw custom" title="Vlastní barva"><input type="radio" name="color" value="custom" data-change="theme-prev" ${PALETTE.includes(r.color)?'':'checked'}><span></span><input type="color" name="colorCustom" value="${PALETTE.includes(r.color)?'#2563eb':r.color}" data-change="theme-custom"></label></div></div>
+   <div class="field"><label>Motiv záhlaví</label><div class="motifs">${Object.entries(THEMES).map(([k,t])=>`<label class="motif"><input type="radio" name="theme" value="${k}" data-change="theme-prev" ${k===(r.theme||'kruhy')?'checked':''}><span class="mt pat" data-motif="${k}" style="${esc(themeStyle(r.color,k))}"></span><b>${t.l}</b></label>`).join('')}</div></div>
+   ${adm?`<div class="g2"><div class="field"><label>Předmět</label><select name="subjectId">${S.subjects.map(s=>`<option value="${s.id}" ${s.id===r.subjectId?'selected':''}>${esc(s.name)}</option>`).join('')}</select></div><div class="field"><label>Režim členů</label><select name="auto"><option value="1" ${r.auto!==false?'selected':''}>Automaticky podle zápisů v IS</option><option value="0" ${r.auto===false?'selected':''}>Pouze ručně</option></select></div></div>
+   <div class="field"><label>Učitelé</label><div class="checks">${S.users.filter(x=>x.role==='teacher').map(t=>`<label><input type="checkbox" name="teachers" value="${t.id}" ${r.teacherIds.includes(t.id)?'checked':''}>${esc(t.name)}</label>`).join('')}</div></div>
+   <div class="field"><label>Studenti</label><div class="checks">${S.users.filter(x=>x.role==='student').map(s=>`<label><input type="checkbox" name="students" value="${s.id}" ${r.studentIds.includes(s.id)?'checked':''}>${esc(s.name)}</label>`).join('')}</div><p class="mut xs" style="margin:6px 0 0">Ručně přidané studenty automatická synchronizace neodebere.</p></div>`:''}`;
+  openModal(isNew?'Nová učebna':'Upravit učebnu',body,{wide:adm,submit:isNew?'Vytvořit':'Uložit',onSubmit:f=>{
+    const fd = new FormData(f); const name = (fd.get('name')||'').toString().trim(); if(!name){toast('Vyplňte název');return false;}
+    const col = fd.get('color')==='custom' ? (fd.get('colorCustom')||r.color) : (fd.get('color')||r.color);
+    Object.assign(r,{name,section:fd.get('section')||'',color:col,theme:fd.get('theme')||r.theme||'kruhy'});
+    if(adm){
+      r.subjectId = fd.get('subjectId'); r.auto = fd.get('auto')==='1'; r.teacherIds = fd.getAll('teachers');
+      const newS = fd.getAll('students'); const before = r.studentIds.slice();
+      r.manual = (r.manual||[]).filter(s=>newS.includes(s)).concat(newS.filter(s=>!before.includes(s)));
+      r.studentIds = newS;
+    }
+    if(isNew){ r.id = uid('r'); r.createdAt = Date.now(); r.manual = r.manual||r.studentIds.slice(); S.rooms.push(r); }
+    changed(); toast('Učebna uložena'); return true; }});
+}
+function userModal(x){
+  const isNew = !x; x = x || {name:'',role:'student',subjects:[],enroll:[],color:COLORS[S.users.length%COLORS.length]};
+  const teachersOf = sid => S.users.filter(t=>t.role==='teacher' && (t.subjects||[]).includes(sid));
+  const body = `<div class="g2"><div class="field"><label>Uživatelské jméno v IS *</label><input name="uid" ${isNew?'':'disabled'} required value="${esc(x.id||'')}" placeholder="prijmeni.jmeno"></div><div class="field"><label>Jméno *</label><input name="name" required value="${esc(x.name)}"></div></div><div class="g2"><div class="field"><label>Role</label><select name="role">${Object.entries(ROLE).map(([k,v])=>`<option value="${k}" ${x.role===k?'selected':''}>${v}</option>`).join('')}</select></div><div></div></div>
+   <div class="field"><label>Učitel – vyučuje předměty</label><div class="checks">${S.subjects.map(s=>`<label><input type="checkbox" name="subjects" value="${s.id}" ${(x.subjects||[]).includes(s.id)?'checked':''}>${esc(s.name)}</label>`).join('')}</div></div>
+   <div class="field"><label>Student – zapsané předměty a učitelé</label><div style="display:grid;gap:6px;border:1px solid var(--line);border-radius:8px;padding:10px">${S.subjects.map(s=>{const e=(x.enroll||[]).find(e=>e.subjectId===s.id);return `<div class="row"><label class="row" style="gap:8px;flex:1;margin:0;font-weight:400;font-size:14px;color:var(--ink)"><input type="checkbox" name="en_${s.id}" ${e?'checked':''}>${esc(s.name)}</label><select name="et_${s.id}" style="width:auto;max-width:240px;padding:5px 8px"><option value="">Automaticky</option>${teachersOf(s.id).map(t=>`<option value="${t.id}" ${e&&e.teacherId===t.id?'selected':''}>${esc(t.name)}</option>`).join('')}</select></div>`;}).join('')}</div></div>`;
+  openModal(isNew?'Nový uživatel':'Upravit uživatele',body,{wide:true,onSubmit:f=>{
+    const fd = new FormData(f); const name = (fd.get('name')||'').toString().trim(); if(!name){toast('Vyplňte jméno');return false;}
+    Object.assign(x,{name,role:fd.get('role'),subjects:fd.getAll('subjects')});
+    x.enroll = S.subjects.filter(s=>fd.get('en_'+s.id)).map(s=>({subjectId:s.id,teacherId:fd.get('et_'+s.id)||null}));
+    if(isNew){ const id=(fd.get('uid')||'').toString().trim().toLowerCase(); if(!/^[a-z0-9][a-z0-9._-]{1,63}$/.test(id)){toast('Neplatné uživatelské jméno');return false;} if(U(id)){toast('Uživatel už existuje');return false;} x.id = id; S.users.push(x); }
+    changed(); toast('Uloženo, přiřazení se aktualizuje'); return true; }});
+}
+function gradeModal(sid,g){
+  const r = R(ui.roomId); const isNew = !g;
+  openModal(isNew?'Přidat hodnocení':'Upravit hodnocení',`<p class="mut sm" style="margin:0">${esc(uname(sid))} · ${esc(r.name)}</p><div class="field"><label>Za co *</label><input name="label" required value="${esc(g?g.label:'')}" placeholder="např. Aktivita v hodině, Ústní zkoušení"></div><div class="g2"><div class="field"><label>Známka</label><select name="grade"><option value="">—</option>${GRADES.map(x=>`<option ${g&&g.grade===x?'selected':''}>${x}</option>`).join('')}</select></div><div class="field"><label>Body (nepovinné)</label><div class="row"><input type="number" name="points" step="0.5" value="${g&&g.points!=null?g.points:''}" placeholder="body"><span class="mut">z</span><input type="number" name="maxPoints" step="0.5" value="${g&&g.maxPoints!=null?g.maxPoints:''}" placeholder="max"></div></div></div><div class="field"><label>Komentář pro studenta</label><textarea name="comment">${esc(g?g.comment:'')}</textarea></div>`,{onSubmit:f=>{
+    const fd = new FormData(f); const label = (fd.get('label')||'').toString().trim(); if(!label){toast('Vyplňte, za co hodnotíte');return false;}
+    const o = g || {id:uid('g'),roomId:r.id,studentId:sid,date:Date.now(),by:me};
+    Object.assign(o,{label,grade:fd.get('grade')||'',points:fd.get('points')!==''?+fd.get('points'):null,maxPoints:fd.get('maxPoints')!==''?+fd.get('maxPoints'):null,comment:fd.get('comment')||''});
+    if(isNew) S.grades.push(o); changed(); toast('Hodnocení uloženo'); return true; }});
+}
+function lessonModal(r){
+  openModal(`${kIcon('lesson',30)}Simulace zápisu hodiny z IS`,`<p class="mut sm" style="margin:0">Takto bude vypadat zpráva z kalendáře IS. V provozu se zápis propíše sám, jakmile ho učitel uloží v kalendáři.</p><div class="g2"><div class="field"><label>Datum a čas hodiny</label><input type="datetime-local" name="date" value="${toLocalInput(D(0,15))}"></div><div class="field"><label>Téma hodiny *</label><input name="topic" required placeholder="např. Násobení zlomků"></div></div><div class="field"><label>Náplň hodiny</label><textarea name="content" placeholder="Co jsme probírali…"></textarea></div><div class="field"><label>Studenti na hodině</label><div class="checks">${r.studentIds.map(s=>`<label><input type="checkbox" name="sids" value="${s}" checked>${esc(uname(s))}</label>`).join('')}</div></div><hr style="margin:4px 0"><div class="g2"><div class="field"><label>Domácí úkol – název (nepovinné)</label><input name="hw" placeholder="např. Pracovní list č. 3"></div><div class="field"><label>Termín odevzdání</label><input type="datetime-local" name="hwdue" value="${toLocalInput(D(4,20))}"></div></div><div class="field"><label>Zadání úkolu</label><textarea name="hwdesc" style="min-height:60px"></textarea></div>`,{wide:true,submit:'Odeslat jako z IS',onSubmit:f=>{
+    const fd = new FormData(f); if(!(fd.get('topic')||'').toString().trim()){toast('Vyplňte téma');return false;}
+    const all = fd.getAll('sids');
+    handleLesson({id:uid('cal-'),roomId:r.id,teacherId:r.teacherIds[0]||me,subjectId:r.subjectId,studentIds:all.length===r.studentIds.length?null:all,date:fd.get('date'),topic:fd.get('topic'),content:fd.get('content'),homework:fd.get('hw')?{title:fd.get('hw'),description:fd.get('hwdesc'),due:fd.get('hwdue'),maxPoints:10}:null});
+    return true; }});
+}
+const FILECACHE = {};
+async function previewAtt(id){
+  const f = findAtt(id); if(!f) return;
+  const e = extInfo(f.name);
+  let data = f.data || FILECACHE[id];
+  if(!data){
+    openModal(esc(f.name),`<div class="empty"><div class="eic" style="background:${e.c};color:#fff">${e.l}</div><h3>Načítám soubor…</h3></div>`,{wide:true,noFocus:true});
+    try { const r = await api('file',{id}); data = FILECACHE[id] = `data:${r.type||'application/octet-stream'};base64,${r.b64}`; }
+    catch(err){ if(M) openModal(esc(f.name),`<div class="empty"><h3>Soubor nejde otevřít</h3><p>${esc(err.message)}</p></div>`,{wide:true,noFocus:true}); return; }
+  }
+  let h = '';
+  if(/^data:image/.test(data)) h = `<img src="${data}" alt="">`;
+  else if(/^data:audio/.test(data) || ['mp3','wav','m4a','ogg','aac','flac'].includes(e.e)) h = `<audio controls src="${data}"></audio>`;
+  else if(/^data:video/.test(data)) h = `<video controls src="${data}"></video>`;
+  else if(/^data:application\/pdf/.test(data)) { try { h = `<iframe src="${URL.createObjectURL(dataToBlob(data))}"></iframe>`; } catch(x){ h = ''; } }
+  if(!h) h = `<div class="empty"><div class="eic" style="background:${e.c};color:#fff">${e.l}</div><h3>${esc(f.name)}</h3><p>Náhled tohoto typu souboru v prohlížeči není. Soubor si stáhněte.</p></div>`;
+  openModal(esc(f.name),`<div class="prev">${h}</div>`,{wide:true,noFocus:true,extra:`<a class="btn" href="${data}" download="${esc(f.name)}">${ic('down',16)}Stáhnout</a>`});
+}
+function dataToBlob(d){ const [m,b] = d.split(','); const mime = m.match(/:(.*?);/)[1]; const bin = atob(b); const arr = new Uint8Array(bin.length); for(let i=0;i<bin.length;i++) arr[i]=bin.charCodeAt(i); return new Blob([arr],{type:mime}); }
+function findAtt(id){ for(const list of [PEND,...S.items.map(i=>i.attachments||[]),...S.submissions.map(s=>s.attachments||[])]){ const f = list.find(a=>a.id===id); if(f) return f; } return null; }
+async function readFiles(files){
+  const out = [];
+  for(const f of [...files]){
+    if(f.size > CONFIG.maxFile){ toast(`${f.name}: soubor je větší než 10 MB`); continue; }
+    if(!f.size){ toast(`${f.name}: prázdný soubor`); continue; }
+    toast(`Nahrávám ${f.name}…`);
+    try {
+      const data = await new Promise((res,rej)=>{ const fr = new FileReader(); fr.onload=()=>res(fr.result); fr.onerror=()=>rej(new Error('Soubor nejde přečíst.')); fr.readAsDataURL(f); });
+      const meta = await api('upload',{name:f.name,type:f.type||'application/octet-stream',b64:String(data).split(',')[1]||''});
+      FILECACHE[meta.id] = data; out.push(meta);
+    } catch(err){ toast(`${f.name}: ${err.message}`); }
+  }
+  if(out.length) toast(out.length===1?'Soubor nahrán':`Nahráno souborů: ${out.length}`);
+  return out;
+}
+
+/* ---------- IS bridge ---------- */
+function send(type,payload={}){ if(window.parent===window) return; try { window.parent.postMessage(Object.assign({src:'ucebna',v:1,type:'uceb:'+type},payload), CONFIG.isOrigin); } catch(e){} }
+/* ---------- server Učebny ---------- */
+let TOKEN = null;
+async function api(action,payload={}){
+  if(!CONFIG.api) throw new Error('Učebna není nastavená.');
+  let r;
+  try { r = await fetch(CONFIG.api,{method:'POST',body:JSON.stringify(Object.assign({action,token:TOKEN},payload))}); }
+  catch(e){ const er = new Error('Nepodařilo se spojit se serverem Učebny.'); er.code='net'; throw er; }
+  let j; try { j = await r.json(); } catch(e){ const er = new Error('Server Učebny neodpověděl správně.'); er.code='net'; throw er; }
+  if(!j.ok){ const er = new Error(j.error||'Chyba serveru.'); er.code=j.code||''; if(er.code==='auth' && bridge.authed){ bridge.authed=false; TOKEN=null; send('auth-error',{error:er.message}); } throw er; }
+  return j.data;
+}
+const COLMAP = {users:'users',rooms:'rooms',chapters:'chapters',items:'items',posts:'posts',grades:'grades',submissions:'subs',testResults:'results'};
+const ORDER = ['users','rooms','chapters','items','posts','grades','submissions','testResults'];
+let SNAP = {}, saving = false, dirty = false, saveTimer = null, lastViewJSON = '';
+function snapOf(st){ const o = {}; ORDER.forEach(c => { o[c] = {}; (st[c]||[]).forEach(d => { if(d && d.id) o[c][d.id] = JSON.stringify(d); }); }); return o; }
+function applyView(v){
+  lastViewJSON = JSON.stringify(v);
+  S = {subjects:v.subjects||[],users:v.users||[],rooms:v.rooms||[],chapters:v.chapters||[],items:v.items||[],submissions:v.subs||[],grades:v.grades||[],posts:v.posts||[],testResults:v.results||[],tests:v.tests||[],log:v.log||[]};
+  SNAP = snapOf(S);
+  if(v.me){ me = v.me.u; }
+}
+function diffOps(){
+  const cur = snapOf(S), sets = [], dels = [];
+  ORDER.forEach(c => { for(const id in cur[c]) if(cur[c][id] !== SNAP[c][id]) sets.push({op:'set',col:COLMAP[c],doc:JSON.parse(cur[c][id])});
+    for(const id in SNAP[c]) if(!(id in cur[c])) dels.push({c,op:{op:'del',col:COLMAP[c],id}}); });
+  dels.sort((a,b)=>ORDER.indexOf(b.c)-ORDER.indexOf(a.c));
+  return sets.concat(dels.map(d=>d.op));
+}
+function changed(){ render(); dirty = true; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 250); }
+async function flush(){
+  if(saving || !bridge.authed) return;
+  const ops = diffOps(); if(!ops.length){ dirty = false; return; }
+  saving = true; dirty = false; setSaving(true);
+  try {
+    const res = await api('batch',{ops});
+    if(res.rejected && res.rejected.length) toast('Některé změny se neuložily: '+res.rejected[0].error);
+    if(dirty){ SNAP = snapOf({users:res.view.users,rooms:res.view.rooms,chapters:res.view.chapters,items:res.view.items,posts:res.view.posts,grades:res.view.grades,submissions:res.view.subs,testResults:res.view.results}); lastViewJSON = JSON.stringify(res.view); }
+    else { applyView(res.view); if(!M) render(); }
+    send('changed',{at:Date.now()});
+  } catch(err){
+    dirty = true;
+    if(err.code!=='auth'){ toast('Změny se zatím neuložily – zkusím to znovu. ('+err.message+')'); setTimeout(flush, 8000); }
+  } finally { saving = false; setSaving(false); if(dirty) setTimeout(flush, 300); }
+}
+function setSaving(on){ const el = document.getElementById('savest'); if(el) el.textContent = on ? 'Ukládám…' : ''; }
+async function refresh(force){
+  if(!bridge.authed || saving || dirty) return;
+  if(!force && (M || document.visibilityState==='hidden' || (document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName)))) return;
+  try { const v = await api('load'); if(saving || dirty) return; const j = JSON.stringify(v); if(j !== lastViewJSON){ applyView(v); render(); } } catch(e){}
+}
+setInterval(()=>refresh(false), CONFIG.pollMs);
+document.addEventListener('visibilitychange', ()=>{ if(document.visibilityState==='visible') refresh(false); });
+const mapRole = r => ({admin:'admin',spravce:'admin','správce':'admin',teacher:'teacher',ucitel:'teacher','učitel':'teacher',lektor:'teacher',student:'student',zak:'student','žák':'student'})[String(r||'').toLowerCase()] || '';
+function upsertUser(x){
+  if(!x || !x.id) return null;
+  let u = U(x.id);
+  if(!u){ u = {id:x.id,color:COLORS[S.users.length%COLORS.length]}; S.users.push(u); }
+  u.name = x.name || u.name || 'Uživatel'; u.role = mapRole(x.role || u.role) || u.role || 'student';
+  const codes = v => (Array.isArray(v) ? v : String(v||'').split(/[,;\s]+/)).map(c=>String(c).trim().toUpperCase()).filter(c=>S.subjects.some(x=>x.id===c));
+  if(x.subjects) u.subjects = codes(x.subjects);
+  if(x.predmety!=null){ if(u.role==='teacher') u.subjects = codes(x.predmety); else if(u.role==='student'){ const old = u.enroll||[]; u.enroll = codes(x.predmety).map(c=>({subjectId:c,teacherId:(old.find(e=>e.subjectId===c)||{}).teacherId||null})); } }
+  if(x.enrollments || x.enroll) u.enroll = (x.enrollments||x.enroll).map(e=>({subjectId:e.subjectId,teacherId:e.teacherId||null}));
+  if(x.color) u.color = x.color;
+  return u;
+}
+function handleLesson(L){
+  if(!L) return;
+  let r = L.roomId && R(L.roomId);
+  if(!r) r = S.rooms.find(x=>x.subjectId===L.subjectId && x.teacherIds.includes(L.teacherId));
+  if(!r && L.studentIds && L.studentIds.length) r = S.rooms.find(x=>x.subjectId===L.subjectId && L.studentIds.every(s=>x.studentIds.includes(s)));
+  if(!r){ logPush(['⚠ Zápis hodiny „'+(L.topic||'')+'“: nenalezena učebna pro předmět/učitele'],'Zápis z kalendáře'); toast('Pro zápis nebyla nalezena učebna'); return; }
+  const sids = L.studentIds && L.studentIds.length && L.studentIds.length < r.studentIds.length ? L.studentIds.filter(s=>r.studentIds.includes(s)) : null;
+  let ch = S.chapters.find(c=>c.roomId===r.id && !c.studentId && c.title==='Zápisy z hodin');
+  if(!ch){ ch = {id:uid('c'),roomId:r.id,title:'Zápisy z hodin',order:Math.min(0,...S.chapters.filter(c=>c.roomId===r.id).map(c=>c.order))-1,studentId:null}; S.chapters.push(ch); }
+  const when = L.date ? new Date(L.date).getTime() : Date.now();
+  let les = L.id && S.items.find(i=>i.isId===L.id);
+  if(!les){ les = {id:uid('i'),roomId:r.id,kind:'lesson',createdAt:Date.now(),attachments:[],links:[],source:'is',isId:L.id}; S.items.push(les); }
+  Object.assign(les,{chapterId:les.chapterId||ch.id,authorId:L.teacherId||r.teacherIds[0],title:L.topic||'Zápis hodiny',body:L.content||'',lessonDate:when,studentIds:sids,attachments:L.attachments||les.attachments,links:L.links?L.links.map(l=>typeof l==='string'?{title:'',url:safeUrl(l)}:l):les.links});
+  if(L.homework && L.homework.title){
+    let hw = les.homeworkId && I(les.homeworkId);
+    if(!hw){ hw = {id:uid('i'),roomId:r.id,kind:'task',createdAt:Date.now(),attachments:[],links:[],source:'is'}; S.items.push(hw); les.homeworkId = hw.id; }
+    Object.assign(hw,{chapterId:hw.chapterId||ch.id,authorId:les.authorId,title:L.homework.title,body:L.homework.description||'',due:L.homework.due?new Date(L.homework.due).getTime():null,maxPoints:L.homework.maxPoints??null,studentIds:sids,lessonId:les.id});
+  }
+  logPush([`✓ Zápis „${les.title}“ (${fmtD(when)}) → ${r.name} (${r.section})${les.homeworkId?' + domácí úkol':''}`],'Zápis z kalendáře');
+  changed(); toast('Zápis hodiny propsán do učebny');
+}
+function handleTestResult(x){
+  if(!x) return;
+  let it = x.itemId && I(x.itemId);
+  if(!it) it = S.items.find(i=>i.kind==='test' && i.testId===x.testId && seesAsStudent(i,x.studentId));
+  if(!it) return;
+  let tr = testRes(it.id,x.studentId);
+  if(!tr){ tr = {id:uid('t'),itemId:it.id,studentId:x.studentId}; S.testResults.push(tr); }
+  Object.assign(tr,{score:+x.score,max:+(x.max||it.maxPoints||x.score),at:x.at?new Date(x.at).getTime():Date.now()});
+  if(x.grade) tr.grade = x.grade;
+  changed(); toast('Výsledek testu zapsán');
+}
+const fold = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().split(/\s+/).filter(Boolean).sort().join(' ');
+const flipName = n => { const p = String(n||'').trim().split(/\s+/); return p.length>1 ? p.slice(1).join(' ')+' '+p[0] : String(n||''); };
+function renameUser(oldId,newId){ if(oldId===newId || U(newId)) return; S = JSON.parse(JSON.stringify(S).split('"'+oldId+'"').join('"'+newId+'"')); }
+/* přihlášení: IS pošle omezený klíč (ap1.…), Učebna ho ověří u serveru IS akcí "me" */
+async function login(token){
+  if(!/^[A-Za-z0-9._-]{8,300}$/.test(String(token||''))){ bridge.state='error'; bridge.err='Neplatný přihlašovací klíč.'; render(); send('auth-error',{error:bridge.err}); return; }
+  const silent = !!me;
+  TOKEN = token; if(!silent){ bridge.state = 'checking'; render(); }
+  try {
+    const v = await api('load');
+    applyView(v); bridge.authed = true; bridge.state = 'ok'; bridge.err = '';
+    if(!silent){ ui.view = 'home'; ui.roomId = null; }
+    render(); send('auth-ok',{role:v.me.role});
+    if(dirty) flush();
+  } catch(err){
+    if(silent && err.code==='net') return;
+    me = null; bridge.authed = false; bridge.state = 'error'; TOKEN = null; S = emptyState();
+    bridge.err = err.message || 'Přihlášení se nepodařilo.';
+    render(); send('auth-error',{error:bridge.err});
+  }
+}
+window.addEventListener('message', e => {
+  if(e.source !== window.parent || e.origin !== CONFIG.isOrigin) return;
+  const d = e.data; if(!d || typeof d!=='object' || typeof d.type!=='string') return;
+  const type = d.type.replace(/^is:/,'');
+  try {
+    if(type==='auth'){ login(d.token); return; }
+    if(type==='logout'){ me = null; TOKEN = null; S = emptyState(); SNAP = {}; bridge.authed = false; bridge.state = 'wait'; closeModal(); render(); return; }
+    if(!bridge.authed) return;
+    const u = cur(), staff = u && u.role!=='student';
+    switch(type){
+      case 'sync': {
+        if(!staff) return;
+        api('sync',{users:Array.isArray(d.users)?d.users:null,tests:Array.isArray(d.tests)?d.tests:null}).then(r=>{ if(!dirty&&!saving){ applyView(r.view); render(); } }).catch(()=>{});
+        break; }
+      case 'lesson': if(staff) handleLesson(d.lesson); break;
+      case 'lessonDelete': { if(!staff) return; const l = S.items.find(i=>i.isId===d.id); if(l){ S.items = S.items.filter(i=>i.id!==l.id); changed(); } break; }
+      case 'testResult': if(staff) handleTestResult(d.result); break;
+      case 'navigate': if(d.roomId && R(d.roomId)){ ui.view='room'; ui.roomId=d.roomId; ui.tab=d.tab||'stream'; render(); } break;
+    }
+  } catch(err){ console.error('[Učebna] chyba zprávy z IS', err); }
+});
+
+/* ---------- actions ---------- */
+const go = o => { Object.assign(ui,o); render(); window.scrollTo(0,0); if(window.innerWidth<=860 && ui.sidebar) { ui.sidebar=false; render(); } };
+const ACT = {
+  'home':()=>go({view:'home',roomId:null}),
+  'todo':()=>go({view:'todo',roomId:null}),
+  'admin':()=>go({view:'admin',roomId:null}),
+  'admin-tab':id=>go({adminTab:id}),
+  'toggle-side':()=>{ ui.sidebar=!ui.sidebar; render(); },
+  'open-room':id=>go({view:'room',roomId:id,tab:'stream',scope:'all'}),
+  'tab':id=>go({view:'room',tab:id}),
+  'scope':id=>go({scope:id}),
+  'open-item':id=>{ const it=I(id); if(it) go({view:'item',itemId:id,roomId:it.roomId,subTab:'zadani'}); },
+  'open-subs':id=>{ const it=I(id); if(it) go({view:'item',itemId:id,roomId:it.roomId,subTab:'prace',subStudent:null}); },
+  'back-room':()=>go({view:'room',tab:'work'}),
+  'subtab':id=>go({subTab:id}),
+  'sub-sel':id=>go({subStudent:id}),
+  'grade-cell':id=>{ const [iid,sid]=id.split('|'); const it=I(iid); if(!it) return; go({view:'item',itemId:iid,roomId:it.roomId,subTab:it.kind==='task'?'prace':'zadani',subStudent:sid}); },
+  'student-card':id=>go({view:'studentcard',studentId:id}),
+  'item-new':k=>{ closeMenus(); itemModal(k); },
+  'item-edit':id=>itemModal(null,I(id)),
+  'item-del':id=>{ const it=I(id); confirmBox(`Smazat „${esc(it.title)}“ včetně odevzdaných prací?`,()=>{ S.items=S.items.filter(i=>i.id!==id); S.submissions=S.submissions.filter(s=>s.itemId!==id); S.testResults=S.testResults.filter(t=>t.itemId!==id); S.items.forEach(i=>{ if(i.homeworkId===id) delete i.homeworkId; }); ui.view='room'; ui.tab='work'; changed(); toast('Smazáno'); }); },
+  'ch-new':()=>{ closeMenus(); chapterModal(); },
+  'ch-edit':id=>chapterModal(CHP(id)),
+  'ch-add':id=>itemModal('material',null,id),
+  'ch-del':id=>{ const c=CHP(id); confirmBox(`Smazat kapitolu „${esc(c.title)}“? Položky v ní zůstanou v sekci „Bez kapitoly“.`,()=>{ S.chapters=S.chapters.filter(x=>x.id!==id); S.items.forEach(i=>{ if(i.chapterId===id) i.chapterId=null; }); changed(); }); },
+  'ch-up':id=>moveCh(id,-1), 'ch-down':id=>moveCh(id,1),
+  'ch-toggle':id=>{ ui.closed[id]=!ui.closed[id]; render(); },
+  'preview':id=>previewAtt(id),
+  'pend-del':idx=>{ PEND.splice(+idx,1); $('#pend').innerHTML=pendHtml(); },
+  'sub-att-del':id=>{ const [iid,idx]=id.split('|'); const s=subOf(iid,me); if(s){ s.attachments.splice(+idx,1); changed(); } },
+  'sub-submit':id=>{ const s=getSub(id,me); const ta=document.querySelector(`textarea[data-change="sub-text"][data-id="${id}"]`); if(ta) s.text=ta.value; s.status='submitted'; s.submittedAt=Date.now(); changed(); toast('Odevzdáno'); },
+  'sub-unsubmit':id=>{ const s=subOf(id,me); if(s){ s.status='draft'; changed(); toast('Odevzdání zrušeno – můžete práci upravit'); } },
+  'sim-lesson':id=>lessonModal(R(id)),
+  'post-del':id=>confirmBox('Smazat toto oznámení?',()=>{ S.posts=S.posts.filter(p=>p.id!==id); changed(); }),
+  'room-new':()=>roomModal(),
+  'room-edit':id=>roomModal(R(id)),
+  'room-del':id=>{ const r=R(id); confirmBox(`Smazat učebnu „${esc(r.name)}“ (${esc(r.section||'')}) se všemi materiály, úkoly a hodnocením?`,()=>{ const ids=S.items.filter(i=>i.roomId===id).map(i=>i.id); S.rooms=S.rooms.filter(x=>x.id!==id); S.items=S.items.filter(i=>i.roomId!==id); S.chapters=S.chapters.filter(c=>c.roomId!==id); S.submissions=S.submissions.filter(s=>!ids.includes(s.itemId)); S.testResults=S.testResults.filter(t=>!ids.includes(t.itemId)); S.posts=S.posts.filter(p=>p.roomId!==id); S.grades=S.grades.filter(g=>g.roomId!==id); changed(); }); },
+  'user-new':()=>userModal(),
+  'user-edit':id=>userModal(U(id)),
+  'user-del':id=>confirmBox(`Smazat uživatele ${esc(uname(id))}?`,()=>{ S.users=S.users.filter(u=>u.id!==id); S.rooms.forEach(r=>{ r.teacherIds=r.teacherIds.filter(x=>x!==id); r.studentIds=r.studentIds.filter(x=>x!==id); }); changed(); }),
+  'auto-run':async ()=>{ try { const r = await api('autoAssign'); applyView(r.view); render(); toast(r.lines.length?`Synchronizace: ${r.lines.length} změn`:'Vše je správně přiřazeno'); } catch(e){ toast(e.message); } },
+  'grade-new':sid=>gradeModal(sid),
+  'grade-edit':id=>{ const g=S.grades.find(x=>x.id===id); gradeModal(g.studentId,g); },
+  'grade-del':id=>confirmBox('Smazat toto hodnocení?',()=>{ S.grades=S.grades.filter(g=>g.id!==id); changed(); }),
+  'copy-state':()=>{ try { navigator.clipboard.writeText(JSON.stringify(S,null,2)).then(()=>toast('Data zkopírována'),()=>toast('Kopírování se nepodařilo')); } catch(e){ toast('Kopírování se nepodařilo'); } },
+  'modal-close':()=>closeModal(),
+  'modal-bg':()=>closeModal()
+};
+function moveCh(id,dir){
+  const c = CHP(id); const sib = S.chapters.filter(x=>x.roomId===c.roomId && (x.studentId||null)===(c.studentId||null)).sort((a,b)=>a.order-b.order);
+  const i = sib.indexOf(c), j = i+dir; if(j<0 || j>=sib.length) return;
+  const t = sib[j].order; sib[j].order = c.order; c.order = t; if(sib[j].order===c.order) c.order += dir; changed();
+}
+function updateThemePreview(f){
+  const fd = new FormData(f); const col = fd.get('color')==='custom' ? fd.get('colorCustom') : fd.get('color'); const th = fd.get('theme')||'kruhy';
+  const pv = f.querySelector('#tprev'); if(pv) pv.setAttribute('style', themeStyle(col,th));
+  f.querySelectorAll('.mt[data-motif]').forEach(m => m.setAttribute('style', themeStyle(col,m.dataset.motif)));
+}
+document.addEventListener('input', e => { if(e.target.name==='colorCustom' || e.target.name==='name' && e.target.form && e.target.form.querySelector('#tprev')){ const f=e.target.form; if(e.target.name==='colorCustom'){ f.querySelector('input[name=color][value=custom]').checked=true; updateThemePreview(f); } else { f.querySelector('#tprev h3').textContent = e.target.value || 'Název učebny'; } } });
+const closeMenus = () => document.querySelectorAll('details.menu[open]').forEach(d=>d.open=false);
+const CHG = {
+  'sub-file':async (id,el)=>{ const files = await readFiles(el.files); const s = getSub(id,me); s.attachments = (s.attachments||[]).concat(files); const ta=document.querySelector(`textarea[data-change="sub-text"][data-id="${id}"]`); if(ta) s.text=ta.value; changed(); toast(files.length+' soubor(ů) přidáno'); },
+  'sub-text':(id,el)=>{ const s = getSub(id,me); s.text = el.value; changed(); },
+  'pend-file':async (id,el)=>{ const files = await readFiles(el.files); PEND = PEND.concat(files); $('#pend').innerHTML = pendHtml(); el.value=''; },
+  'theme-prev':(id,el)=>updateThemePreview(el.form),
+  'theme-custom':(id,el)=>{ const rb=el.form.querySelector('input[name=color][value=custom]'); rb.checked=true; updateThemePreview(el.form); },
+  'kind-switch':(id,el)=>{ el.closest('.modal').dataset.k = el.value; },
+  'aud-switch':(id,el)=>{ $('#audsel').style.display = el.value==='sel' ? '' : 'none'; },
+  'test-grade':(id,el)=>{ const [iid,sid]=id.split('|'); const it=I(iid); let tr=testRes(iid,sid); if(!tr){ tr={id:uid('t'),itemId:iid,studentId:sid,score:null,max:it.maxPoints}; S.testResults.push(tr); } tr.grade=el.value; changed(); toast('Známka uložena'); },
+  'test-score':(id,el)=>{ const [iid,sid]=id.split('|'); const it=I(iid); let tr=testRes(iid,sid); if(el.value===''){ if(tr && !tr.grade){ S.testResults=S.testResults.filter(x=>x!==tr); changed(); } else if(tr){ tr.score=null; changed(); } return; } if(!tr){ tr={id:uid('t'),itemId:iid,studentId:sid,max:it.maxPoints}; S.testResults.push(tr); } tr.score=+el.value; tr.at=Date.now(); changed(); toast('Body uloženy'); }
+};
+document.addEventListener('click', e => {
+  if(!e.target.closest('details.menu')) closeMenus();
+  const el = e.target.closest('[data-act]'); if(!el) return;
+  const a = el.dataset.act;
+  if(a==='modal-bg' && e.target!==el) return;
+  const fn = ACT[a]; if(!fn) return;
+  if(el.tagName!=='A' || !el.getAttribute('href')) e.preventDefault();
+  fn(el.dataset.id, el, e);
+});
+document.addEventListener('change', e => { const el = e.target.closest('[data-change]'); if(el && CHG[el.dataset.change]) CHG[el.dataset.change](el.dataset.id, el, e); });
+document.addEventListener('submit', e => {
+  e.preventDefault(); const f = e.target; const kind = f.dataset.form;
+  if(kind==='modal'){ if(M && M.onSubmit && M.onSubmit(f)!==false) closeModal(); return; }
+  const fd = new FormData(f);
+  if(kind==='post'){ const text=(fd.get('text')||'').toString().trim(); if(!text) return; S.posts.push({id:uid('p'),roomId:f.dataset.id,authorId:me,createdAt:Date.now(),text,studentId:fd.get('to')||null}); changed(); toast('Oznámení zveřejněno'); }
+  if(kind==='grade'){ const [iid,sid]=f.dataset.id.split('|'); const s=getSub(iid,sid); const p=fd.get('points'); s.points = p!=='' ? +p : null; s.grade = fd.get('grade')||''; s.comment = fd.get('comment')||''; if(s.status!=='submitted' && s.status!=='returned') s.submittedAt = s.submittedAt||null; s.status='returned'; s.gradedAt=Date.now(); s.gradedBy=me;
+    const it=I(iid); const next=assignees(it).find(x=>x!==sid && (subOf(iid,x)||{}).status==='submitted'); ui.subStudent = next || sid; changed(); toast('Ohodnoceno a vráceno'+(next?' – další: '+uname(next):'')); }
+  if(kind==='thread'){ const [iid,sid]=f.dataset.id.split('|'); const text=(fd.get('text')||'').toString().trim(); if(!text) return; const s=getSub(iid,sid); s.thread.push({by:me,text,at:Date.now()}); changed(); }
+});
+document.addEventListener('keydown', e => { if(e.key==='Escape' && M) closeModal(); });
+
+render();
+send('ready');
+if(window.ResizeObserver && window.parent!==window){ let lastH=0; new ResizeObserver(()=>{ const h=Math.max(360,document.documentElement.scrollHeight); if(Math.abs(h-lastH)>4){ lastH=h; send('height',{h}); } }).observe(document.body); }
+</script>
+</body>
+</html>
