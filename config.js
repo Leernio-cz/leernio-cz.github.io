@@ -8,5 +8,5 @@ window.LEERNIO_APPS = {
   // Až nahraješ Opakovačku do složky opakovacka/, změň "" na "/opakovacka/".
   testy: "/opakovacka/",
   // nová online učebna (zatím jen odkaz do nové karty, musí začínat https://)
-  ucebna: ""
+  ucebna: ""/ucebna/"
 };
