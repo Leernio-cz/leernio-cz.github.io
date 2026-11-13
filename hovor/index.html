@@ -33,7 +33,15 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .err{color:var(--red);font-size:14px;margin:8px 0 0;min-height:0}
 .note{font-size:13px;color:var(--mut);line-height:1.45}
 /* ---------- načítání ---------- */
-#boot{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:var(--mut)}
+.lock{display:grid;place-items:center;padding:24px}
+.lockc{background:#fff;border:1px solid var(--line);border-radius:18px;box-shadow:0 10px 30px #0f172a14;max-width:420px;width:100%;text-align:center;padding:36px 28px}
+.lockc .hlogo{width:64px;height:64px;display:block;margin:0 auto 14px}
+.lockc h2{color:#1e3a8a;font-size:20px;margin:0 0 8px}
+.lockc p{color:var(--mut);font-size:15px;line-height:1.5;margin:0 0 14px}
+.lockc p:empty{display:none}
+.lockc .spin{margin:6px auto 0}
+.lockc .btn{text-decoration:none}
+.hlogo{width:34px;height:34px;flex:none}
 .spin{width:34px;height:34px;border:3px solid #cbd5e1;border-top-color:var(--blue);border-radius:50%;animation:sp 0.8s linear infinite}
 @keyframes sp{to{transform:rotate(360deg)}}
 /* ---------- předsíň ---------- */
@@ -48,12 +56,16 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .pv{position:relative;aspect-ratio:16/9;background:#0b1220;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px #0f172a22}
 .pv video{width:100%;height:100%;object-fit:cover}
 .pv .mirror,.tile .mirror{transform:scaleX(-1)}
-.pv .off{position:absolute;inset:0;display:grid;place-items:center;color:#cbd5e1;font-size:15px}
+.pv .camoff{position:absolute;inset:0;display:grid;place-items:center;color:#cbd5e1;font-size:15px}
 .pv .bar{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:12px}
-.rb{width:50px;height:50px;border-radius:50%;border:0;display:grid;place-items:center;background:#ffffff26;color:#fff;backdrop-filter:blur(6px)}
-.rb:hover{background:#ffffff3a}
-.rb.off{background:var(--red)}
-.rb.on2{background:var(--blue)}
+.pv:after{content:"";position:absolute;left:0;right:0;bottom:0;height:96px;background:linear-gradient(to top,#0b1220b3,#0b122000);pointer-events:none}
+.pv .bar{z-index:1}
+.rb{width:52px;height:52px;border-radius:50%;border:2px solid #ffffffd9;display:grid;place-items:center;background:#0f172ae6;color:#fff;box-shadow:0 4px 14px #0008;transition:background .15s}
+.rb svg.i{width:22px;height:22px}
+.rb:hover{background:#1e293b}
+.rb.off{background:var(--red);border-color:#fff}
+.rb.off:hover{background:#b91c1c}
+.rb.on2{background:var(--blue);border-color:#fff}
 .pv .lvl{position:absolute;left:14px;top:14px;display:flex;gap:3px;align-items:flex-end;height:16px}
 .pv .lvl i{width:4px;background:#22c55e;border-radius:2px;height:3px;transition:height .1s}
 .devs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
@@ -207,24 +219,23 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 </style>
 </head>
 <body>
-<div id="boot" class="scr"><div class="spin"></div><div id="bootMsg">Načítám hovor…</div></div>
-<div id="gate" class="scr center hide">
-  <div class="logo"><b>L</b>Leernio <small>Hovor</small></div>
-  <h1>Do Hovoru se přihlásíš přes IS Leernio</h1>
-  <p id="gateP">Otevři IS Leernio a v záložce Aplikace vyber Hovor.</p>
-  <a class="btn" id="gateGo" target="_top" rel="noopener" style="text-decoration:none;margin-top:10px">Otevřít IS Leernio</a>
-</div>
+<div id="boot" class="scr lock"><div class="lockc"><svg class="hlogo" viewBox="0 0 48 48" aria-label="Hovor"><defs><linearGradient id="lgH1" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#lgH1)"/><rect x="8" y="15" width="22" height="18" rx="4" fill="#fff"/><path d="M30 21.5l9-5v15l-9-5z" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle cx="14" cy="21" r="2.2" fill="#1d4ed8"/><circle cx="37" cy="11" r="4.3" fill="#fbbf24" stroke="#1e3a8a" stroke-width="1.6"/></svg><h2 id="bootH">Načítám Hovor…</h2><p id="bootMsg">Přihlášení se převezme z IS automaticky.</p><div class="spin" id="bootSpin"></div></div></div>
+<div id="gate" class="scr lock hide"><div class="lockc"><svg class="hlogo" viewBox="0 0 48 48" aria-label="Hovor"><defs><linearGradient id="lgH2" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#lgH2)"/><rect x="8" y="15" width="22" height="18" rx="4" fill="#fff"/><path d="M30 21.5l9-5v15l-9-5z" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle cx="14" cy="21" r="2.2" fill="#1d4ed8"/><circle cx="37" cy="11" r="4.3" fill="#fbbf24" stroke="#1e3a8a" stroke-width="1.6"/></svg>
+  <h2 id="gateH">Do Hovoru se přihlásíš přes IS Leernio</h2>
+  <p id="gateP">Hovor funguje jen v okně IS Leernio. Přihlas se do IS a otevři Aplikace → Hovor.</p>
+  <a class="btn" id="gateGo" target="_top" rel="noopener">Otevřít IS Leernio</a>
+</div></div>
 
 <div id="lobby" class="scr hide">
   <div class="top">
-    <div class="logo"><b>L</b>Leernio <small>Hovor</small></div>
+    <div class="logo"><svg class="hlogo" viewBox="0 0 48 48" aria-label="Hovor"><defs><linearGradient id="lgH3" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#lgH3)"/><rect x="8" y="15" width="22" height="18" rx="4" fill="#fff"/><path d="M30 21.5l9-5v15l-9-5z" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle cx="14" cy="21" r="2.2" fill="#1d4ed8"/><circle cx="37" cy="11" r="4.3" fill="#fbbf24" stroke="#1e3a8a" stroke-width="1.6"/></svg>Leernio <small>Hovor</small></div>
     <div class="who" id="lobWho"></div>
   </div>
   <div class="lob">
     <div class="prev">
       <div class="pv">
         <video id="pvVid" autoplay playsinline muted class="mirror"></video>
-        <div class="off hide" id="pvOff">Kamera je vypnutá</div>
+        <div class="camoff hide" id="pvOff">Kamera je vypnutá</div>
         <div class="lvl" id="pvLvl"><i></i><i></i><i></i><i></i><i></i></div>
         <div class="bar">
           <button class="rb" id="pvMic" title="Mikrofon"></button>
@@ -260,7 +271,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 </div>
 
 <div id="wait" class="scr center hide">
-  <div class="wprev"><div class="pv"><video id="wVid" autoplay playsinline muted class="mirror"></video><div class="off hide" id="wOff">Kamera je vypnutá</div></div></div>
+  <div class="wprev"><div class="pv"><video id="wVid" autoplay playsinline muted class="mirror"></video><div class="camoff hide" id="wOff">Kamera je vypnutá</div></div></div>
   <div class="pulse"></div>
   <h1>Čekáš na připuštění</h1>
   <p id="wTxt">Hostitel tě brzy pustí do hovoru.</p>
@@ -268,7 +279,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 </div>
 
 <div id="end" class="scr center hide">
-  <div class="logo"><b>L</b>Leernio <small>Hovor</small></div>
+  <div class="logo"><svg class="hlogo" viewBox="0 0 48 48" aria-label="Hovor"><defs><linearGradient id="lgH4" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#3b82f6"/><stop offset="1" stop-color="#1e3a8a"/></linearGradient></defs><rect width="48" height="48" rx="12" fill="url(#lgH4)"/><rect x="8" y="15" width="22" height="18" rx="4" fill="#fff"/><path d="M30 21.5l9-5v15l-9-5z" fill="#fff" stroke="#fff" stroke-width="1.5" stroke-linejoin="round"/><circle cx="14" cy="21" r="2.2" fill="#1d4ed8"/><circle cx="37" cy="11" r="4.3" fill="#fbbf24" stroke="#1e3a8a" stroke-width="1.6"/></svg>Leernio <small>Hovor</small></div>
   <h1 id="endH">Hovor skončil</h1>
   <p id="endP"></p>
   <div style="display:flex;gap:10px;margin-top:10px">
@@ -413,7 +424,12 @@ function modal(title, text, acts, body) {
 }
 function show(id) { ["boot", "gate", "lobby", "wait", "end", "call"].forEach(x => $(x).classList.toggle("hide", x !== id)); }
 
-function needIS(msg) { $("gateP").textContent = msg || "Otevři IS Leernio a v záložce Aplikace vyber Hovor."; $("gateGo").href = CFG.isUrl + "#hovor"; show("gate"); }
+function bootState(h, p, spin) { show("boot"); $("bootH").textContent = h; $("bootMsg").textContent = p || ""; $("bootSpin").classList.toggle("hide", !spin); }
+function needIS(msg, title) {
+  $("gateH").textContent = title || (msg ? "Přihlášení se nepodařilo ověřit" : "Do Hovoru se přihlásíš přes IS Leernio");
+  $("gateP").textContent = msg || "Hovor funguje jen v okně IS Leernio. Přihlas se do IS a otevři Aplikace → Hovor.";
+  $("gateGo").href = CFG.isUrl + "#hovor"; show("gate");
+}
 /* =====================================================================
    Přihlášení přes IS (stejně jako Učebna a Opakovačka)
    ===================================================================== */
@@ -427,7 +443,7 @@ window.addEventListener("message", e => {
   if (e.source !== window.parent && e.source !== window.opener) return;
   const m = e.data || {};
   if (m.type === "is:auth" && m.token) onToken(String(m.token));
-  else if (m.type === "is:logout") { AUTH = null; if (SESS) leaveCall("logout"); else needIS("Odhlásil(a) ses z IS Leernio."); }
+  else if (m.type === "is:logout") { AUTH = null; if (SESS) leaveCall("logout"); else needIS("Přihlas se znovu v IS Leernio a otevři Aplikace → Hovor.", "Odhlásil(a) ses z IS Leernio"); }
   else if (m.type === "is:hovor" && /^\d{6}$/.test(String(m.pin || ""))) { $("jPin").value = m.pin; }
 });
 async function onToken(token) {
@@ -1093,10 +1109,10 @@ function canShare() { return isHost() || !ROOM || ROOM.settings.share || !!L.scr
 function renderControls() {
   if (!SESS) return;
   const lab = (on, a, b) => '<span class="lb">' + (on ? a : b) + "</span>";
-  const b = $("bMic"); b.innerHTML = ic(L.mic ? "mic" : "micOff") + lab(L.mic, "Ztlumit", "Zapnout"); b.classList.toggle("off", !L.mic); b.classList.toggle("lock", !L.mic && !canMic()); b.title = (L.mic ? "Vypnout" : "Zapnout") + " mikrofon (M)";
+  const b = $("bMic"); b.innerHTML = ic(L.mic ? "mic" : "micOff") + lab(1, "Mikrofon", ""); b.classList.toggle("off", !L.mic); b.classList.toggle("lock", !L.mic && !canMic()); b.title = (L.mic ? "Vypnout" : "Zapnout") + " mikrofon (M)";
   const c = $("bCam"); c.innerHTML = ic(L.outVideo ? "cam" : "camOff") + lab(!!L.outVideo, "Kamera", "Kamera"); c.classList.toggle("off", !L.outVideo); c.classList.toggle("lock", !L.outVideo && !canCam()); c.title = (L.outVideo ? "Vypnout" : "Zapnout") + " kameru (V)";
-  const s = $("bShare"); s.innerHTML = ic("share") + lab(!!L.screen, "Ukončit sdílení", "Sdílet"); s.classList.toggle("on", !!L.screen); s.classList.toggle("lock", !L.screen && !canShare()); s.title = "Sdílet obrazovku";
-  const h = $("bHand"); h.innerHTML = ic("hand") + lab(SESS.hand, "Sklopit", "Hlásit se"); h.classList.toggle("on", !!SESS.hand); h.title = "Přihlásit se (H)";
+  const s = $("bShare"); s.innerHTML = ic("share") + lab(1, "Sdílet", ""); s.classList.toggle("on", !!L.screen); s.classList.toggle("lock", !L.screen && !canShare()); s.title = "Sdílet obrazovku";
+  const h = $("bHand"); h.innerHTML = ic("hand") + lab(1, "Hlásit se", ""); h.classList.toggle("on", !!SESS.hand); h.title = SESS.hand ? "Sklopit ruku (H)" : "Přihlásit se (H)";
   $("bReact").innerHTML = ic("smile") + lab(1, "Reakce", ""); $("bReact").title = "Reakce"; $("bReact").classList.toggle("hide", !!(ROOM && !ROOM.settings.react && !isHost()));
   $("bMore").innerHTML = ic("more"); $("bMore").title = "Další možnosti";
   const ch = $("bChat"); ch.innerHTML = ic("chat") + lab(1, "Chat", "") + (unread ? '<span class="bd">' + unread + "</span>" : ""); ch.classList.toggle("on", SIDE === "chat"); ch.title = "Chat";
@@ -1365,22 +1381,22 @@ async function boot() {
     history.replaceState(null, "", location.pathname + location.search);
     try {
       const r = await api("redeem", { tk: tk[1] });
-      $("bootMsg").innerHTML = '<button class="btn" id="contBtn">Pokračovat v hovoru</button>';
+      bootState("Hovor pokračuje v novém okně", "", false); $("bootMsg").innerHTML = '<button class="btn" id="contBtn">Pokračovat v hovoru</button>';
       await new Promise(res => $("contBtn").onclick = res);
-      $("bootMsg").textContent = "Zapínám kameru a mikrofon…";
+      bootState("Zapínám kameru a mikrofon…", "Prohlížeč se může zeptat na povolení.", true);
       await initMedia();
       await enterSession(Object.assign(r, { status: "member" }), false);
       return;
-    } catch (e) { $("bootMsg").textContent = e.message; }
+    } catch (e) { bootState("Hovor se nepodařilo otevřít", e.message, false); }
   }
-  try { PING = await api("ping", {}, 1); } catch (e) { $("bootMsg").textContent = e.message; if (e.code === "config") return; }
+  try { PING = await api("ping", {}, 1); } catch (e) { bootState(e.code === "config" ? "Hovor není nastavený" : "Server Hovoru neodpovídá", e.message, false); if (e.code === "config") return; }
   /* obnovená stránka uprostřed hovoru */
   const old = sstore.get("sess");
   if (old && old.pid) {
     try {
       const r = await api("poll", { pin: old.pin, pid: old.pid, pt: old.pt, st: {} }, 0);
       if (r.me.status === "member" || r.me.status === "waiting") {
-        $("bootMsg").innerHTML = '<button class="btn" id="contBtn">Vrátit se do hovoru</button>';
+        bootState("Hovor stále běží", "", false); $("bootMsg").innerHTML = '<button class="btn" id="contBtn">Vrátit se do hovoru</button>';
         await new Promise(res => $("contBtn").onclick = res);
         await initMedia();
         await enterSession(Object.assign({}, old, { status: r.me.status }), false);
@@ -1392,10 +1408,10 @@ async function boot() {
   /* přihlášení jen přes IS: okno v IS dostane klíč zprávou is:auth */
   if (!EMBED && !window.opener) { needIS(); return; }
   toIS("hov:ready");
-  $("bootMsg").textContent = "Ověřuji přihlášení z IS…";
+  bootState("Ověřuji přihlášení…", "Přihlášení se převezme z IS automaticky.", true);
   await Promise.race([new Promise(r => authWaiter = r), sleep(25000)]);
   authWaiter = null;
-  if (!AUTH) { needIS(AUTHERR ? "Přihlášení z IS se nepodařilo ověřit: " + AUTHERR : "Přihlášení z IS nedorazilo. Zkus IS obnovit a Hovor otevřít znovu."); return; }
+  if (!AUTH) { needIS(AUTHERR ? AUTHERR + " Zkus Hovor v IS zavřít a otevřít znovu." : "Přihlášení z IS nedorazilo. Zkus IS obnovit a Hovor otevřít znovu.", AUTHERR ? "" : "Přihlášení z IS nedorazilo"); return; }
   await startLobby();
 }
 let lobbyStarted = false;
