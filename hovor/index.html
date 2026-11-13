@@ -70,11 +70,36 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 .pv .lvl i{width:4px;background:#22c55e;border-radius:2px;height:3px;transition:height .1s}
 .devs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
 .devs select{flex:1;min-width:150px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font-size:13px;color:var(--ink)}
-.card{width:min(390px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 10px 30px #0f172a14}
+.card{width:min(440px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 10px 30px #0f172a14}
 .card h1{font-size:23px;margin:0 0 4px}
 .card h2{font-size:15px;margin:18px 0 10px}
 .sep{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13px;margin:16px 0}
 .sep:before,.sep:after{content:"";flex:1;height:1px;background:var(--line)}
+.rooms{display:flex;flex-direction:column;gap:10px}
+.room{border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#f8fafc;transition:border-color .15s}
+.room.live{background:#fff;border-color:#c7d7fe;box-shadow:0 2px 10px #1d4ed812}
+.room .rh{display:flex;align-items:center;gap:12px}
+.room .ri{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:#e8eefc;color:var(--blue);font-weight:800;font-size:14px;flex:none;position:relative}
+.room.live .ri{background:var(--blue);color:#fff}
+.room.staff .ri{background:#fef3c7;color:#92400e}
+.room.staff.live .ri{background:#b45309;color:#fff}
+.room .ri svg.i{width:20px;height:20px}
+.room .ri .ld{position:absolute;right:-3px;top:-3px;width:12px;height:12px;border-radius:50%;background:#22c55e;border:2px solid #fff}
+.room .rt{flex:1;min-width:0}
+.room .rt b{display:block;font-size:15.5px}
+.room .rt small{color:var(--mut);font-size:12.5px;display:block;margin-top:1px}
+.room .rgo{border:0;border-radius:10px;padding:9px 13px;font-weight:700;font-size:13.5px;background:var(--blue);color:#fff;white-space:nowrap}
+.room .rgo:hover{background:var(--blue2)}
+.room .rgo.ask{background:#e8eefc;color:var(--blue)}
+.room .rgo:disabled{background:#e2e8f0;color:#94a3b8;cursor:default}
+.room .rm{margin:10px 0 0 54px;display:flex;flex-direction:column;gap:6px}
+.rmp{display:flex;align-items:center;gap:8px;font-size:13.5px;min-width:0}
+.rmp .a{width:24px;height:24px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:10.5px;flex:none}
+.rmp .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rmp .hb2{background:#dbeafe;color:#1e40af;border-radius:999px;padding:1px 7px;font-size:11px;font-weight:700;flex:none}
+.rmp .tm{margin-left:auto;color:var(--mut);font-variant-numeric:tabular-nums;font-size:12px;flex:none}
+.room.want{border-color:var(--blue);box-shadow:0 0 0 3px #1d4ed833}
+.room .rw{margin:8px 0 0 54px;font-size:12.5px;color:#92400e}
 .mine{display:flex;flex-direction:column;gap:8px;margin:10px 0 0}
 .mine button{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:#f8fafc;border-radius:10px;padding:10px 12px;text-align:left;color:var(--ink)}
 .mine button:hover{border-color:var(--blue)}
@@ -252,19 +277,9 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
     </div>
     <div class="card">
       <div id="isNote" class="warn hide"></div>
-      <div id="createBox" class="hide">
-        <h1>Nový hovor</h1>
-        <label class="field"><span>Název (nepovinné)</span><input id="cTitle" maxlength="40" placeholder="např. Doučování ČJL"></label>
-        <button class="btn full" id="cGo">Založit hovor</button>
-        <div class="mine" id="mineList"></div>
-        <div class="sep">nebo se připoj</div>
-      </div>
-      <div id="joinBox">
-        <h1 id="joinH">Připojit se k hovoru</h1>
-        <p class="note" id="joinNote" style="margin:0 0 14px">Zadej PIN, který ti poslal učitel. Do hovoru tě pustí hostitel.</p>
-        <label class="field"><span>PIN hovoru</span><input id="jPin" class="pin-in" inputmode="numeric" maxlength="7" autocomplete="off" placeholder="••••••"></label>
-        <button class="btn full" id="jGo">Připojit se</button>
-      </div>
+      <h1>Místnosti</h1>
+      <p class="note" id="roomsNote" style="margin:0 0 14px"></p>
+      <div class="rooms" id="roomList"><p class="note">Načítám místnosti…</p></div>
       <div class="err" id="lobErr"></div>
     </div>
   </div>
@@ -273,7 +288,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
 <div id="wait" class="scr center hide">
   <div class="wprev"><div class="pv"><video id="wVid" autoplay playsinline muted class="mirror"></video><div class="camoff hide" id="wOff">Kamera je vypnutá</div></div></div>
   <div class="pulse"></div>
-  <h1>Čekáš na připuštění</h1>
+  <h1 id="wH">Čekáš na připuštění</h1>
   <p id="wTxt">Hostitel tě brzy pustí do hovoru.</p>
   <button class="btn ghost" id="wCancel">Zrušit</button>
 </div>
@@ -283,7 +298,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
   <h1 id="endH">Hovor skončil</h1>
   <p id="endP"></p>
   <div style="display:flex;gap:10px;margin-top:10px">
-    <button class="btn" id="endAgain">Připojit znovu</button>
+    <button class="btn" id="endAgain">Zpět na místnosti</button>
     <button class="btn sec" id="endHome">Hlavní stránka</button>
   </div>
 </div>
@@ -292,7 +307,7 @@ svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke
   <div id="banners"></div>
   <div class="cbar">
     <div class="ctitle" id="cTitleT"></div>
-    <button class="chip" id="pinChip" title="Zkopírovat pozvánku"></button>
+    <span class="chip" id="pinChip"></span>
     <span class="timer" id="timerT"></span>
     <span class="sp"></span>
     <span class="netw hide" id="netW">Obnovuji spojení se serverem…</span>
@@ -373,7 +388,7 @@ const IC = {
 const ic = (n, cls) => '<svg class="i' + (cls ? " " + cls : "") + '" viewBox="0 0 24 24">' + IC[n] + "</svg>";
 const COLORS = ["#2563eb", "#0e7490", "#7c3aed", "#0f766e", "#b45309", "#be185d", "#4338ca", "#15803d", "#c2410c"];
 const colorOf = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return COLORS[h % COLORS.length]; };
-const initials = n => String(n || "?").trim().split(/\s+/).slice(0, 2).map(x => x[0]).join("").toUpperCase();
+const initials = n => String(n || "?").replace(/\(.*?\)/g, "").trim().split(/\s+/).slice(0, 2).map(x => x[0]).join("").toUpperCase();
 
 /* ---------- server ---------- */
 async function api(action, body, retries) {
@@ -444,7 +459,7 @@ window.addEventListener("message", e => {
   const m = e.data || {};
   if (m.type === "is:auth" && m.token) onToken(String(m.token));
   else if (m.type === "is:logout") { AUTH = null; if (SESS) leaveCall("logout"); else needIS("Přihlas se znovu v IS Leernio a otevři Aplikace → Hovor.", "Odhlásil(a) ses z IS Leernio"); }
-  else if (m.type === "is:hovor" && /^\d{6}$/.test(String(m.pin || ""))) { $("jPin").value = m.pin; }
+  else if (m.type === "is:hovor" && (m.room || m.pin)) { WANT = String(m.room || m.pin); renderRooms(); }
 });
 async function onToken(token) {
   try {
@@ -495,6 +510,7 @@ async function initMedia() {
   listDevices();
   if (navigator.mediaDevices.addEventListener) navigator.mediaDevices.addEventListener("devicechange", listDevices);
   meterLocal();
+  if (!appShown()) suspendMedia();
 }
 async function listDevices() {
   let ds = []; try { ds = await navigator.mediaDevices.enumerateDevices(); } catch (e) { }
@@ -585,6 +601,39 @@ function stopShare() {
   L.screen = null; Peers.setTrack(2, null);
   stateChanged(); renderControls(); renderTiles();
 }
+
+/* ---------- mimo Hovor (jiná aplikace v IS, jiná karta prohlížeče) a ještě ne v místnosti → kamera a mikrofon vypnout ----------
+   Stav tlačítek (co má být zapnuté) se nemění; po návratu se zapne zase to, co bylo. */
+let MSUSP = null, IOVIS = true;
+function appShown() { return document.visibilityState === "visible" && IOVIS; }
+function inRoom() { return !!(SESS && SESS.status === "member"); }
+function suspendMedia() {
+  if (MSUSP || inRoom() || (!L.micTrack && !L.camTrack)) return;
+  MSUSP = { mic: L.mic, cam: L.cam };
+  Blur.stop();
+  [L.micTrack, L.camTrack].forEach(t => { if (t) try { t.stop(); } catch (e) { } });
+  L.micTrack = L.camTrack = L.outVideo = null; Meters.delete("me");
+  ["pvVid", "wVid"].forEach(id => { $(id).srcObject = null; });
+  $("pvOff").classList.remove("hide"); $("wOff").classList.remove("hide");
+}
+async function resumeMedia() {
+  if (!MSUSP) return;
+  const s = MSUSP; MSUSP = null;
+  try {
+    const st = await navigator.mediaDevices.getUserMedia({ audio: aConstraints(), video: s.cam ? vConstraints() : false });
+    if (MSUSP || !appShown() && !inRoom()) { st.getTracks().forEach(t => t.stop()); if (!MSUSP) MSUSP = s; return; }   /* mezitím zase odešel */
+    L.micTrack = st.getAudioTracks()[0] || null; L.camTrack = st.getVideoTracks()[0] || null;
+    L.mic = s.mic && !!L.micTrack; L.cam = s.cam && !!L.camTrack;
+    if (L.micTrack) L.micTrack.enabled = L.mic;
+  } catch (e) { L.err = mediaErrText(e); }
+  Peers.setTrack(0, L.micTrack);
+  meterLocal(); await refreshOutVideo(); renderLobbyControls(); renderControls(); stateChanged();
+}
+function visCheck() { if (appShown()) resumeMedia(); else suspendMedia(); }
+document.addEventListener("visibilitychange", visCheck);
+try {   /* okno Hovoru schované v IS (přepnutí na jinou aplikaci nebo zpět do IS) → rám není vidět */
+  new IntersectionObserver(es => { IOVIS = es.some(e => e.isIntersecting); visCheck(); }).observe(document.documentElement);
+} catch (e) { }
 
 /* ---------- měření hlasitosti (kdo mluví, ukazatel v předsíni) ---------- */
 const Meters = new Map();   // klíč → {an, buf, src}
@@ -878,9 +927,9 @@ async function pollOnce() {
   if (st !== "member") { leaveCall(st, true); return; }
   const wasHost = SESS.host;
   SESS.host = !!r.me.host;
-  const prev = ROOM; ROOM = r.room;
+  const prev = ROOM || { members: r.room.members, waiting: [], settings: r.room.settings }; ROOM = r.room;   /* po vstupu ohlásit i ty, kdo už čekají */
   if (SESS.status !== "member") await becameMember();
-  if (wasHost !== SESS.host && SESS.host && prev) { toast("Jsi teď hostitel hovoru."); beep("join"); }
+  if (wasHost !== SESS.host && SESS.host && prev.pin) { toast("Jsi teď hostitel místnosti."); beep("join"); }
   ROOM.members.forEach(m => { const p = PEERST[m.pid]; if (!p || m.v >= p.v) PEERST[m.pid] = { mic: m.mic, cam: m.cam, hand: m.hand, ha: m.ha, sh: m.sh, blur: m.blur, q: m.q, v: m.v }; });
   diffRoom(prev, ROOM);
   if (SESS.needHi) {   /* po obnovení stránky / v novém okně: ostatní zahodí stará spojení se mnou */
@@ -917,7 +966,7 @@ function diffRoom(a, b) {
     (b.waiting || []).forEach(w => {
       if (w0.has(w.pid)) return;
       beep("knock");
-      toast("<b>" + esc(w.name) + "</b>" + (w.verified ? " ✓" : "") + " chce do hovoru.", { ms: 0, key: "w" + w.pid, acts: [{ t: "Pustit", cls: "ok", f: () => hostCmd("admit", w.pid) }, { t: "Odmítnout", f: () => hostCmd("deny", w.pid) }] });
+      toast("<b>" + esc(w.name) + "</b>" + (w.verified ? " ✓" : "") + " žádá o vstup.", { ms: 0, key: "w" + w.pid, acts: [{ t: "Pustit", cls: "ok", f: () => hostCmd("admit", w.pid) }, { t: "Odmítnout", f: () => hostCmd("deny", w.pid) }] });
     });
     const wn = new Set((b.waiting || []).map(w => w.pid));
     w0.forEach(p => { if (!wn.has(p)) { const t = document.querySelector('.toast[data-k="w' + p + '"]'); if (t) t.remove(); } });
@@ -965,15 +1014,16 @@ async function leaveCall(reason, fromServer, opts) {
   document.querySelectorAll(".toast[data-k]").forEach(t => t.remove());
   toIS("hov:call", { state: "end" });
   const T = {
-    left: ["Odešel(a) jsi z hovoru", "", true], ended: ["Hovor skončil", "Hostitel hovor ukončil.", false],
-    end: ["Hovor skončil", "Ukončil(a) jsi hovor pro všechny.", false],
-    kicked: ["Byl(a) jsi odebrán(a)", "Hostitel tě z hovoru odebral.", false], denied: ["Hostitel tě nepustil", "Do hovoru tě hostitel tentokrát nepustil.", true],
+    left: ["Odešel(a) jsi z místnosti", "", true], ended: ["Hodina skončila", "Učitel ukončil hodinu a místnost vyprázdnil.", true],
+    end: ["Hodina skončila", "Místnost je zase prázdná.", true],
+    kicked: ["Byl(a) jsi odebrán(a)", "Učitel tě z místnosti odebral.", true], denied: ["Učitel tě nepustil", "Do místnosti tě učitel tentokrát nepustil.", true],
     moved: ["Hovor pokračuje jinde", "K hovoru ses připojil(a) v jiném okně nebo zařízení.", false], popout: ["Hovor pokračuje v novém okně", "Toto okno můžeš zavřít.", false],
-    logout: ["Odhlášení", "Odhlásil(a) ses z IS Leernio.", false], cancel: ["Čekání zrušeno", "", true]
+    logout: ["Odhlášení", "Odhlásil(a) ses z IS Leernio.", false], cancel: ["Žádost o vstup zrušena", "", true]
   }[reason] || ["Hovor skončil", "", true];
   $("endH").textContent = T[0]; $("endP").textContent = T[1];
-  $("endAgain").classList.toggle("hide", !T[2] || !AUTH); $("endAgain").dataset.pin = s.pin;
-  $("endHome").textContent = EMBED && AUTH ? "Zpět na začátek" : "Otevřít IS Leernio";
+  $("endAgain").classList.toggle("hide", !T[2] || !AUTH);
+  $("endHome").classList.toggle("hide", !!(T[2] && AUTH)); $("endHome").textContent = "Otevřít IS Leernio";
+  if (reason === "cancel" && AUTH) { goLobby(); return; }
   if (reason === "popout" || reason === "logout") { Blur.stop(); }
   show("end");
 }
@@ -985,10 +1035,14 @@ window.addEventListener("pagehide", () => {
 document.addEventListener("pointerdown", () => { if (AC && AC.state === "suspended") AC.resume().catch(() => { }); }, true);
 
 /* ---------- čekárna ---------- */
-function showWait() { show("wait"); $("wTxt").textContent = "Hostitel tě brzy pustí do hovoru."; }
+function showWait() { show("wait"); $("wH").textContent = "Žádáš o vstup"; $("wTxt").textContent = "Učitel tě brzy pustí dovnitř."; }
 function updateWait(room) {
   if (!room) return;
-  $("wTxt").innerHTML = room.full ? "Hovor je teď plný (nejvýš 4 lidé). Počkej, až někdo odejde." : "Hostitel " + (room.host ? "<b>" + esc(room.host) + "</b> " : "") + "tě brzy pustí do hovoru „" + esc(room.title) + "“.";
+  $("wH").textContent = "Žádáš o vstup do místnosti " + room.title.replace(/^Třída /, "");
+  const h = room.hosts || [];
+  $("wTxt").innerHTML = room.full ? esc(room.title) + " je teď plná (nejvýš 4 lidé). Počkej, až někdo odejde." :
+    h.length ? (h.length > 1 ? "Učitelé " : "Učitel ") + h.map(x => "<b>" + esc(x) + "</b>").join(", ") + " tě brzy pustí dovnitř." :
+    "Ve třídě zatím není žádný učitel. Jakmile přijde, pustí tě dovnitř.";
 }
 
 /* =====================================================================
@@ -1001,7 +1055,7 @@ let renderQ = false;
 function render() { if (renderQ) return; renderQ = true; requestAnimationFrame(() => { renderQ = false; if (!SESS || SESS.status !== "member" || !ROOM) return; renderBar(); renderTiles(); renderControls(); renderSide(); }); }
 function renderBar() {
   $("cTitleT").textContent = ROOM.title;
-  $("pinChip").innerHTML = ic("copy") + "PIN " + ROOM.pin.slice(0, 3) + " " + ROOM.pin.slice(3);
+  $("pinChip").innerHTML = ic("users") + ROOM.members.length + "/" + ROOM.max;
   $("lockChip").classList.toggle("hide", !ROOM.settings.locked); $("lockChip").innerHTML = ic("lock") + "Zamčeno";
 }
 function stOf(pid) { if (pid === SESS.pid) return myState(); return PEERST[pid] || {}; }
@@ -1061,7 +1115,7 @@ function renderTiles() {
     t.video.classList.toggle("mirror", me && L.mirror);
     t.av.classList.toggle("hide", camOn);
     t.avb.textContent = initials(m.name); t.avb.style.background = colorOf(m.name);
-    t.nm.textContent = (me ? "Ty" : m.name) + (m.pid === ROOM.hostPid ? " · hostitel" : "");
+    t.nm.textContent = (me ? "Ty" : m.name) + (m.host ? " · " + (m.role === "admin" ? "správce" : "učitel") : "");
     t.mo.classList.toggle("hide", me ? L.mic : !!st.mic);
     t.hand.classList.toggle("hide", !(me ? SESS.hand : st.hand));
     if (!me) {
@@ -1149,7 +1203,6 @@ function moreMenu() {
     ["blur", L.blur ? "Vypnout rozostření pozadí" : "Rozostřit pozadí", () => { if (!L.cam) toast("Rozostření se projeví, až zapneš kameru."); setBlur(!L.blur); }],
     ["share", L.screen ? "Ukončit sdílení obrazovky" : "Sdílet obrazovku", () => L.screen ? stopShare() : startShare(), "share-m"],
     ["gear", "Nastavení zvuku a obrazu", devicesModal],
-    ["copy", "Zkopírovat pozvánku", copyInvite],
     ["full", document.fullscreenElement ? "Ukončit celou obrazovku" : "Celá obrazovka", () => { if (document.fullscreenElement) document.exitFullscreen(); else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => toast("Celou obrazovku tu prohlížeč nepovolil.")); }]
   ];
   if (window.innerWidth <= 800 && (!ROOM || ROOM.settings.react || isHost())) items.unshift(["smile", "Reakce", () => setTimeout(() => reactMenu($("bMore")), 0)]);
@@ -1164,11 +1217,6 @@ function reactMenu(anchor) {
   p.querySelectorAll("button").forEach(b => b.onclick = () => { closePop(); const m = { t: "react", e: b.textContent, id: rid() }; seenApp.add(m.id); Peers.broadcast(m, true); floatReact(SESS.pid, m.e); });
 }
 function rid() { return Math.random().toString(36).slice(2, 12); }
-async function copyInvite() {
-  const txt = "Připoj se k hovoru „" + ROOM.title + "“ v IS Leernio: Aplikace → Hovor, PIN " + ROOM.pin + "\n" + CFG.isUrl + "#hovor";
-  try { await navigator.clipboard.writeText(txt); toast("Pozvánka zkopírována."); }
-  catch (e) { const ta = document.createElement("textarea"); ta.value = txt; ta.style.cssText = "width:100%;height:110px;border:1px solid #cbd5e1;border-radius:10px;padding:10px;font:inherit;font-size:14px"; ta.readOnly = true; modal("Pozvánka do hovoru", "Zkopíruj text a pošli ho účastníkům.", null, ta); setTimeout(() => ta.select(), 50); }
-}
 async function popOut() {
   try {
     const r = await api("ticket", { pin: SESS.pin, pid: SESS.pid, pt: SESS.pt });
@@ -1192,18 +1240,13 @@ function devicesModal() {
   modal("Nastavení zvuku a obrazu", "", null, box);
 }
 function leaveMenu() {
-  if (!isHost() || ROOM.members.length < 2) {
-    if (isHost()) { modal("Odejít z hovoru?", "Jsi v hovoru sám/sama. Hovor se ukončí.", [{ t: "Zrušit" }, { t: "Ukončit hovor", cls: "red", f: () => { leaveCall("end", false, { end: true }); } }]); return; }
-    leaveCall("left"); return;
-  }
-  const others = ROOM.members.filter(m => m.pid !== SESS.pid);
-  const box = document.createElement("div");
-  box.innerHTML = '<label class="field"><span>Kdo bude hostitel, když odejdeš</span><select>' + others.map(m => '<option value="' + m.pid + '">' + esc(m.name) + "</option>").join("") + "</select></label>";
-  modal("Odejít z hovoru", "Můžeš hovor ukončit pro všechny, nebo odejít a předat roli hostitele.", [
+  if (!isHost() || ROOM.members.length < 2) { leaveCall("left"); return; }
+  const cls = ROOM.kind !== "staff";
+  modal("Odejít z " + (cls ? "třídy" : "kabinetu") + "?", cls ? "Můžeš jen odejít, nebo ukončit hodinu – pak musí odejít všichni a třída se vyprázdní." : "Můžeš jen odejít, nebo kabinet vyprázdnit pro všechny.", [
     { t: "Zrušit" },
-    { t: "Odejít", f: () => { leaveCall("left", false, { next: box.querySelector("select").value }); } },
-    { t: "Ukončit pro všechny", cls: "red", f: () => { leaveCall("end", false, { end: true }); } }
-  ], box);
+    { t: "Odejít", f: () => { leaveCall("left"); } },
+    { t: cls ? "Ukončit hodinu pro všechny" : "Vyprázdnit kabinet", cls: "red", f: () => { leaveCall("end", false, { end: true }); } }
+  ]);
 }
 
 /* ---------- boční panel: chat a lidé ---------- */
@@ -1242,31 +1285,31 @@ function renderSide() {
   const host = isHost();
   let h = "";
   if (host && ROOM.waiting && ROOM.waiting.length) {
-    h += '<div class="sec-t">Čekárna (' + ROOM.waiting.length + ')' + (ROOM.waiting.length > 1 ? '<button class="sbtn ok" data-a="admitAll">Pustit všechny</button>' : "") + "</div>";
-    ROOM.waiting.forEach(w => { h += '<div class="pp"><div class="a" style="background:' + colorOf(w.name) + '">' + esc(initials(w.name)) + '</div><div class="n"><div>' + esc(w.name) + "</div><small>" + (w.verified ? "✓ přihlášen(a) přes Leernio" : "host bez účtu") + '</small></div><button class="sbtn no" data-a="deny" data-p="' + w.pid + '">Odmítnout</button><button class="sbtn ok" data-a="admit" data-p="' + w.pid + '">Pustit</button></div>'; });
-    if (ROOM.members.length >= ROOM.max) h += '<p class="note">Hovor je plný. Pustit někoho dalšího půjde, až někdo odejde.</p>';
+    h += '<div class="sec-t">Žádají o vstup (' + ROOM.waiting.length + ')' + (ROOM.waiting.length > 1 ? '<button class="sbtn ok" data-a="admitAll">Pustit všechny</button>' : "") + "</div>";
+    ROOM.waiting.forEach(w => { h += '<div class="pp"><div class="a" style="background:' + colorOf(w.name) + '">' + esc(initials(w.name)) + '</div><div class="n"><div>' + esc(w.name) + "</div><small>" + ("čeká " + Math.max(1, Math.round((Date.now() - (w.at || Date.now())) / 60000)) + " min") + '</small></div><button class="sbtn no" data-a="deny" data-p="' + w.pid + '">Odmítnout</button><button class="sbtn ok" data-a="admit" data-p="' + w.pid + '">Pustit</button></div>'; });
+    if (ROOM.members.length >= ROOM.max) h += '<p class="note">Místnost je plná (nejvýš 4 lidé). Pustit dalšího půjde, až někdo odejde.</p>';
   }
   const hands = ROOM.members.filter(m => stOf(m.pid).hand).sort((a, b) => (stOf(a.pid).ha || 0) - (stOf(b.pid).ha || 0)).map(m => m.pid);
-  h += '<div class="sec-t">V hovoru' + (host && ROOM.members.length > 1 ? '<button class="sbtn no" data-a="muteAll">Ztlumit všechny</button>' : "") + "</div>";
+  h += '<div class="sec-t">V místnosti' + (host && ROOM.members.length > 1 ? '<button class="sbtn no" data-a="muteAll">Ztlumit všechny</button>' : "") + "</div>";
   if (host && hands.length > 1) h += '<div style="margin:-2px 0 6px"><button class="sbtn no" data-a="lowerAll">Sklopit všechny ruce</button></div>';
   ROOM.members.forEach(m => {
     const me = m.pid === SESS.pid, st = stOf(m.pid), hi = hands.indexOf(m.pid);
-    h += '<div class="pp"><div class="a" style="background:' + colorOf(m.name) + '">' + esc(initials(m.name)) + '</div><div class="n"><div>' + esc(m.name) + (me ? " (ty)" : "") + "</div><small>" + (m.pid === ROOM.hostPid ? "Hostitel · " : "") + (m.verified ? "✓ Leernio" : "host") + (m.on === false ? " · bez spojení" : "") + "</small></div>" +
+    h += '<div class="pp"><div class="a" style="background:' + colorOf(m.name) + '">' + esc(initials(m.name)) + '</div><div class="n"><div>' + esc(m.name) + (me ? " (ty)" : "") + "</div><small>" + (m.host ? "Hostitel · " : "") + ({ admin: "správce", teacher: "učitel", student: "student" }[m.role] || "") + (m.on === false ? " · bez spojení" : "") + "</small></div>" +
       '<div class="ic">' + (hi >= 0 ? '<span class="hb">✋ ' + (hi + 1) + "</span>" : "") + (st.sh ? ic("share") : "") + ((me ? L.outVideo : st.cam) ? ic("cam") : ic("camOff", "r")) + ((me ? L.mic : st.mic) ? ic("mic") : ic("micOff", "r")) + "</div>" +
-      (host && !me ? '<button class="mb" data-a="menu" data-p="' + m.pid + '" title="Možnosti">' + ic("more") + "</button>" : "") + "</div>";
+      (host && !me && !(m.host && ROOM.kind !== "staff") ? '<button class="mb" data-a="menu" data-p="' + m.pid + '" title="Možnosti">' + ic("more") + "</button>" : "") + "</div>";
   });
   if (host) {
     const S = ROOM.settings, tg = (k, t) => '<label class="tg"><span>' + t + '</span><input type="checkbox" data-s="' + k + '"' + (S[k] ? " checked" : "") + "><i></i></label>";
-    h += '<div class="sec-t">Nastavení hovoru</div>' + tg("locked", "Zamknout hovor (nikdo další se nepřipojí)") + tg("autoIS", "Přihlášené přes Leernio pouštět bez čekání") +
-      tg("unmute", "Účastníci si mohou zapnout mikrofon") + tg("video", "Účastníci si mohou zapnout kameru") + tg("share", "Účastníci mohou sdílet obrazovku") + tg("chat", "Chat") + tg("react", "Reakce") +
-      '<div style="margin-top:10px"><button class="sbtn no" data-a="rename">Přejmenovat hovor</button></div>';
-  } else h += '<p class="note" style="margin-top:14px">Pouštět lidi, ztlumit ostatní a měnit nastavení může jen hostitel.</p>';
+    const cls = ROOM.kind !== "staff";
+    h += '<div class="sec-t">Nastavení ' + (cls ? "třídy" : "kabinetu") + '</div>' + (cls ? tg("locked", "Zamknout třídu (studenti nemohou žádat o vstup)") : "") +
+      tg("unmute", "Ostatní si mohou zapnout mikrofon") + tg("video", "Ostatní si mohou zapnout kameru") + tg("share", "Ostatní mohou sdílet obrazovku") + tg("chat", "Chat") + tg("react", "Reakce") +
+      '<p class="note" style="margin-top:8px">Nastavení platí, dokud v místnosti někdo je. Když se vyprázdní, vrátí se na výchozí.</p>';
+  } else h += '<p class="note" style="margin-top:14px">' + (ROOM.kind === "staff" ? "Hostitelem kabinetu je správce." : "Pouštět studenty, ztlumit ostatní a měnit nastavení mohou učitelé ve třídě.") + '</p>';
   if (sideHtml === h) return;   /* překreslit jen při změně (nezavírá rozdělané kliknutí) */
   sideHtml = h; B.innerHTML = h;
   B.querySelectorAll("[data-a]").forEach(b => b.onclick = e => {
     const a = b.dataset.a, p = b.dataset.p;
     if (a === "menu") return memberMenu(b, p);
-    if (a === "rename") { const i = document.createElement("input"); i.value = ROOM.title; i.maxLength = 40; i.style.cssText = "width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px"; modal("Přejmenovat hovor", "", [{ t: "Zrušit" }, { t: "Uložit", cls: "", f: () => { hostCmd("title", "", { title: i.value }); } }], i); return; }
     hostCmd(a, p);
   });
   B.querySelectorAll("[data-s]").forEach(i => i.onchange = () => { const s = {}; s[i.dataset.s] = i.checked; hostCmd("settings", "", { settings: s }); });
@@ -1279,8 +1322,7 @@ function memberMenu(btn, pid) {
   if (st.cam) items.push(["camOff", "Vypnout kameru", () => hostCmd("camOff", pid)]); else items.push(["cam", "Požádat o zapnutí kamery", () => hostCmd("askCam", pid)]);
   if (st.hand) items.push(["hand", "Sklopit ruku", () => hostCmd("lowerHand", pid)]);
   if (st.sh) items.push(["share", "Ukončit sdílení obrazovky", () => hostCmd("stopShare", pid)]);
-  items.push(["crown", "Předat roli hostitele", () => modal("Předat roli hostitele?", esc(m.name) + " bude moct pouštět lidi, ztlumit ostatní a ukončit hovor.", [{ t: "Zrušit" }, { t: "Předat", cls: "", f: () => { hostCmd("makeHost", pid); } }])]);
-  items.push(["kick", "Odebrat z hovoru", () => modal("Odebrat " + m.name + "?", m.verified ? "Můžeš mu/jí také zakázat návrat do tohoto hovoru." : "Host bez účtu se může zkusit připojit znovu – můžeš hovor zamknout.", [{ t: "Zrušit" }].concat(m.verified ? [{ t: "Odebrat a zakázat návrat", cls: "red", f: () => { hostCmd("kick", pid, { ban: true }); } }] : []).concat([{ t: "Odebrat", cls: "red", f: () => { hostCmd("kick", pid); } }]))]);
+  items.push(["kick", "Odebrat z místnosti", () => modal("Odebrat " + m.name + "?", "Můžeš mu/jí také zakázat návrat, dokud bude " + (ROOM.kind === "staff" ? "kabinet" : "třída") + " obsazená.", [{ t: "Zrušit" }, { t: "Odebrat a zakázat návrat", cls: "red", f: () => { hostCmd("kick", pid, { ban: true }); } }, { t: "Odebrat", cls: "red", f: () => { hostCmd("kick", pid); } }])]);
   const p = popAt(btn, items.map((x, i) => '<button data-i="' + i + '"' + (x[0] === "kick" ? ' class="dng"' : "") + ">" + ic(x[0]) + esc(x[1]) + "</button>").join(""));
   p.querySelectorAll("button").forEach(b => b.onclick = () => { closePop(); items[+b.dataset.i][2](); });
 }
@@ -1294,42 +1336,61 @@ function renderLobbyControls() {
   $("pvBlur").innerHTML = ic("blur"); $("pvBlur").classList.toggle("on2", L.blur); $("pvBlur").title = L.blur ? "Vypnout rozostření pozadí" : "Rozostřit pozadí";
   $("mediaErr").textContent = L.err || "";
 }
+let RLIST = null, RSKEW = 0, RTIMER = 0, WANT = "", ROOMSHTML = "";
 async function renderLobby() {
   show("lobby"); renderLobbyControls();
   const who = AUTH && AUTH.who;
   $("lobWho").innerHTML = who ? '<span style="width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;background:' + colorOf(who.name) + '">' + esc(initials(who.name)) + "</span>" + esc(who.name) : "";
-  $("createBox").classList.toggle("hide", !(who && who.staff));
-  $("joinH").textContent = who && who.staff ? "Připojit se k hovoru" : "Připojit se k hovoru";
-  if (who && who.staff) {
-    try {
-      const r = await api("mine", { token: AUTH.token });
-      $("mineList").innerHTML = r.rooms.length ? '<div class="sec-t" style="margin:16px 0 2px">Tvoje probíhající hovory</div>' + r.rooms.map(x => '<button data-pin="' + x.pin + '"><span style="flex:1"><b>' + esc(x.title) + "</b><small>PIN " + x.pin + " · " + x.people + (x.people === 1 ? " člověk" : x.people > 1 && x.people < 5 ? " lidé" : " lidí") + "</small></span>Vrátit se</button>").join("") : "";
-      $("mineList").querySelectorAll("button").forEach(b => b.onclick = () => doJoin(b.dataset.pin));
-    } catch (e) { }
-  }
+  $("roomsNote").textContent = who && who.staff ? "Do tříd vstoupíš rovnou a pouštíš studenty. KABOŠ je kabinet jen pro učitele a správce." : "Vyber třídu a požádej o vstup. Pustí tě učitel, který je uvnitř.";
+  roomsLoop();
+}
+function goLobby() { renderLobby(); if (!L.micTrack && !L.camTrack && !L.blocked && !MSUSP) initMedia().then(renderLobbyControls); }
+/* přehled místností se obnovuje každé 4 s, dokud je vidět předsíň */
+async function roomsLoop() {
+  clearTimeout(RTIMER);
+  if (SESS || $("lobby").classList.contains("hide") || !AUTH) return;
+  try { const r = await api("rooms", { token: AUTH.token }, 1); RLIST = r.rooms; RSKEW = r.now - Date.now(); renderRooms(); lobErr(""); }
+  catch (e) { if (!RLIST) $("roomList").innerHTML = '<p class="note">' + esc(e.message) + "</p>"; }
+  RTIMER = setTimeout(roomsLoop, appShown() ? 4000 : 15000);
+}
+function ago(t) { const m = Math.max(0, Math.floor((Date.now() + RSKEW - t) / 60000)); return m < 1 ? "teď" : m < 60 ? m + " min" : Math.floor(m / 60) + " h " + (m % 60) + " min"; }
+function renderRooms() {
+  if (!RLIST) return;
+  const staff = !!(AUTH && AUTH.who.staff);
+  const html = RLIST.map(r => {
+    const st = r.kind === "staff", n = r.count, full = n >= r.max;
+    let sub = n ? n + "/" + r.max + " · " + ago(r.since) : (st ? "Prázdný" : "Prázdná");
+    if (!st && n && !r.host) sub += " · bez učitele";
+    if (r.waiting && (staff || !st)) sub += " · " + (r.waiting === 1 ? "čeká 1" : "čekají " + r.waiting);
+    if (r.locked) sub += " · zamčeno";
+    if (st && !r.allowed) sub = (n ? n + (n === 1 ? " člověk" : n < 5 ? " lidé" : " lidí") + " · " : "") + "jen pro učitele a správce";
+    let btn;
+    if (!r.allowed) btn = '<button class="rgo" disabled>' + ic("lock") + "</button>";
+    else if (full) btn = '<button class="rgo" disabled>Plná</button>';
+    else if (staff) btn = '<button class="rgo" data-r="' + r.id + '">Vstoupit</button>';
+    else if (r.locked) btn = '<button class="rgo" disabled>Zamčeno</button>';
+    else btn = '<button class="rgo ask" data-r="' + r.id + '">Požádat o vstup</button>';
+    const icon = st ? ic("lock") : esc(r.id);
+    const mem = (r.members || []).map(m => '<div class="rmp"><span class="a" style="background:' + colorOf(m.name) + '">' + esc(initials(m.name)) + '</span><span class="nm">' + esc(m.name) + "</span>" +
+      (m.host ? '<span class="hb2">hostitel</span>' : "") + '<span class="tm">' + ago(m.joined) + "</span></div>").join("");
+    return '<div class="room' + (st ? " staff" : "") + (n ? " live" : "") + (WANT === r.id ? " want" : "") + '" data-room="' + r.id + '"><div class="rh"><span class="ri">' + icon + (n ? '<i class="ld"></i>' : "") + '</span><span class="rt"><b>' + esc(r.name) + "</b><small>" + esc(sub) + "</small></span>" + btn + "</div>" +
+      (mem ? '<div class="rm">' + mem + "</div>" : "") + (!st && !staff && n && !r.host ? '<div class="rw">Učitel ve třídě teď není – po žádosti počkáš, až přijde.</div>' : "") + "</div>";
+  }).join("");
+  if (html === ROOMSHTML) return;   /* překreslit jen při změně, ať se neztratí rozkliknuté tlačítko */
+  ROOMSHTML = html; $("roomList").innerHTML = html;
+  $("roomList").querySelectorAll("[data-r]").forEach(b => b.onclick = () => doJoin(b.dataset.r, b));
 }
 function lobErr(t) { $("lobErr").textContent = t || ""; }
-function busy(btn, on) { btn.disabled = on; if (on) { btn.dataset.t = btn.textContent; btn.textContent = "Chvilku…"; } else if (btn.dataset.t) btn.textContent = btn.dataset.t; }
-async function doCreate() {
-  lobErr();
-  if (!AUTH) { needIS(); return; }
-  const btn = $("cGo"); busy(btn, true);
-  try {
-    const r = await api("create", { token: AUTH.token, title: $("cTitle").value });
-    await enterSession(r);
-    toast("Hovor je založený. PIN <b>" + r.pin + "</b> pošli účastníkům.", { ms: 9000, acts: [{ t: "Zkopírovat pozvánku", cls: "ok", f: () => setTimeout(copyInvite, 300) }] });
-  } catch (e) { lobErr(e.message); } finally { busy(btn, false); }
-}
-async function doJoin(pinArg) {
+function busy(btn, on) { if (!btn) return; btn.disabled = on; if (on) { btn.dataset.t = btn.textContent; btn.textContent = "Chvilku…"; } else if (btn.dataset.t) btn.textContent = btn.dataset.t; }
+async function doJoin(room, btn) {
   lobErr("");
-  const pin = String(pinArg || $("jPin").value).replace(/\D/g, "");
-  if (pin.length !== 6) { lobErr("PIN má 6 číslic."); return; }
   if (!AUTH) { needIS(); return; }
-  const btn = $("jGo"); busy(btn, true);
+  busy(btn, true);
   try {
-    const r = await api("join", { pin, token: AUTH.token });
+    const r = await api("join", { room, token: AUTH.token });
+    clearTimeout(RTIMER);
     await enterSession(r);
-  } catch (e) { lobErr(e.message); } finally { busy(btn, false); }
+  } catch (e) { lobErr(e.message); roomsLoop(); } finally { busy(btn, false); }
 }
 
 /* ---------- ovládání ---------- */
@@ -1340,13 +1401,9 @@ function bind() {
   $("selCam").onchange = e => switchDevice("cam", e.target.value);
   $("selMic").onchange = e => switchDevice("mic", e.target.value);
   $("selSpk").onchange = e => switchDevice("spk", e.target.value);
-  $("cGo").onclick = () => doCreate();
-  $("jGo").onclick = () => doJoin();
-  $("jPin").addEventListener("input", e => { const d = e.target.value.replace(/\D/g, "").slice(0, 6); e.target.value = d; });
-  $("jPin").addEventListener("keydown", e => { if (e.key === "Enter") doJoin(); });
   $("wCancel").onclick = () => leaveCall("cancel");
-  $("endAgain").onclick = () => { if (!AUTH) { needIS(); return; } renderLobby(); $("jPin").value = $("endAgain").dataset.pin || ""; if (!L.micTrack && !L.camTrack && !L.blocked) initMedia().then(renderLobbyControls); };
-  $("endHome").onclick = () => { if (EMBED && AUTH) { renderLobby(); if (!L.micTrack && !L.camTrack) initMedia().then(renderLobbyControls); } else { try { window.top.location.href = CFG.isUrl; } catch (e) { location.href = CFG.isUrl; } } };
+  $("endAgain").onclick = () => { if (!AUTH) { needIS(); return; } goLobby(); };
+  $("endHome").onclick = () => { try { window.top.location.href = CFG.isUrl; } catch (e) { location.href = CFG.isUrl; } };
   $("bMic").onclick = toggleMic; $("bCam").onclick = toggleCam;
   $("bShare").onclick = () => L.screen ? stopShare() : (canShare() ? startShare() : toast("Sdílení obrazovky hostitel vypnul."));
   $("bHand").onclick = () => setHand(!SESS.hand);
@@ -1358,7 +1415,6 @@ function bind() {
   $("sideX").onclick = () => openSide(SIDE);
   $("chatSend").onclick = sendChat;
   $("chatTxt").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } });
-  $("pinChip").onclick = copyInvite;
   document.addEventListener("keydown", e => {
     if (!SESS || SESS.status !== "member" || e.ctrlKey || e.metaKey || e.altKey) return;
     if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || "")) return;
@@ -1374,7 +1430,7 @@ function bind() {
 async function boot() {
   bind();
   if (EMBED) document.querySelector("#lobby .top").classList.add("hide");   /* v IS je nahoře lišta IS se jménem */
-  if (Q.get("pin")) $("jPin").value = Q.get("pin").replace(/\D/g, "").slice(0, 6);
+  if (Q.get("room")) WANT = Q.get("room");
   /* přenos z okna IS do samostatného okna */
   const tk = /#tk=([A-Za-z0-9]+)/.exec(location.hash);
   if (tk) {
@@ -1419,7 +1475,6 @@ async function startLobby() {
   await renderLobby();
   if (!lobbyStarted) { lobbyStarted = true; await initMedia(); }
   renderLobbyControls();
-  if ($("jPin").value.length === 6 && !AUTH.who.staff) $("jGo").focus();
 }
 boot();
 </script>
