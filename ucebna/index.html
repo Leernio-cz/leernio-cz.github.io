@@ -1014,6 +1014,20 @@ async function api(action,payload={}){
   return j.data;
 }
 const SRV_NEED = '2026-11-13g';
+const PAGE_VER = '2026-11-13h';
+/* automatická aktualizace: když je na GitHubu novější index.html, stránka se sama znovu načte
+   (nová adresa s ?v=… obejde mezipaměť prohlížeče, IS po načtení znovu pošle přihlášení) */
+async function checkUpdate(){
+  try {
+    const r = await fetch(location.pathname + '?chk=' + Date.now(), {cache:'no-store'});
+    const m = /const PAGE_VER = '([^']+)'/.exec(await r.text());
+    if(!m || m[1] === PAGE_VER) return;
+    const q = new URLSearchParams(location.search); if(q.get('v') === m[1]) return;   /* už jsme to zkoušeli, nezacyklit */
+    if(saving || dirty || M || uplBusy('pend')) { setTimeout(checkUpdate, 30000); return; }
+    q.set('v', m[1]); location.replace(location.pathname + '?' + q.toString());
+  } catch(e){}
+}
+setTimeout(checkUpdate, 3000); setInterval(checkUpdate, 10*60000);
 const COLMAP = {users:'users',rooms:'rooms',chapters:'chapters',items:'items',posts:'posts',grades:'grades',submissions:'subs',testResults:'results'};
 const ORDER = ['users','rooms','chapters','items','posts','grades','submissions','testResults'];
 let SNAP = {}, saving = false, dirty = false, saveTimer = null, lastViewJSON = '';
