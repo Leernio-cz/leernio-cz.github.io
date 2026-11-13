@@ -129,6 +129,10 @@ input[type=checkbox],input[type=radio]{width:auto;accent-color:var(--b6)}
 .annc{display:flex;align-items:center;gap:14px;padding:14px 18px;cursor:pointer}
 .annc:hover{background:#fafcff}
 .lesson{border-left:4px solid #059669}
+.sech{display:flex;align-items:baseline;gap:10px;margin:6px 2px 12px;flex-wrap:wrap}.sech h2{display:flex;align-items:center;gap:8px;font-size:17px;color:var(--b8)}
+.lchap{border-left:4px solid #059669}.ldate{font-weight:700;color:#047857;font-size:14px;white-space:nowrap}
+.linfo{padding:12px 16px 14px;border-bottom:1px solid var(--line)}.linfo .lbody{margin-top:10px}
+.rf .iconbtn{color:var(--mut)}.rf .iconbtn:hover{color:var(--b7)}
 .lbody{margin:12px 0 0;padding:12px 14px;background:#f8fafc;border-radius:8px}
 .hwlink{margin-top:10px;display:flex;align-items:center;gap:8px;padding:10px 12px;border:1px dashed #fdba74;border-radius:8px;color:#9a3412;cursor:pointer;background:#fff7ed}
 /* classwork */
@@ -515,7 +519,7 @@ function roomCard(r,u){
     const nItems = S.items.filter(i=>i.roomId===r.id).length;
     body = `<div class="row" style="flex-wrap:wrap;gap:6px"><span class="chip">${r.studentIds.length} ${r.studentIds.length===1?'student':r.studentIds.length<5&&r.studentIds.length>0?'studenti':'studentů'}</span><span class="chip">${nItems} položek</span>${toGrade?`<span class="chip amber">${toGrade} k ohodnocení</span>`:''}${r.auto!==false?`<span class="chip blue" title="Členové se synchronizují z IS">${ic('bolt',12)}auto</span>`:''}</div>`;
   }
-  return `<div class="card rcard" data-act="open-room" data-id="${r.id}"><div class="bn pat" style="${roomStyle(r)}"><h3>${esc(r.name)}</h3><div class="sub">${esc(r.subjectId||'')} · ${esc(r.section||'')}</div>${t[0]?`<div class="bav">${av(t[0],62)}</div>`:''}</div><div class="rb">${body}</div><div class="rf"><span class="iconbtn s" title="Výuka">${ic('folder',18)}</span><span class="iconbtn s" title="Hodnocení">${ic('award',18)}</span></div></div>`;
+  return `<div class="card rcard" data-act="open-room" data-id="${r.id}"><div class="bn pat" style="${roomStyle(r)}"><h3>${esc(r.name)}</h3><div class="sub">${esc(r.subjectId||'')} · ${esc(r.section||'')}</div>${t[0]?`<div class="bav">${av(t[0],62)}</div>`:''}</div><div class="rb">${body}</div><div class="rf"><button type="button" class="iconbtn s" data-act="open-room-tab" data-id="${r.id}|work" title="Výuka" aria-label="Výuka">${ic('folder',18)}</button><button type="button" class="iconbtn s" data-act="open-room-tab" data-id="${r.id}|grades" title="${u.role==='student'?'Moje hodnocení':'Hodnocení'}" aria-label="Hodnocení">${ic('award',18)}</button></div></div>`;
 }
 
 /* ---------- room ---------- */
@@ -539,7 +543,8 @@ function tStream(r,u,ed){
   const comp = ed ? `<form class="card pad composer" data-form="post" data-id="${r.id}" style="margin-bottom:14px"><div class="row">${av(u,36)}<textarea name="text" placeholder="Oznamte něco své učebně…" required></textarea></div><div class="row end"><select name="to" style="width:auto;max-width:220px">${audienceOpts(r)}</select><button class="btn pri sm">${ic('mega',16)}Zveřejnit</button></div></form>` : '';
   const entries = [];
   S.posts.filter(p => p.roomId===r.id && (ed || !p.studentId || p.studentId===u.id)).forEach(p => entries.push({t:p.createdAt,h:postCard(p,ed)}));
-  S.items.filter(i => i.roomId===r.id && canSee(i,u)).forEach(i => entries.push({t:i.createdAt,h: i.kind==='lesson' ? lessonCard(i,ed) : annCard(i,ed)}));
+  S.items.filter(i => i.roomId===r.id && canSee(i,u) && !i.fromLesson).forEach(i => entries.push({t:i.createdAt,h: i.kind==='lesson' ? lessonCard(i,ed) : annCard(i,ed)}));
+  S.chapters.filter(c => c.roomId===r.id && c.lesson && !c.lesson.removed).forEach(c => entries.push({t:c.lesson.ts||0,h:lessonChapterCard(c,ed)}));
   entries.sort((a,b)=>b.t-a.t);
   return banner + `<div class="cols s"><div>${left}</div><div>${comp}<div class="feed">${entries.length?entries.map(e=>e.h).join(''):`<div class="card">${empty('Zatím tu nic není','Oznámení, nové materiály a zápisy z hodin se zobrazí zde.','mega')}</div>`}</div></div></div>`;
 }
@@ -552,6 +557,11 @@ function annCard(i,ed){
   const verb = {material:'nový materiál',task:'nový úkol',test:'nový test'}[i.kind];
   return `<div class="card annc" data-act="open-item" data-id="${i.id}">${kIcon(i.kind,40)}<div class="grow"><div>${esc(a?a.name:'Učitel')} zveřejnil(a) ${verb}: <b>${esc(i.title)}</b></div><div class="mut xs">${fmtD(i.createdAt)}${i.due?' · termín '+fmtDT(i.due):''} ${ed?targetChip(i):''}</div></div></div>`;
 }
+function lessonChapterCard(c,ed){
+  const L = c.lesson, hw = S.items.find(i => i.fromLesson && i.lessonChapterId===c.id);
+  const extra = S.items.filter(i => i.chapterId===c.id && !i.fromLesson).length;
+  return `<div class="card pad lesson"><div class="row">${kIcon('lesson',40)}<div class="grow"><b>${esc(c.title)}</b><div class="mut xs">${esc(lesDate(L))} · ${esc((L.a||'')+(L.b?'–'+L.b:''))} · ${esc(uname(L.teacherId))}${ed?` · <span class="chip violet">${esc(uname(c.studentId))}</span>`:''}</div></div></div>${L.c?`<div class="lbody">${linkify(L.c)}</div>`:''}${hw?`<div class="hwlink" data-act="open-item" data-id="${hw.id}">${ic('task',18)}<span>Domácí úkol: <b>${esc(hw.body.length>120?hw.body.slice(0,117)+'…':hw.body)}</b>${hw.due?' · odevzdat do '+fmtDT(hw.due):''}</span></div>`:''}<div class="row end" style="margin-top:10px">${extra?`<span class="mut xs">+ ${extra} ${extra===1?'položka':extra<5?'položky':'položek'} od učitele</span>`:''}<button class="btn sm" data-act="open-lesson" data-id="${c.id}">${ic('folder',16)}Otevřít hodinu</button></div></div>`;
+}
 function lessonCard(i,ed){
   const hw = i.homeworkId && I(i.homeworkId);
   return `<div class="card pad lesson"><div class="row">${kIcon('lesson',40)}<div class="grow"><b>${esc(i.title)}</b><div class="mut xs">Zápis z hodiny ${fmtD(i.lessonDate)} · ${esc(uname(i.authorId))} ${i.source==='is'?'<span class="chip blue">z kalendáře IS</span>':''} ${ed?targetChip(i):''}</div></div><button class="iconbtn s" data-act="open-item" data-id="${i.id}" title="Otevřít">${ic('chev',16)}</button></div>${i.body?`<div class="lbody">${nl(i.body)}</div>`:''}${attList(i.attachments)}${hw?`<div class="hwlink" data-act="open-item" data-id="${hw.id}">${ic('task',18)}<span>Domácí úkol: <b>${esc(hw.title)}</b>${hw.due?' · odevzdat do '+fmtDT(hw.due):''}</span></div>`:''}</div>`;
@@ -559,25 +569,37 @@ function lessonCard(i,ed){
 
 function tWork(r,u,ed){
   const scope = ed ? (ui.scope==='all' || r.studentIds.includes(ui.scope) ? ui.scope : 'all') : u.id;
-  const chs = S.chapters.filter(c => c.roomId===r.id && (scope==='all' ? !c.studentId : (!c.studentId || c.studentId===scope))).sort((a,b)=>a.order-b.order);
+  const chs = S.chapters.filter(c => c.roomId===r.id && !c.lesson && (scope==='all' ? !c.studentId : (!c.studentId || c.studentId===scope))).sort((a,b)=>a.order-b.order);
+  const lchs = S.chapters.filter(c => c.roomId===r.id && c.lesson && (scope==='all' || c.studentId===scope)).sort((a,b)=>(b.lesson.ts||0)-(a.lesson.ts||0));
   const items = S.items.filter(i => i.roomId===r.id && (scope==='all' ? true : seesAsStudent(i,scope)));
-  const toolbar = ed ? `<div class="row" style="margin-bottom:16px;flex-wrap:wrap"><details class="menu"><summary class="btn pri">${ic('plus',18)}Vytvořit</summary><div class="mlist">${['material','task','test'].map(k=>`<button data-act="item-new" data-id="${k}">${kIcon(k,28)}${KIND[k].l}</button>`).join('')}<button data-act="item-new" data-id="lesson">${kIcon('lesson',28)}Zápis hodiny (ručně)</button><hr><button data-act="ch-new">${ic('folder')}Kapitola</button></div></details><div class="spacer"></div>${scope!=='all'?`<span class="chip violet">Pohled studenta: ${esc(uname(scope))}</span>`:''}</div>` : '';
+  const toolbar = ed ? `<div class="row" style="margin-bottom:16px;flex-wrap:wrap"><details class="menu"><summary class="btn pri">${ic('plus',18)}Vytvořit</summary><div class="mlist">${['material','task','test'].map(k=>`<button data-act="item-new" data-id="${k}">${kIcon(k,28)}${KIND[k].l}</button>`).join('')}<hr><button data-act="ch-new">${ic('folder')}Kapitola</button></div></details><div class="spacer"></div>${scope!=='all'?`<span class="chip violet">Pohled studenta: ${esc(uname(scope))}</span>`:''}</div>` : '';
   let h = '';
   const loose = items.filter(i => !i.chapterId || !CHP(i.chapterId));
   if(loose.length) h += chapterBlock(null,loose,r,u,ed);
+  if(lchs.length) h += `<div class="sech"><h2>${ic('cal',20)}Hodiny</h2><span class="mut xs">zápisy z kalendáře IS · nejnovější nahoře</span></div>` + lchs.map((c,idx) => chapterBlock(c,items.filter(i=>i.chapterId===c.id),r,u,ed,idx>=3)).join('');
+  if(chs.length && lchs.length) h += `<div class="sech"><h2>${ic('folder',20)}Témata a materiály</h2></div>`;
   h += chs.map(c => chapterBlock(c,items.filter(i=>i.chapterId===c.id),r,u,ed)).join('');
   if(!h) h = `<div class="card">${empty(ed?'Začněte vytvořením kapitoly':'Učitel sem zatím nic nepřidal', ed?(scope==='all'?'Kapitoly si pojmenujte podle sebe – např. „1. Zlomky“ nebo „Opakování před testem“. Do nich pak přidávejte materiály, úkoly a testy.':'Vytvořte individuální kapitolu jen pro tohoto studenta.'):'','folder')}</div>`;
   if(!ed) return h;
   const side = `<div class="card scope"><h4>Rozdělení podle studentů</h4>${[['all','Celá učebna',null],...r.studentIds.map(s=>[s,uname(s),U(s)])].map(([k,l,us])=>`<div class="sitem ${scope===k?'on':''}" data-act="scope" data-id="${k}">${us?av(us,26):`<div class="av" style="background:var(--b6);width:26px;height:26px">${ic('users',14)}</div>`}<span class="ell">${esc(l)}</span>${us?`<span class="spacer"></span><span class="mut xs">${S.chapters.filter(c=>c.roomId===r.id&&c.studentId===k).length||''}</span>`:''}</div>`).join('')}<p class="mut xs">„Celá učebna“ = společné kapitoly. U každého studenta vidíte jeho individuální kapitoly i to, co z celé učebny vidí.</p></div>`;
   return `<div class="cols"><div>${side}</div><div>${toolbar}${h}</div></div>`;
 }
-function chapterBlock(c,its,r,u,ed){
-  its = its.filter(i => canSee(i,u)).sort((a,b)=>b.createdAt-a.createdAt);
-  const key = c ? c.id : 'none-'+r.id; const closed = ui.closed[key];
-  const badge = c && ed ? (c.studentId ? `<span class="chip violet">Individuální · ${esc(uname(c.studentId))}</span>` : `<span class="chip">Celá učebna</span>`) : '';
-  const acts = ed && c ? `<div class="acts"><button class="iconbtn s" data-act="ch-add" data-id="${c.id}" title="Přidat do kapitoly">${ic('plus',17)}</button><button class="iconbtn s hide-sm" data-act="ch-up" data-id="${c.id}" title="Posunout nahoru">${ic('up',16)}</button><button class="iconbtn s hide-sm" data-act="ch-down" data-id="${c.id}" title="Posunout dolů">${ic('down',16)}</button><button class="iconbtn s" data-act="ch-edit" data-id="${c.id}" title="Přejmenovat">${ic('edit',16)}</button><button class="iconbtn s" data-act="ch-del" data-id="${c.id}" title="Smazat kapitolu">${ic('trash',16)}</button></div>` : '';
-  const rows = closed ? '' : (its.length ? its.map(i => itemRow(i,u,ed)).join('') : `<div class="irow noitem">V kapitole zatím nic není.</div>`);
-  return `<section class="card chap"><div class="chh"><div class="cht" data-act="ch-toggle" data-id="${key}">${ic(closed?'chev':'chevd',18)}<h3>${esc(c?c.title:'Bez kapitoly')}</h3>${badge}</div>${acts}</div>${rows}</section>`;
+function chapterBlock(c,its,r,u,ed,defClosed){
+  its = its.filter(i => canSee(i,u)).sort((a,b)=>(b.fromLesson?1:0)-(a.fromLesson?1:0) || b.createdAt-a.createdAt);
+  const key = c ? c.id : 'none-'+r.id; const closed = ui.closed[key]===undefined ? !!defClosed : ui.closed[key];
+  const L = c && c.lesson;
+  const badge = L ? `${ed?`<span class="chip violet">${esc(uname(c.studentId))}</span>`:''}${L.removed?'<span class="chip red">Smazáno v IS</span>':''}` : c && ed ? (c.studentId ? `<span class="chip violet">Individuální · ${esc(uname(c.studentId))}</span>` : `<span class="chip">Celá učebna</span>`) : '';
+  const acts = ed && c ? `<div class="acts"><button class="iconbtn s" data-act="ch-add" data-id="${c.id}" title="Přidat do kapitoly">${ic('plus',17)}</button>${L?'':`<button class="iconbtn s hide-sm" data-act="ch-up" data-id="${c.id}" title="Posunout nahoru">${ic('up',16)}</button><button class="iconbtn s hide-sm" data-act="ch-down" data-id="${c.id}" title="Posunout dolů">${ic('down',16)}</button>`}<button class="iconbtn s" data-act="ch-edit" data-id="${c.id}" title="Přejmenovat">${ic('edit',16)}</button><button class="iconbtn s" data-act="ch-del" data-id="${c.id}" title="Smazat kapitolu">${ic('trash',16)}</button></div>` : '';
+  const info = L && !closed ? lessonInfo(L) : '';
+  const rows = closed ? '' : (its.length ? its.map(i => itemRow(i,u,ed)).join('') : (L ? '' : `<div class="irow noitem">V kapitole zatím nic není.</div>`));
+  return `<section class="card chap${L?' lchap':''}" id="ch-${c?c.id:key}"><div class="chh"><div class="cht" data-act="ch-toggle" data-id="${key}">${ic(closed?'chev':'chevd',18)}${L&&c.autoTitle===false?`<span class="ldate">${esc(lesDate(L,true))}</span>`:''}<h3>${esc(c?c.title:'Bez kapitoly')}</h3>${badge}</div>${acts}</div>${info}${rows}</section>`;
+}
+const DOWS = ['neděle','pondělí','úterý','středa','čtvrtek','pátek','sobota'];
+function lesDate(L,short){ const p=String(L.date||'').split('-'); if(p.length!==3) return L.date||''; const d=new Date(+p[0],+p[1]-1,+p[2]); return short ? `${+p[2]}. ${+p[1]}.` : `${DOWS[d.getDay()]} ${+p[2]}. ${+p[1]}. ${p[0]}`; }
+const linkify = t => nl(t).replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?)])/g, m => `<a href="${m}" target="_blank" rel="noopener">${m}</a>`);
+function lessonInfo(L){
+  const time = (L.a||'') + (L.b?'–'+L.b:'') + (L.m?` · ${L.m} min`:'');
+  return `<div class="linfo"><div class="row" style="flex-wrap:wrap;gap:6px">${ic('cal',16)}<b>${esc(lesDate(L))}</b><span class="mut">${esc(time)}</span>${String(L.sj||'').split(/[,;\s]+/).filter(Boolean).map(x=>`<span class="chip blue">${esc(x)}</span>`).join('')}<span class="spacer"></span><span class="chip">z kalendáře IS</span></div>${L.c?`<div class="lbody"><div class="mut xs" style="margin-bottom:4px">Náplň hodiny</div>${linkify(L.c)}</div>`:''}</div>`;
 }
 function itemRow(i,u,ed){
   let right = '';
@@ -586,7 +608,7 @@ function itemRow(i,u,ed){
       right = `${tg?`<span class="chip amber hide-sm">${tg} k ohodnocení</span>`:''}<span class="chip">${done}/${as.length} ${i.kind==='task'?'odevzdáno':'splněno'}</span>`; }
     else { const st = status(i,u.id); right = `<span class="chip ${st.c}">${st.t}</span>`; }
   }
-  const meta = i.kind==='lesson' ? 'Hodina '+fmtD(i.lessonDate) : i.due ? 'Termín: '+fmtDT(i.due) : 'Zveřejněno '+fmtD(i.createdAt);
+  const meta = i.kind==='lesson' ? 'Hodina '+fmtD(i.lessonDate) : i.due ? (i.fromLesson&&i.autoDue!==false?'Do další hodiny: ':'Termín: ')+fmtDT(i.due) : i.fromLesson ? 'Domácí úkol z hodiny' : 'Zveřejněno '+fmtD(i.createdAt);
   const extra = [(i.attachments||[]).length?`${i.attachments.length} soub.`:'',(i.links||[]).length?`${i.links.length} odkaz${i.links.length>1?'y':''}`:''].filter(Boolean).join(' · ');
   return `<div class="irow" data-act="open-item" data-id="${i.id}">${kIcon(i.kind)}<div class="grow"><div class="it ell">${esc(i.title)}</div><div class="mut xs">${KIND[i.kind].l} · ${meta}${extra?' · '+extra:''} ${ed?targetChip(i):''}</div></div>${right}${ed?`<button class="iconbtn s" data-act="item-edit" data-id="${i.id}" title="Upravit">${ic('edit',16)}</button>`:''}</div>`;
 }
@@ -601,7 +623,7 @@ function tPeople(r,u,ed){
 
 function tGrades(r,u,ed){
   if(!ed) return studentCard(r,u.id,false);
-  const cols = S.items.filter(i => i.roomId===r.id && (i.kind==='task'||i.kind==='test')).sort((a,b)=>(a.due||a.createdAt)-(b.due||b.createdAt));
+  const cols = S.items.filter(i => i.roomId===r.id && (i.kind==='task'||i.kind==='test') && (!i.fromLesson || i.maxPoints || r.studentIds.some(s => { const x = resultOf(i,s); return x && (x.p!=null || x.g); }))).sort((a,b)=>(a.due||a.createdAt)-(b.due||b.createdAt));
   if(!r.studentIds.length) return `<div class="card">${empty('V učebně nejsou žádní studenti','','users')}</div>`;
   const head = `<tr><th>Student</th>${cols.map(c=>`<th class="col"><a class="lnk sm" data-act="open-item" data-id="${c.id}" style="padding:0">${esc(c.title)}</a><div class="mut xs">${KIND[c.kind].l}${c.due?' · '+fmtD(c.due):''}${c.maxPoints?' · z '+c.maxPoints:''}</div></th>`).join('')}<th>Body</th><th>Průměr</th></tr>`;
   const rows = r.studentIds.map(sid => {
@@ -646,7 +668,7 @@ function vItem(u){
   const head = `<div class="ihead">${kIcon(it.kind,46)}<div class="grow"><h1>${esc(it.title)}</h1><div class="mut sm">${esc(auth?auth.name:'')} · ${it.kind==='lesson'?'hodina '+fmtD(it.lessonDate):fmtD(it.createdAt)}${it.editedAt?' (upraveno)':''} ${it.source==='is'?'<span class="chip blue">z kalendáře IS</span>':''}</div><div class="row sp" style="margin-top:10px;flex-wrap:wrap">${it.maxPoints?`<b>${it.maxPoints} bodů</b>`:'<span></span>'}${it.due?`<b>Termín: ${fmtDT(it.due)}</b>`:''}</div></div>${ed?`<div class="acts"><button class="iconbtn" data-act="item-edit" data-id="${it.id}" title="Upravit">${ic('edit',18)}</button><button class="iconbtn" data-act="item-del" data-id="${it.id}" title="Smazat">${ic('trash',18)}</button></div>`:''}</div>`;
   const hw = it.kind==='lesson' && it.homeworkId && I(it.homeworkId);
   const les = it.lessonId && I(it.lessonId);
-  let main = `<div class="card pad">${head}<hr>${it.body?`<div class="body">${nl(it.body)}</div>`:''}${attList(it.attachments)}${linkList(it.links)}${it.kind==='test'?testBox(it,u,ed):''}${hw?`<div class="hwlink" data-act="open-item" data-id="${hw.id}">${ic('task',18)}<span>Domácí úkol z hodiny: <b>${esc(hw.title)}</b></span></div>`:''}${les&&canSee(les,u)?`<p class="sm"><a class="lnk" data-act="open-item" data-id="${les.id}">${ic('cal',14)} Zadáno v hodině ${fmtD(les.lessonDate)}</a></p>`:''}${ed?`<hr><p class="mut xs" style="margin:0">Vidí: ${assignees(it).map(s=>esc(uname(s))).join(', ')||'zatím nikdo'}</p>`:''}</div>`;
+  let main = `<div class="card pad">${head}<hr>${it.body?`<div class="body">${nl(it.body)}</div>`:''}${attList(it.attachments)}${linkList(it.links)}${it.kind==='test'?testBox(it,u,ed):''}${hw?`<div class="hwlink" data-act="open-item" data-id="${hw.id}">${ic('task',18)}<span>Domácí úkol z hodiny: <b>${esc(hw.title)}</b></span></div>`:''}${it.fromLesson&&CHP(it.lessonChapterId)?`<p class="sm"><a class="lnk" data-act="open-lesson" data-id="${it.lessonChapterId}">${ic('cal',14)} Zadáno v hodině ${esc(lesDate(CHP(it.lessonChapterId).lesson))}${it.autoDue!==false?' · termín odevzdání je začátek další hodiny':''}</a></p>`:''}${les&&canSee(les,u)?`<p class="sm"><a class="lnk" data-act="open-item" data-id="${les.id}">${ic('cal',14)} Zadáno v hodině ${fmtD(les.lessonDate)}</a></p>`:''}${ed?`<hr><p class="mut xs" style="margin:0">Vidí: ${assignees(it).map(s=>esc(uname(s))).join(', ')||'zatím nikdo'}</p>`:''}</div>`;
   const side = !ed && it.kind==='task' ? yourWork(it,u) : '';
   return sub + `<div class="wrap">${back}<div class="${side?'icols':''}"><div>${main}</div>${side?`<div>${side}</div>`:''}</div></div>`;
 }
@@ -815,7 +837,7 @@ function saveItem(f,existing,r){
 function chapterModal(c){
   const r = R(c ? c.roomId : ui.roomId);
   const def = c ? c.studentId : (ui.scope!=='all' && r.studentIds.includes(ui.scope) ? ui.scope : '');
-  openModal(c?'Upravit kapitolu':'Nová kapitola',`<div class="field"><label>Název kapitoly *</label><input name="title" required value="${esc(c?c.title:'')}" placeholder="např. 3. Procenta, Repertoár, Opakování před testem"></div><div class="field"><label>Kapitola pro</label><select name="studentId"><option value="">Celou učebnu (všichni studenti)</option>${r.studentIds.map(s=>`<option value="${s}" ${def===s?'selected':''}>Individuálně: ${esc(uname(s))}</option>`).join('')}</select></div>`,{submit:c?'Uložit':'Vytvořit',onSubmit:f=>{
+  openModal(c?'Upravit kapitolu':'Nová kapitola',`<div class="field"><label>Název kapitoly *</label><input name="title" required value="${esc(c?c.title:'')}" placeholder="např. 3. Procenta, Repertoár, Opakování před testem"></div>${c&&c.lesson?`<p class="mut xs" style="margin:0">Kapitola vznikla ze zápisu hodiny v IS. Náplň a domácí úkol se dál propisují z IS, název už zůstane váš.</p><input type="hidden" name="studentId" value="${esc(c.studentId)}">`:`<div class="field"><label>Kapitola pro</label><select name="studentId"><option value="">Celou učebnu (všichni studenti)</option>${r.studentIds.map(s=>`<option value="${s}" ${def===s?'selected':''}>Individuálně: ${esc(uname(s))}</option>`).join('')}</select></div>`}`,{submit:c?'Uložit':'Vytvořit',onSubmit:f=>{
     const fd = new FormData(f); const title = (fd.get('title')||'').toString().trim(); if(!title){toast('Vyplňte název');return false;}
     if(c){ c.title = title; c.studentId = fd.get('studentId')||null; }
     else { const max = Math.max(0,...S.chapters.filter(x=>x.roomId===r.id).map(x=>x.order)); S.chapters.push({id:uid('c'),roomId:r.id,title,order:max+1,studentId:fd.get('studentId')||null}); }
@@ -947,13 +969,14 @@ async function flush(){
     const res = await api('batch',{ops});
     if(res.rejected && res.rejected.length) toast('Některé změny se neuložily: '+res.rejected[0].error);
     if(dirty){ SNAP = snapOf({users:res.view.users,rooms:res.view.rooms,chapters:res.view.chapters,items:res.view.items,posts:res.view.posts,grades:res.view.grades,submissions:res.view.subs,testResults:res.view.results}); lastViewJSON = JSON.stringify(res.view); }
-    else { applyView(res.view); if(!M) render(); }
+    else { applyView(res.view); if(!M && !typing()) render(); }
     send('changed',{at:Date.now()});
   } catch(err){
     dirty = true;
     if(err.code!=='auth'){ toast('Změny se zatím neuložily – zkusím to znovu. ('+err.message+')'); setTimeout(flush, 8000); }
   } finally { saving = false; setSaving(false); if(dirty) setTimeout(flush, 300); }
 }
+const typing = () => !!(document.activeElement && /INPUT|TEXTAREA|SELECT/.test(document.activeElement.tagName) && !document.activeElement.closest('.modal'));
 function setSaving(on){ const el = document.getElementById('savest'); if(el) el.textContent = on ? 'Ukládám…' : ''; }
 async function refresh(force){
   if(!bridge.authed || saving || dirty) return;
@@ -1011,6 +1034,20 @@ const fold = t => String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').
 const flipName = n => { const p = String(n||'').trim().split(/\s+/); return p.length>1 ? p.slice(1).join(' ')+' '+p[0] : String(n||''); };
 function renameUser(oldId,newId){ if(oldId===newId || U(newId)) return; S = JSON.parse(JSON.stringify(S).split('"'+oldId+'"').join('"'+newId+'"')); }
 /* přihlášení: IS pošle omezený klíč (ap1.…), Učebna ho ověří u serveru IS akcí "me" */
+/* zápisy hodin: IS dá vědět (is:lessons / is:lesson / is:lessonDelete), Učebna si je nechá načíst serverem přímo z IS */
+let pullTimer = null;
+const lessonSig = () => S.chapters.filter(c=>c.lesson).map(c=>c.id+':'+(c.lesson.sig||'')+(c.lesson.removed?'x':'')).sort().join('|');
+function queuePull(){ clearTimeout(pullTimer); pullTimer = setTimeout(doPull, 1500); }
+async function doPull(){
+  if(!bridge.authed) return;
+  if(saving || dirty){ pullTimer = setTimeout(doPull, 2000); return; }
+  try {
+    const before = lessonSig(); const v = await api('load',{pull:true});
+    if(saving || dirty) return;
+    applyView(v); if(!M && !typing()) render();
+    if(before && before !== lessonSig()) toast('Zápisy hodin z IS aktualizovány');
+  } catch(e){}
+}
 async function login(token){
   if(!/^[A-Za-z0-9._-]{8,300}$/.test(String(token||''))){ bridge.state='error'; bridge.err='Neplatný přihlašovací klíč.'; render(); send('auth-error',{error:bridge.err}); return; }
   const silent = !!me;
@@ -1042,8 +1079,7 @@ window.addEventListener('message', e => {
         if(!staff) return;
         api('sync',{users:Array.isArray(d.users)?d.users:null,tests:Array.isArray(d.tests)?d.tests:null}).then(r=>{ if(!dirty&&!saving){ applyView(r.view); render(); } }).catch(()=>{});
         break; }
-      case 'lesson': if(staff) handleLesson(d.lesson); break;
-      case 'lessonDelete': { if(!staff) return; const l = S.items.find(i=>i.isId===d.id); if(l){ S.items = S.items.filter(i=>i.id!==l.id); changed(); } break; }
+      case 'lessons': case 'lesson': case 'lessonDelete': queuePull(); break;
       case 'testResult': if(staff) handleTestResult(d.result); break;
       case 'navigate': if(d.roomId && R(d.roomId)){ ui.view='room'; ui.roomId=d.roomId; ui.tab=d.tab||'stream'; render(); } break;
     }
@@ -1059,6 +1095,8 @@ const ACT = {
   'admin-tab':id=>go({adminTab:id}),
   'toggle-side':()=>{ ui.sidebar=!ui.sidebar; render(); },
   'open-room':id=>go({view:'room',roomId:id,tab:'stream',scope:'all'}),
+  'open-room-tab':id=>{ const [rid,tab]=id.split('|'); go({view:'room',roomId:rid,tab:tab||'stream',scope:'all'}); },
+  'open-lesson':id=>{ const c=CHP(id); if(!c) return; const u=cur(); ui.closed[c.id]=false; go({view:'room',roomId:c.roomId,tab:'work',scope: canEdit(R(c.roomId),u) ? (c.studentId||'all') : 'all'}); setTimeout(()=>{ const el=document.getElementById('ch-'+c.id); if(el) el.scrollIntoView({block:'start',behavior:'smooth'}); },60); },
   'tab':id=>go({view:'room',tab:id}),
   'scope':id=>go({scope:id}),
   'open-item':id=>{ const it=I(id); if(it) go({view:'item',itemId:id,roomId:it.roomId,subTab:'zadani'}); },
@@ -1074,7 +1112,7 @@ const ACT = {
   'ch-new':()=>{ closeMenus(); chapterModal(); },
   'ch-edit':id=>chapterModal(CHP(id)),
   'ch-add':id=>itemModal('material',null,id),
-  'ch-del':id=>{ const c=CHP(id); confirmBox(`Smazat kapitolu „${esc(c.title)}“? Položky v ní zůstanou v sekci „Bez kapitoly“.`,()=>{ S.chapters=S.chapters.filter(x=>x.id!==id); S.items.forEach(i=>{ if(i.chapterId===id) i.chapterId=null; }); changed(); }); },
+  'ch-del':id=>{ const c=CHP(id); confirmBox(c.lesson?`Smazat hodinu „${esc(c.title)}“ z Učebny? Z IS se už znovu nevytvoří. Domácí úkol bez odevzdání se smaže, ostatní položky přejdou do „Bez kapitoly“.`:`Smazat kapitolu „${esc(c.title)}“? Položky v ní zůstanou v sekci „Bez kapitoly“.`,()=>{ S.chapters=S.chapters.filter(x=>x.id!==id); S.items.forEach(i=>{ if(i.chapterId===id) i.chapterId=null; }); changed(); }); },
   'ch-up':id=>moveCh(id,-1), 'ch-down':id=>moveCh(id,1),
   'ch-toggle':id=>{ ui.closed[id]=!ui.closed[id]; render(); },
   'preview':id=>previewAtt(id),
@@ -1112,7 +1150,7 @@ document.addEventListener('input', e => { if(e.target.name==='colorCustom' || e.
 const closeMenus = () => document.querySelectorAll('details.menu[open]').forEach(d=>d.open=false);
 const CHG = {
   'sub-file':async (id,el)=>{ const files = await readFiles(el.files); const s = getSub(id,me); s.attachments = (s.attachments||[]).concat(files); const ta=document.querySelector(`textarea[data-change="sub-text"][data-id="${id}"]`); if(ta) s.text=ta.value; changed(); toast(files.length+' soubor(ů) přidáno'); },
-  'sub-text':(id,el)=>{ const s = getSub(id,me); s.text = el.value; changed(); },
+  'sub-text':(id,el)=>{ const s = getSub(id,me); s.text = el.value; dirty = true; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 250); },
   'pend-file':async (id,el)=>{ const files = await readFiles(el.files); PEND = PEND.concat(files); $('#pend').innerHTML = pendHtml(); el.value=''; },
   'theme-prev':(id,el)=>updateThemePreview(el.form),
   'theme-custom':(id,el)=>{ const rb=el.form.querySelector('input[name=color][value=custom]'); rb.checked=true; updateThemePreview(el.form); },
