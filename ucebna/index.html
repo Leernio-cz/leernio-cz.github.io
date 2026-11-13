@@ -951,15 +951,17 @@ async function uploadOne(f, onPct){
   }
   throw new Error('Nahrávání se nedokončilo.');
 }
-async function readFiles(files, ctx){
+async function readFiles(files, ctx, onEach){
   const out = [], sess = MSESS;
   const list = [...files].filter(f => { if(f.size > CONFIG.maxFile){ toast(`${f.name}: soubor je větší než ${Math.round(CONFIG.maxFile/1048576)} MB`); return false; } if(!f.size){ toast(`${f.name}: prázdný soubor`); return false; } return true; });
   const ups = list.map(f => ({key:uid('u'),ctx,name:f.name,size:f.size,pct:0,f}));
   UPLOADS = UPLOADS.concat(ups); uplPaint(ctx);
   for(const u of ups){
-    try { const meta = await uploadOne(u.f, p => { u.pct = p; uplPaint(ctx); }); if(u.f.size <= CONFIG.part) FILECACHE[meta.id] = URL.createObjectURL(u.f); else FILECACHE[meta.id] = URL.createObjectURL(u.f); out.push(meta); }
+    try { const meta = await uploadOne(u.f, p => { u.pct = p; uplPaint(ctx); }); FILECACHE[meta.id] = URL.createObjectURL(u.f); out.push(meta);
+      UPLOADS = UPLOADS.filter(x => x!==u);
+      if(onEach && !(ctx==='pend' && sess !== MSESS)) onEach(meta);   /* hotový soubor se ukáže hned, ne až po všech */ }
     catch(err){ toast(`${u.name}: ${err.message}`); }
-    finally { UPLOADS = UPLOADS.filter(x => x!==u); }
+    finally { UPLOADS = UPLOADS.filter(x => x!==u); uplPaint(ctx); }
   }
   if(ctx==='pend' && sess !== MSESS) return [];   /* formulář mezitím zavřený */
   if(out.length) toast(out.length===1?'Soubor nahrán':`Nahráno souborů: ${out.length}`);
@@ -979,6 +981,7 @@ async function api(action,payload={}){
   if(!j.ok){ const er = new Error(j.error||'Chyba serveru.'); er.code=j.code||''; if(er.code==='auth' && bridge.authed){ bridge.authed=false; TOKEN=null; send('auth-error',{error:er.message}); } throw er; }
   return j.data;
 }
+const SRV_NEED = '2026-11-13c';
 const COLMAP = {users:'users',rooms:'rooms',chapters:'chapters',items:'items',posts:'posts',grades:'grades',submissions:'subs',testResults:'results'};
 const ORDER = ['users','rooms','chapters','items','posts','grades','submissions','testResults'];
 let SNAP = {}, saving = false, dirty = false, saveTimer = null, lastViewJSON = '';
@@ -988,6 +991,7 @@ function applyView(v){
   S = {subjects:v.subjects||[],users:v.users||[],rooms:v.rooms||[],chapters:v.chapters||[],items:v.items||[],submissions:v.subs||[],grades:v.grades||[],posts:v.posts||[],testResults:v.results||[],tests:v.tests||[],log:v.log||[]};
   SNAP = snapOf(S);
   if(v.me){ me = v.me.u; }
+  if(v.me && v.me.role!=='student' && String(v.v||'') < SRV_NEED && !applyView.warned){ applyView.warned = true; setTimeout(()=>toast(`Server Učebny je starší verze (${v.v||'?'}) – nasaďte nový Code.gs (Nová verze).`), 800); }
 }
 function diffOps(){
   const cur = snapOf(S), sets = [], dels = [];
@@ -1004,6 +1008,10 @@ async function flush(){
   try {
     const res = await api('batch',{ops});
     if(res.rejected && res.rejected.length) toast('Některé změny se neuložily: '+res.rejected[0].error);
+    else { const lost = ops.filter(o => o.op==='set' && (o.col==='items'||o.col==='subs') && (o.doc.attachments||[]).length).some(o => {
+        const v = (o.col==='items' ? res.view.items : res.view.subs).find(x => x.id===o.doc.id || (o.col==='subs' && x.itemId===o.doc.itemId && x.studentId===o.doc.studentId));
+        return v && (v.attachments||[]).length < o.doc.attachments.length; });
+      if(lost) toast('Některý soubor se nepodařilo připojit – nahrajte ho prosím znovu.'); }
     if(dirty){ SNAP = snapOf({users:res.view.users,rooms:res.view.rooms,chapters:res.view.chapters,items:res.view.items,posts:res.view.posts,grades:res.view.grades,submissions:res.view.subs,testResults:res.view.results}); lastViewJSON = JSON.stringify(res.view); }
     else { applyView(res.view); if(!M && !typing()) render(); }
     send('changed',{at:Date.now()});
@@ -1185,9 +1193,9 @@ function updateThemePreview(f){
 document.addEventListener('input', e => { if(e.target.name==='colorCustom' || e.target.name==='name' && e.target.form && e.target.form.querySelector('#tprev')){ const f=e.target.form; if(e.target.name==='colorCustom'){ f.querySelector('input[name=color][value=custom]').checked=true; updateThemePreview(f); } else { f.querySelector('#tprev h3').textContent = e.target.value || 'Název učebny'; } } });
 const closeMenus = () => document.querySelectorAll('details.menu[open]').forEach(d=>d.open=false);
 const CHG = {
-  'sub-file':async (id,el)=>{ const fl=[...el.files]; el.value=''; const files = await readFiles(fl,id); uplPaint(id); if(!files.length) return; const s = getSub(id,me); s.attachments = (s.attachments||[]).concat(files); const ta=document.querySelector(`textarea[data-change="sub-text"][data-id="${id}"]`); if(ta) s.text=ta.value; changed(); },
+  'sub-file':async (id,el)=>{ const fl=[...el.files]; el.value=''; await readFiles(fl,id,m=>{ const s = getSub(id,me); s.attachments = (s.attachments||[]).concat([m]); const ta=document.querySelector(`textarea[data-change="sub-text"][data-id="${id}"]`); if(ta) s.text=ta.value; changed(); }); uplPaint(id); },
   'sub-text':(id,el)=>{ const s = getSub(id,me); s.text = el.value; dirty = true; clearTimeout(saveTimer); saveTimer = setTimeout(flush, 250); },
-  'pend-file':async (id,el)=>{ const fl=[...el.files]; el.value=''; const files = await readFiles(fl,'pend'); PEND = PEND.concat(files); uplPaint('pend'); },
+  'pend-file':async (id,el)=>{ const fl=[...el.files]; el.value=''; await readFiles(fl,'pend',m=>{ PEND.push(m); uplPaint('pend'); }); uplPaint('pend'); },
   'theme-prev':(id,el)=>updateThemePreview(el.form),
   'theme-custom':(id,el)=>{ const rb=el.form.querySelector('input[name=color][value=custom]'); rb.checked=true; updateThemePreview(el.form); },
   'kind-switch':(id,el)=>{ el.closest('.modal').dataset.k = el.value; },
