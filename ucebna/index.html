@@ -489,7 +489,6 @@ function sidebar(u){
   let h = nav('home',ic('home'),'Domů',ui.view==='home');
   h += nav('todo',ic(u.role==='student'?'task':'inbox'),u.role==='student'?'Moje úkoly':'K ohodnocení',ui.view==='todo');
   if(isAdmin(u)) h += nav('admin',ic('settings'),'Správa učeben',ui.view==='admin');
-  else if(u.role==='teacher') h += nav('uptest',ic('upload'),'Test nahrávání',ui.view==='uptest');
   h += `<h6>${u.role==='student'?'Moje učebny':'Učebny'}</h6>`;
   const rs = roomsFor(u);
   h += rs.map(r => nav('open-room',`<div class="dot" style="background:${r.color}">${esc((r.name||'?')[0])}</div>`,r.name + (isAdmin(u)||u.role==='student' ? ' · '+(r.section||'') : ''),ui.roomId===r.id && ['room','item','studentcard'].includes(ui.view),r.id)).join('') || `<p class="mut xs sidenote" style="padding:0 24px">Zatím žádné učebny</p>`;
@@ -500,7 +499,6 @@ function mainView(u){
     case 'room': return vRoom(u);
     case 'item': return vItem(u);
     case 'todo': return vTodo(u);
-    case 'uptest': return wrap(`<div class="phead"><h1>Test nahrávání souborů</h1></div><div class="card pad"><p class="sm mut">Vyzkouší na skutečném serveru nahrání malého souboru a 9 MB souboru po částech, jejich stažení a porovnání. Výsledek můžete zkopírovat a poslat.</p><button class="btn pri sm" data-act="up-test">${ic('upload',16)}Otestovat nahrávání</button><pre class="code" id="uptest" style="margin-top:10px;white-space:pre-wrap;min-height:40px">${esc(UPLOG)}</pre></div>`);
     case 'admin': return isAdmin(u) ? vAdmin(u) : vHome(u);
     case 'studentcard': { const r = R(ui.roomId); if(!r || !canEdit(r,u)) return vHome(u);
       return wrap(`<a class="lnk back" data-act="tab" data-id="grades">${ic('back',16)} Zpět na hodnocení</a>` + studentCard(r,ui.studentId,true)); }
@@ -593,7 +591,7 @@ function tWork(r,u,ed){
   return `<div class="cols"><div>${side}</div><div>${toolbar}${h}</div></div>`;
 }
 function chapterBlock(c,its,r,u,ed,defClosed){
-  its = its.filter(i => canSee(i,u)).sort((a,b)=>(b.fromLesson?1:0)-(a.fromLesson?1:0) || b.createdAt-a.createdAt);
+  its = sortItems(its.filter(i => canSee(i,u)));
   const key = c ? c.id : 'none-'+r.id; const closed = ui.closed[key]===undefined ? !!defClosed : ui.closed[key];
   const L = c && c.lesson;
   const badge = L ? `${ed?`<span class="chip violet">${esc(uname(c.studentId))}</span>`:''}${L.removed?'<span class="chip red">Smazáno v IS</span>':''}` : c && ed ? (c.studentId ? `<span class="chip violet">Individuální · ${esc(uname(c.studentId))}</span>` : `<span class="chip">Celá učebna</span>`) : '';
@@ -609,6 +607,18 @@ function lessonInfo(L){
   const time = (L.a||'') + (L.b?'–'+L.b:'') + (L.m?` · ${L.m} min`:'');
   return `<div class="linfo"><div class="row" style="flex-wrap:wrap;gap:6px">${ic('cal',16)}<b>${esc(lesDate(L))}</b><span class="mut">${esc(time)}</span>${String(L.sj||'').split(/[,;\s]+/).filter(Boolean).map(x=>`<span class="chip blue">${esc(x)}</span>`).join('')}<span class="spacer"></span><span class="chip">z kalendáře IS</span></div>${L.c?`<div class="lbody"><div class="mut xs" style="margin-bottom:4px">Náplň hodiny</div>${linkify(L.c)}</div>`:''}</div>`;
 }
+/* pořadí položek v kapitole: učitel ho mění šipkami (item.order); položky bez pořadí (nové) jsou nahoře, nejnovější první */
+function sortItems(list){ return list.slice().sort((a,b) => { const ao = a.order!=null, bo = b.order!=null;
+  if(ao!==bo) return ao ? 1 : -1; if(ao) return a.order-b.order || a.createdAt-b.createdAt;
+  return (b.fromLesson?1:0)-(a.fromLesson?1:0) || b.createdAt-a.createdAt; }); }
+function moveItem(id,dir){
+  const it = I(id); if(!it) return; const u = cur();
+  const sib = sortItems(S.items.filter(x => x.roomId===it.roomId && (x.chapterId||null)===(it.chapterId||null) && canSee(x,u)));
+  const i = sib.indexOf(it), j = i+dir; if(j<0 || j>=sib.length) return;
+  [sib[i], sib[j]] = [sib[j], sib[i]];
+  sib.forEach((x,k) => { if(x.order !== (k+1)*10) x.order = (k+1)*10; });
+  changed();
+}
 function itemRow(i,u,ed){
   let right = '';
   if(i.kind==='task' || i.kind==='test'){
@@ -618,7 +628,7 @@ function itemRow(i,u,ed){
   }
   const meta = i.kind==='lesson' ? 'Hodina '+fmtD(i.lessonDate) : i.due ? (i.fromLesson&&i.autoDue!==false?'Do další hodiny: ':'Termín: ')+fmtDT(i.due) : i.fromLesson ? 'Domácí úkol z hodiny' : 'Zveřejněno '+fmtD(i.createdAt);
   const extra = [(i.attachments||[]).length?`${i.attachments.length} soub.`:'',(i.links||[]).length?`${i.links.length} odkaz${i.links.length>1?'y':''}`:''].filter(Boolean).join(' · ');
-  return `<div class="irow" data-act="open-item" data-id="${i.id}">${kIcon(i.kind)}<div class="grow"><div class="it ell">${esc(i.title)}</div><div class="mut xs">${KIND[i.kind].l} · ${meta}${extra?' · '+extra:''} ${ed?targetChip(i):''}</div></div>${right}${ed?`<button class="iconbtn s" data-act="item-edit" data-id="${i.id}" title="Upravit">${ic('edit',16)}</button>`:''}</div>`;
+  return `<div class="irow" data-act="open-item" data-id="${i.id}">${kIcon(i.kind)}<div class="grow"><div class="it ell">${esc(i.title)}</div><div class="mut xs">${KIND[i.kind].l} · ${meta}${extra?' · '+extra:''} ${ed?targetChip(i):''}</div></div>${right}${ed?`<button class="iconbtn s" data-act="item-up" data-id="${i.id}" title="Posunout nahoru">${ic('up',16)}</button><button class="iconbtn s" data-act="item-down" data-id="${i.id}" title="Posunout dolů">${ic('down',16)}</button><button class="iconbtn s" data-act="item-edit" data-id="${i.id}" title="Upravit">${ic('edit',16)}</button>`:''}</div>`;
 }
 
 function tPeople(r,u,ed){
@@ -771,27 +781,9 @@ function vAdmin(u){
   }
   return wrap(`<div class="phead"><h1>Správa učeben</h1></div><div class="subtabs">${tabs.map(([k,l])=>`<button class="btn sm ${ui.adminTab===k?'pri':''}" data-act="admin-tab" data-id="${k}">${l}</button>`).join('')}</div>${body}`);
 }
-/* test nahrávání na skutečném serveru: malý soubor, soubor po částech (9 MB), stažení a porovnání */
-let UPLOG = '', UPRUN = false;
-async function uploadSelfTest(){
-  if(UPRUN) return; UPRUN = true; UPLOG = '';
-  const log = t => { UPLOG += t + '\n'; const out = $('#uptest'); if(out) out.textContent = UPLOG; };
-  const rnd = n => { const a = new Uint8Array(n); for(let i=0;i<n;i+=65536) crypto.getRandomValues(a.subarray(i, Math.min(n,i+65536))); return a; };
-  const same = (a,b) => { if(a.length!==b.length) return false; for(let i=0;i<a.length;i+=4097) if(a[i]!==b[i]) return false; return a[a.length-1]===b[b.length-1]; };
-  const fetchBack = async m => { const r = await api('file',{id:m.id}); if(!r.big) return b64Bytes(r.b64); const parts=[]; for(let i=0;i<r.n;i++){ parts.push(b64Bytes((await api('fileChunk',{id:m.id,idx:i})).b64)); } const all=new Uint8Array(r.size); let o=0; parts.forEach(p=>{ all.set(p,o); o+=p.length; }); return all; };
-  log('Stránka: ' + SRV_NEED + ' · ' + navigator.userAgent.slice(0,80));
-  try { log('Server: ' + (await api('load')).v); } catch(e){ log('Server neodpovídá: ' + e.message); UPRUN = false; return; }
-  for(const [label,size] of [['malý soubor 200 kB',200*1024],['soubor po částech 9 MB',9*1024*1024+333]]){
-    const t0 = Date.now(), data = rnd(size), f = new File([data], 'test-nahravani-' + size + '.bin', {type:'application/octet-stream'}); log(`… ${label}: nahrávám`);
-    try { const m = await uploadOne(f, ()=>{}); log(`✓ ${label}: nahráno za ${((Date.now()-t0)/1000).toFixed(1)} s (id ${m.id})`);
-      const back = await fetchBack(m); log(same(back,data) ? `✓ ${label}: stažení a porovnání v pořádku` : `✗ ${label}: stažený soubor se liší (${back.length} B)`); }
-    catch(e){ log(`✗ ${label}: ${e.message} [${e.code||''}]`); }
-  }
-  log('Hotovo. Testovací soubory „test-nahravani-…“ můžete na Disku smazat.'); UPRUN = false;
-}
 function apiDoc(){
   const ex = (title,desc,obj) => `<div class="card pad" style="margin-bottom:14px"><h3>${title}</h3><p class="mut sm">${desc}</p><pre class="code">${esc(JSON.stringify(obj,null,2))}</pre></div>`;
-  return `<div class="card pad" style="margin-bottom:14px"><h3>Test nahrávání souborů</h3><p class="sm mut">Vyzkouší na skutečném serveru nahrání malého souboru a 9 MB souboru po částech, jejich stažení a porovnání. Výsledek můžete zkopírovat a poslat.</p><button class="btn pri sm" data-act="up-test">${ic('upload',16)}Otestovat nahrávání</button><pre class="code" id="uptest" style="margin-top:10px;white-space:pre-wrap;min-height:40px">${esc(UPLOG)}</pre></div><div class="card pad" style="margin-bottom:14px"><h3>Napojení na IS Leernio</h3><p class="sm">Do Učebny se přihlašuje <b>jen přes IS</b>, stejně jako do Opakovačky. Učebna běží v okně (iframe) IS na <code>${CONFIG.isOrigin}</code>; zprávy přijímá jen od rodičovského okna z tohoto původu. Otevřená napřímo ukáže „Do Učebny se přihlásíš přes IS Leernio“. Data ukládá samostatný server Učebny (Google Apps Script), který klíč z IS ověřuje u serveru IS a hlídá práva podle role.</p><ol class="sm" style="padding-left:18px;line-height:1.7"><li>Učebna po načtení pošle <code>uceb:ready</code>.</li><li>IS si vyžádá omezený klíč akcí <code>appTok</code> s <code>{app:"ucebna"}</code> a pošle <code>{type:"is:auth", token:"ap1.…"}</code>.</li><li>Server Učebny klíč ověří u serveru IS (<code>{a:"me", t}</code> → <code>{acct:{u, role, name}}</code>) a spáruje účet podle uživatelského jména, případně podle jména.</li><li>Výsledek oznámí <code>uceb:auth-ok</code> nebo <code>uceb:auth-error</code> (IS jednou zkusí nový klíč). Při odhlášení z IS pošle IS <code>is:logout</code>.</li></ol><p class="sm" style="margin:0"><b>Z Učebny do IS</b> (<code>{src:"ucebna", v:1, type}</code>): <code>uceb:ready</code>, <code>uceb:auth-ok</code>, <code>uceb:auth-error</code>, <code>uceb:height</code>, <code>uceb:openTest</code>, <code>uceb:changed</code>.</p></div>`
+  return `<div class="card pad" style="margin-bottom:14px"><h3>Napojení na IS Leernio</h3><p class="sm">Do Učebny se přihlašuje <b>jen přes IS</b>, stejně jako do Opakovačky. Učebna běží v okně (iframe) IS na <code>${CONFIG.isOrigin}</code>; zprávy přijímá jen od rodičovského okna z tohoto původu. Otevřená napřímo ukáže „Do Učebny se přihlásíš přes IS Leernio“. Data ukládá samostatný server Učebny (Google Apps Script), který klíč z IS ověřuje u serveru IS a hlídá práva podle role.</p><ol class="sm" style="padding-left:18px;line-height:1.7"><li>Učebna po načtení pošle <code>uceb:ready</code>.</li><li>IS si vyžádá omezený klíč akcí <code>appTok</code> s <code>{app:"ucebna"}</code> a pošle <code>{type:"is:auth", token:"ap1.…"}</code>.</li><li>Server Učebny klíč ověří u serveru IS (<code>{a:"me", t}</code> → <code>{acct:{u, role, name}}</code>) a spáruje účet podle uživatelského jména, případně podle jména.</li><li>Výsledek oznámí <code>uceb:auth-ok</code> nebo <code>uceb:auth-error</code> (IS jednou zkusí nový klíč). Při odhlášení z IS pošle IS <code>is:logout</code>.</li></ol><p class="sm" style="margin:0"><b>Z Učebny do IS</b> (<code>{src:"ucebna", v:1, type}</code>): <code>uceb:ready</code>, <code>uceb:auth-ok</code>, <code>uceb:auth-error</code>, <code>uceb:height</code>, <code>uceb:openTest</code>, <code>uceb:changed</code>.</p></div>`
    + ex('is:auth – přihlášení','Jediný způsob přihlášení. Role z IS: admin, teacher (i lektor/ucitel), student. Jiné role přístup nemají.',{type:'is:auth',token:'ap1.…'})
    + ex('is:sync – soupiska z IS (jen učitel/správce)','predmety = kódy z tabulky (B01, B02, B03, C01, C02). Po přijetí proběhne automatické přiřazení do učeben.',{type:'is:sync',users:[{u:'novak.jan',name:'Jan Novák',role:'student',predmety:'B01, B02'}],tests:[{id:'opk-101',name:'Literární směry',subjectId:'B01',questions:10}]})
    + ex('is:lesson – zápis hodiny z kalendáře','Vytvoří nebo podle id aktualizuje zápis v kapitole „Zápisy z hodin“. S vyplněným homework vznikne i úkol s odevzdávárnou.',{type:'is:lesson',lesson:{id:'cal-5531',teacherId:'trkan.tobias',subjectId:'B01',studentIds:['musil.tomas'],date:'2026-11-10T15:00',topic:'Literární moderna',content:'Náplň hodiny…',homework:{title:'Rozbor – Krysař',description:'…',due:'2026-11-14T20:00',maxPoints:10}}})
@@ -1021,7 +1013,7 @@ async function api(action,payload={}){
   if(!j.ok){ const er = new Error(j.error||'Chyba serveru.'); er.code=j.code||''; if(er.code==='auth' && bridge.authed){ bridge.authed=false; TOKEN=null; send('auth-error',{error:er.message}); } throw er; }
   return j.data;
 }
-const SRV_NEED = '2026-11-13f';
+const SRV_NEED = '2026-11-13g';
 const COLMAP = {users:'users',rooms:'rooms',chapters:'chapters',items:'items',posts:'posts',grades:'grades',submissions:'subs',testResults:'results'};
 const ORDER = ['users','rooms','chapters','items','posts','grades','submissions','testResults'];
 let SNAP = {}, saving = false, dirty = false, saveTimer = null, lastViewJSON = '';
@@ -1175,7 +1167,6 @@ const go = o => { Object.assign(ui,o); render(); window.scrollTo(0,0); if(window
 const ACT = {
   'home':()=>go({view:'home',roomId:null}),
   'todo':()=>go({view:'todo',roomId:null}),
-  'uptest':()=>go({view:'uptest',roomId:null}),
   'admin':()=>go({view:'admin',roomId:null}),
   'admin-tab':id=>go({adminTab:id}),
   'toggle-side':()=>{ ui.sidebar=!ui.sidebar; render(); },
@@ -1199,9 +1190,9 @@ const ACT = {
   'ch-add':id=>itemModal('material',null,id),
   'ch-del':id=>{ const c=CHP(id); confirmBox(c.lesson?`Smazat hodinu „${esc(c.title)}“ z Učebny? Z IS se už znovu nevytvoří. Domácí úkol bez odevzdání se smaže, ostatní položky přejdou do „Bez kapitoly“.`:`Smazat kapitolu „${esc(c.title)}“? Položky v ní zůstanou v sekci „Bez kapitoly“.`,()=>{ S.chapters=S.chapters.filter(x=>x.id!==id); S.items.forEach(i=>{ if(i.chapterId===id) i.chapterId=null; }); changed(); }); },
   'ch-up':id=>moveCh(id,-1), 'ch-down':id=>moveCh(id,1),
+  'item-up':id=>moveItem(id,-1), 'item-down':id=>moveItem(id,1),
   'ch-toggle':id=>{ ui.closed[id]=!ui.closed[id]; render(); },
   'preview':id=>{ if(document.querySelector('.modal[data-k]')){ toast('Náhled souboru otevřete po uložení.'); return; } previewAtt(id); },
-  'up-test':()=>{ uploadSelfTest(); },
   'upl-x':key=>{ const u=UPLOADS.find(x=>x.key===key); UPLOADS=UPLOADS.filter(x=>x.key!==key); if(u) uplPaint(u.ctx); },
   'pend-del':idx=>{ PEND.splice(+idx,1); $('#pend').innerHTML=pendHtml(); },
   'sub-att-del':id=>{ const [iid,idx]=id.split('|'); const s=subOf(iid,me); if(s){ s.attachments.splice(+idx,1); changed(); } },
