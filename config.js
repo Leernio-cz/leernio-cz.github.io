@@ -7,6 +7,6 @@ window.LEERNIO_API = "https://script.google.com/macros/s/AKfycbyA-HlfXo0VsIQI2rE
 window.LEERNIO_APPS = {
   testy: "/opakovacka/",   // Opakovačka
   ucebna: "/ucebna/",      // Učebna
-  hovor: ""                // Hovor – až nahraješ složku hovor/, změň na "/hovor/"
+  hovor: "/hovor/"                // Hovor – až nahraješ složku hovor/, změň na "/hovor/"
 };
  
