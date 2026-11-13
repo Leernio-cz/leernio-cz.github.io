@@ -232,7 +232,8 @@ const CONFIG = {
   isUrl: UC.isUrl || 'https://leernio-cz.github.io/#ucebna',
   maxFile: 300 * 1024 * 1024,
   part: 4 * 1024 * 1024,
-  single: 20 * 1024 * 1024,   // do 20 MB jedním požadavkem (jako fotky)
+  single: 4 * 1024 * 1024,    // jedním požadavkem jen do 4 MB, větší po částech po 4 MB (žádný požadavek není větší než u fotky)
+  parallel: 3,
   pollMs: 30000
 };
 /* Předměty, které Leernio vyučuje (kód = kód v Seznamu studentů / učitelů) */
@@ -488,6 +489,7 @@ function sidebar(u){
   let h = nav('home',ic('home'),'Domů',ui.view==='home');
   h += nav('todo',ic(u.role==='student'?'task':'inbox'),u.role==='student'?'Moje úkoly':'K ohodnocení',ui.view==='todo');
   if(isAdmin(u)) h += nav('admin',ic('settings'),'Správa učeben',ui.view==='admin');
+  else if(u.role==='teacher') h += nav('uptest',ic('upload'),'Test nahrávání',ui.view==='uptest');
   h += `<h6>${u.role==='student'?'Moje učebny':'Učebny'}</h6>`;
   const rs = roomsFor(u);
   h += rs.map(r => nav('open-room',`<div class="dot" style="background:${r.color}">${esc((r.name||'?')[0])}</div>`,r.name + (isAdmin(u)||u.role==='student' ? ' · '+(r.section||'') : ''),ui.roomId===r.id && ['room','item','studentcard'].includes(ui.view),r.id)).join('') || `<p class="mut xs sidenote" style="padding:0 24px">Zatím žádné učebny</p>`;
@@ -498,6 +500,7 @@ function mainView(u){
     case 'room': return vRoom(u);
     case 'item': return vItem(u);
     case 'todo': return vTodo(u);
+    case 'uptest': return wrap(`<div class="phead"><h1>Test nahrávání souborů</h1></div><div class="card pad"><p class="sm mut">Vyzkouší na skutečném serveru nahrání malého souboru a 9 MB souboru po částech, jejich stažení a porovnání. Výsledek můžete zkopírovat a poslat.</p><button class="btn pri sm" data-act="up-test">${ic('upload',16)}Otestovat nahrávání</button><pre class="code" id="uptest" style="margin-top:10px;white-space:pre-wrap;min-height:40px">${esc(UPLOG)}</pre></div>`);
     case 'admin': return isAdmin(u) ? vAdmin(u) : vHome(u);
     case 'studentcard': { const r = R(ui.roomId); if(!r || !canEdit(r,u)) return vHome(u);
       return wrap(`<a class="lnk back" data-act="tab" data-id="grades">${ic('back',16)} Zpět na hodnocení</a>` + studentCard(r,ui.studentId,true)); }
@@ -768,9 +771,27 @@ function vAdmin(u){
   }
   return wrap(`<div class="phead"><h1>Správa učeben</h1></div><div class="subtabs">${tabs.map(([k,l])=>`<button class="btn sm ${ui.adminTab===k?'pri':''}" data-act="admin-tab" data-id="${k}">${l}</button>`).join('')}</div>${body}`);
 }
+/* test nahrávání na skutečném serveru: malý soubor, soubor po částech (9 MB), stažení a porovnání */
+let UPLOG = '', UPRUN = false;
+async function uploadSelfTest(){
+  if(UPRUN) return; UPRUN = true; UPLOG = '';
+  const log = t => { UPLOG += t + '\n'; const out = $('#uptest'); if(out) out.textContent = UPLOG; };
+  const rnd = n => { const a = new Uint8Array(n); for(let i=0;i<n;i+=65536) crypto.getRandomValues(a.subarray(i, Math.min(n,i+65536))); return a; };
+  const same = (a,b) => { if(a.length!==b.length) return false; for(let i=0;i<a.length;i+=4097) if(a[i]!==b[i]) return false; return a[a.length-1]===b[b.length-1]; };
+  const fetchBack = async m => { const r = await api('file',{id:m.id}); if(!r.big) return b64Bytes(r.b64); const parts=[]; for(let i=0;i<r.n;i++){ parts.push(b64Bytes((await api('fileChunk',{id:m.id,idx:i})).b64)); } const all=new Uint8Array(r.size); let o=0; parts.forEach(p=>{ all.set(p,o); o+=p.length; }); return all; };
+  log('Stránka: ' + SRV_NEED + ' · ' + navigator.userAgent.slice(0,80));
+  try { log('Server: ' + (await api('load')).v); } catch(e){ log('Server neodpovídá: ' + e.message); UPRUN = false; return; }
+  for(const [label,size] of [['malý soubor 200 kB',200*1024],['soubor po částech 9 MB',9*1024*1024+333]]){
+    const t0 = Date.now(), data = rnd(size), f = new File([data], 'test-nahravani-' + size + '.bin', {type:'application/octet-stream'}); log(`… ${label}: nahrávám`);
+    try { const m = await uploadOne(f, ()=>{}); log(`✓ ${label}: nahráno za ${((Date.now()-t0)/1000).toFixed(1)} s (id ${m.id})`);
+      const back = await fetchBack(m); log(same(back,data) ? `✓ ${label}: stažení a porovnání v pořádku` : `✗ ${label}: stažený soubor se liší (${back.length} B)`); }
+    catch(e){ log(`✗ ${label}: ${e.message} [${e.code||''}]`); }
+  }
+  log('Hotovo. Testovací soubory „test-nahravani-…“ můžete na Disku smazat.'); UPRUN = false;
+}
 function apiDoc(){
   const ex = (title,desc,obj) => `<div class="card pad" style="margin-bottom:14px"><h3>${title}</h3><p class="mut sm">${desc}</p><pre class="code">${esc(JSON.stringify(obj,null,2))}</pre></div>`;
-  return `<div class="card pad" style="margin-bottom:14px"><h3>Napojení na IS Leernio</h3><p class="sm">Do Učebny se přihlašuje <b>jen přes IS</b>, stejně jako do Opakovačky. Učebna běží v okně (iframe) IS na <code>${CONFIG.isOrigin}</code>; zprávy přijímá jen od rodičovského okna z tohoto původu. Otevřená napřímo ukáže „Do Učebny se přihlásíš přes IS Leernio“. Data ukládá samostatný server Učebny (Google Apps Script), který klíč z IS ověřuje u serveru IS a hlídá práva podle role.</p><ol class="sm" style="padding-left:18px;line-height:1.7"><li>Učebna po načtení pošle <code>uceb:ready</code>.</li><li>IS si vyžádá omezený klíč akcí <code>appTok</code> s <code>{app:"ucebna"}</code> a pošle <code>{type:"is:auth", token:"ap1.…"}</code>.</li><li>Server Učebny klíč ověří u serveru IS (<code>{a:"me", t}</code> → <code>{acct:{u, role, name}}</code>) a spáruje účet podle uživatelského jména, případně podle jména.</li><li>Výsledek oznámí <code>uceb:auth-ok</code> nebo <code>uceb:auth-error</code> (IS jednou zkusí nový klíč). Při odhlášení z IS pošle IS <code>is:logout</code>.</li></ol><p class="sm" style="margin:0"><b>Z Učebny do IS</b> (<code>{src:"ucebna", v:1, type}</code>): <code>uceb:ready</code>, <code>uceb:auth-ok</code>, <code>uceb:auth-error</code>, <code>uceb:height</code>, <code>uceb:openTest</code>, <code>uceb:changed</code>.</p></div>`
+  return `<div class="card pad" style="margin-bottom:14px"><h3>Test nahrávání souborů</h3><p class="sm mut">Vyzkouší na skutečném serveru nahrání malého souboru a 9 MB souboru po částech, jejich stažení a porovnání. Výsledek můžete zkopírovat a poslat.</p><button class="btn pri sm" data-act="up-test">${ic('upload',16)}Otestovat nahrávání</button><pre class="code" id="uptest" style="margin-top:10px;white-space:pre-wrap;min-height:40px">${esc(UPLOG)}</pre></div><div class="card pad" style="margin-bottom:14px"><h3>Napojení na IS Leernio</h3><p class="sm">Do Učebny se přihlašuje <b>jen přes IS</b>, stejně jako do Opakovačky. Učebna běží v okně (iframe) IS na <code>${CONFIG.isOrigin}</code>; zprávy přijímá jen od rodičovského okna z tohoto původu. Otevřená napřímo ukáže „Do Učebny se přihlásíš přes IS Leernio“. Data ukládá samostatný server Učebny (Google Apps Script), který klíč z IS ověřuje u serveru IS a hlídá práva podle role.</p><ol class="sm" style="padding-left:18px;line-height:1.7"><li>Učebna po načtení pošle <code>uceb:ready</code>.</li><li>IS si vyžádá omezený klíč akcí <code>appTok</code> s <code>{app:"ucebna"}</code> a pošle <code>{type:"is:auth", token:"ap1.…"}</code>.</li><li>Server Učebny klíč ověří u serveru IS (<code>{a:"me", t}</code> → <code>{acct:{u, role, name}}</code>) a spáruje účet podle uživatelského jména, případně podle jména.</li><li>Výsledek oznámí <code>uceb:auth-ok</code> nebo <code>uceb:auth-error</code> (IS jednou zkusí nový klíč). Při odhlášení z IS pošle IS <code>is:logout</code>.</li></ol><p class="sm" style="margin:0"><b>Z Učebny do IS</b> (<code>{src:"ucebna", v:1, type}</code>): <code>uceb:ready</code>, <code>uceb:auth-ok</code>, <code>uceb:auth-error</code>, <code>uceb:height</code>, <code>uceb:openTest</code>, <code>uceb:changed</code>.</p></div>`
    + ex('is:auth – přihlášení','Jediný způsob přihlášení. Role z IS: admin, teacher (i lektor/ucitel), student. Jiné role přístup nemají.',{type:'is:auth',token:'ap1.…'})
    + ex('is:sync – soupiska z IS (jen učitel/správce)','predmety = kódy z tabulky (B01, B02, B03, C01, C02). Po přijetí proběhne automatické přiřazení do učeben.',{type:'is:sync',users:[{u:'novak.jan',name:'Jan Novák',role:'student',predmety:'B01, B02'}],tests:[{id:'opk-101',name:'Literární směry',subjectId:'B01',questions:10}]})
    + ex('is:lesson – zápis hodiny z kalendáře','Vytvoří nebo podle id aktualizuje zápis v kapitole „Zápisy z hodin“. S vyplněným homework vznikne i úkol s odevzdávárnou.',{type:'is:lesson',lesson:{id:'cal-5531',teacherId:'trkan.tobias',subjectId:'B01',studentIds:['musil.tomas'],date:'2026-11-10T15:00',topic:'Literární moderna',content:'Náplň hodiny…',homework:{title:'Rozbor – Krysař',description:'…',due:'2026-11-14T20:00',maxPoints:10}}})
@@ -914,7 +935,9 @@ async function previewAtt(id){
       const r = await api('file',{id}); type = r.type || type;
       let blob;
       if(!r.big) blob = new Blob([b64Bytes(r.b64)],{type});
-      else { const parts=[]; let off=0; while(off < r.size){ if(MSESS!==mine) return; const c = await api('fileChunk',{id,offset:off}); if(MSESS!==mine) return; parts.push(b64Bytes(c.b64)); off = c.next; wait(Math.round(off/r.size*100)); } blob = new Blob(parts,{type}); }
+      else { const n = r.n || Math.ceil(r.size/r.part), parts = new Array(n); let got = 0, stop = false;
+        await pool(CONFIG.parallel, n, async i => { if(stop || MSESS!==mine){ stop = true; return; } const c = await retry(() => api('fileChunk',{id,idx:i})); parts[i] = b64Bytes(c.b64); got++; if(MSESS===mine) wait(Math.round(got/n*100)); });
+        if(stop || MSESS!==mine) return; blob = new Blob(parts,{type}); }
       url = FILECACHE[id] = URL.createObjectURL(blob);
       if(MSESS!==mine && !document.querySelector('.modal')) return;
     } catch(err){ openModal(esc(f.name),`<div class="empty"><h3>Soubor nejde otevřít</h3><p>${esc(err.message)}</p></div>`,{wide:true,noFocus:true}); return; }
@@ -943,19 +966,22 @@ function uplPaint(ctx){
 }
 const b64Of = blob => new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(String(fr.result).split(',')[1]||''); fr.onerror=()=>rej(new Error('Soubor nejde přečíst.')); fr.readAsDataURL(blob); });
 async function uploadSingle(f, type, onPct){ const b64 = await b64Of(f); onPct(50); const m = await api('upload',{name:f.name,type,b64}); onPct(100); return m; }
+async function pool(n, count, fn){ let next = 0; const run = async () => { while(next < count){ const i = next++; await fn(i); } }; await Promise.all(Array.from({length:Math.min(n,count)}, run)); }
+async function retry(fn){ for(let t=0;;t++){ try { return await fn(); } catch(e){ if((e.code==='net' || e.code==='busy') && t < 4){ await new Promise(r=>setTimeout(r,1500*(t+1))); continue; } throw e; } } }
 async function uploadChunked(f, type, onPct){
+  const old = 'Server Učebny je zastaralý – nasaďte nový Code.gs (Nasadit → Spravovat nasazení → tužka → Nová verze).';
   let st;
   try { st = await api('upStart',{name:f.name,type,size:f.size}); }
-  catch(e){ if(e.code==='bad_action') throw new Error('Server Učebny je zastaralý – nasaďte nový Code.gs (Nasadit → Spravovat nasazení → Nová verze).'); throw e; }
-  let off = 0, tries = 0;
-  while(off < f.size){
-    try {
-      const r = await api('upChunk',{uid:st.uid,offset:off,b64:await b64Of(f.slice(off, off+st.part))});
-      if(r.done) return r.file;
-      off = r.next; tries = 0; onPct(Math.min(99, Math.round(off/f.size*100)));
-    } catch(e){ if(e.code==='net' && ++tries <= 3){ await new Promise(r=>setTimeout(r,2000*tries)); continue; } throw e; }
-  }
-  throw new Error('Nahrávání se nedokončilo.');
+  catch(e){ if(e.code==='bad_action') throw new Error(old); throw e; }
+  if(st.mode !== 'parts2') throw new Error(old);
+  const pids = new Array(st.n); let sent = 0;
+  await pool(CONFIG.parallel, st.n, async i => {
+    const blob = f.slice(i*st.part, Math.min(f.size, (i+1)*st.part));
+    const r = await retry(async () => api('upChunk',{ticket:st.ticket, idx:i, b64:await b64Of(blob)}));
+    pids[i] = r.pid; sent++; onPct(Math.min(98, Math.round(sent/st.n*100)));
+  });
+  const file = await retry(() => api('upDone',{ticket:st.ticket, parts:pids}));
+  onPct(100); return file;
 }
 async function uploadOne(f, onPct){
   const type = f.type || 'application/octet-stream';
@@ -995,7 +1021,7 @@ async function api(action,payload={}){
   if(!j.ok){ const er = new Error(j.error||'Chyba serveru.'); er.code=j.code||''; if(er.code==='auth' && bridge.authed){ bridge.authed=false; TOKEN=null; send('auth-error',{error:er.message}); } throw er; }
   return j.data;
 }
-const SRV_NEED = '2026-11-13d';
+const SRV_NEED = '2026-11-13f';
 const COLMAP = {users:'users',rooms:'rooms',chapters:'chapters',items:'items',posts:'posts',grades:'grades',submissions:'subs',testResults:'results'};
 const ORDER = ['users','rooms','chapters','items','posts','grades','submissions','testResults'];
 let SNAP = {}, saving = false, dirty = false, saveTimer = null, lastViewJSON = '';
@@ -1149,6 +1175,7 @@ const go = o => { Object.assign(ui,o); render(); window.scrollTo(0,0); if(window
 const ACT = {
   'home':()=>go({view:'home',roomId:null}),
   'todo':()=>go({view:'todo',roomId:null}),
+  'uptest':()=>go({view:'uptest',roomId:null}),
   'admin':()=>go({view:'admin',roomId:null}),
   'admin-tab':id=>go({adminTab:id}),
   'toggle-side':()=>{ ui.sidebar=!ui.sidebar; render(); },
@@ -1174,6 +1201,7 @@ const ACT = {
   'ch-up':id=>moveCh(id,-1), 'ch-down':id=>moveCh(id,1),
   'ch-toggle':id=>{ ui.closed[id]=!ui.closed[id]; render(); },
   'preview':id=>{ if(document.querySelector('.modal[data-k]')){ toast('Náhled souboru otevřete po uložení.'); return; } previewAtt(id); },
+  'up-test':()=>{ uploadSelfTest(); },
   'upl-x':key=>{ const u=UPLOADS.find(x=>x.key===key); UPLOADS=UPLOADS.filter(x=>x.key!==key); if(u) uplPaint(u.ctx); },
   'pend-del':idx=>{ PEND.splice(+idx,1); $('#pend').innerHTML=pendHtml(); },
   'sub-att-del':id=>{ const [iid,idx]=id.split('|'); const s=subOf(iid,me); if(s){ s.attachments.splice(+idx,1); changed(); } },
