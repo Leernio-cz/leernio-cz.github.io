@@ -1,1 +1,1411 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'wasm-unsafe-eval' https://cdn.jsdelivr.net; connect-src 'self' https://script.google.com https://script.googleusercontent.com https://cdn.jsdelivr.net data: blob:; img-src 'self' data: blob:; media-src 'self' blob: mediastream:; worker-src 'self' blob:; style-src 'self' 'unsafe-inline'; base-uri 'none'; form-action 'none'">
+<meta name="referrer" content="no-referrer">
+<title>Hovor – Leernio</title>
+<script src="config.js"></script>
+<style>
+:root{--blue:#1d4ed8;--blue2:#2563eb;--ink:#0f172a;--mut:#64748b;--line:#e2e8f0;--bg:#f1f5f9;--red:#dc2626;--green:#16a34a;--dark:#0b1220;--dark2:#111a2e;--dark3:#1b2640;--dark4:#26334f;--amber:#f59e0b}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--ink);background:var(--bg);-webkit-font-smoothing:antialiased}
+button{font:inherit;cursor:pointer}
+input,select{font:inherit}
+.hide{display:none!important}
+svg.i{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.scr{position:fixed;inset:0;overflow:auto}
+/* ---------- tlačítka ---------- */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;border:0;border-radius:10px;padding:11px 16px;font-weight:600;background:var(--blue);color:#fff;transition:background .15s,opacity .15s}
+.btn:hover{background:var(--blue2)}
+.btn:disabled{opacity:.5;cursor:default}
+.btn.sec{background:#e8eefc;color:var(--blue)}
+.btn.sec:hover{background:#dbe5fb}
+.btn.ghost{background:transparent;color:var(--mut)}
+.btn.red{background:var(--red)}
+.btn.full{width:100%}
+.field{display:block;margin:0 0 12px}
+.field span{display:block;font-size:13px;color:var(--mut);margin:0 0 5px;font-weight:600}
+.field input,.field select{width:100%;padding:11px 12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;outline:none}
+.field input:focus,.field select:focus{border-color:var(--blue);box-shadow:0 0 0 3px #1d4ed822}
+.pin-in{letter-spacing:.35em;font-size:22px!important;text-align:center;font-weight:700}
+.err{color:var(--red);font-size:14px;margin:8px 0 0;min-height:0}
+.note{font-size:13px;color:var(--mut);line-height:1.45}
+/* ---------- načítání ---------- */
+#boot{display:flex;align-items:center;justify-content:center;flex-direction:column;gap:14px;color:var(--mut)}
+.spin{width:34px;height:34px;border:3px solid #cbd5e1;border-top-color:var(--blue);border-radius:50%;animation:sp 0.8s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+/* ---------- předsíň ---------- */
+#lobby{display:flex;flex-direction:column}
+.top{display:flex;align-items:center;gap:10px;padding:14px 22px}
+.logo{display:flex;align-items:center;gap:9px;font-weight:800;font-size:18px;color:var(--ink)}
+.logo b{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:var(--blue);color:#fff;font-size:17px}
+.logo small{font-weight:600;color:var(--mut);font-size:15px}
+.who{margin-left:auto;font-size:14px;color:var(--mut);display:flex;align-items:center;gap:8px}
+.lob{flex:1;display:flex;gap:28px;align-items:center;justify-content:center;padding:10px 22px 30px;flex-wrap:wrap}
+.prev{width:min(640px,100%);}
+.pv{position:relative;aspect-ratio:16/9;background:#0b1220;border-radius:18px;overflow:hidden;box-shadow:0 10px 30px #0f172a22}
+.pv video{width:100%;height:100%;object-fit:cover}
+.pv .mirror,.tile .mirror{transform:scaleX(-1)}
+.pv .off{position:absolute;inset:0;display:grid;place-items:center;color:#cbd5e1;font-size:15px}
+.pv .bar{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:12px}
+.rb{width:50px;height:50px;border-radius:50%;border:0;display:grid;place-items:center;background:#ffffff26;color:#fff;backdrop-filter:blur(6px)}
+.rb:hover{background:#ffffff3a}
+.rb.off{background:var(--red)}
+.rb.on2{background:var(--blue)}
+.pv .lvl{position:absolute;left:14px;top:14px;display:flex;gap:3px;align-items:flex-end;height:16px}
+.pv .lvl i{width:4px;background:#22c55e;border-radius:2px;height:3px;transition:height .1s}
+.devs{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.devs select{flex:1;min-width:150px;padding:8px 10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;font-size:13px;color:var(--ink)}
+.card{width:min(390px,100%);background:#fff;border-radius:18px;padding:24px;box-shadow:0 10px 30px #0f172a14}
+.card h1{font-size:23px;margin:0 0 4px}
+.card h2{font-size:15px;margin:18px 0 10px}
+.sep{display:flex;align-items:center;gap:10px;color:var(--mut);font-size:13px;margin:16px 0}
+.sep:before,.sep:after{content:"";flex:1;height:1px;background:var(--line)}
+.mine{display:flex;flex-direction:column;gap:8px;margin:10px 0 0}
+.mine button{display:flex;align-items:center;gap:10px;border:1px solid var(--line);background:#f8fafc;border-radius:10px;padding:10px 12px;text-align:left;color:var(--ink)}
+.mine button:hover{border-color:var(--blue)}
+.mine b{font-size:14px}.mine small{color:var(--mut);display:block;font-size:12px}
+.link{background:none;border:0;color:var(--blue);padding:0;font-weight:600;font-size:14px}
+.warn{background:#fff7ed;border:1px solid #fed7aa;color:#9a3412;border-radius:10px;padding:10px 12px;font-size:13px;line-height:1.45;margin:0 0 12px}
+/* ---------- čekárna a konec ---------- */
+.center{display:flex;align-items:center;justify-content:center;flex-direction:column;text-align:center;padding:24px;gap:10px}
+.center h1{font-size:24px;margin:8px 0 0}
+.center p{color:var(--mut);max-width:440px;line-height:1.5;margin:0}
+.wprev{width:min(420px,90vw);margin:0 0 10px}
+.pulse{width:14px;height:14px;border-radius:50%;background:var(--blue);animation:pl 1.4s ease-in-out infinite}
+@keyframes pl{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.15)}}
+/* ---------- hovor ---------- */
+#call{background:var(--dark);color:#e2e8f0;display:flex;flex-direction:column;overflow:hidden}
+.cbar{display:flex;align-items:center;gap:12px;padding:10px 16px;min-height:52px}
+.ctitle{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40vw}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--dark3);border:0;color:#cbd5e1;border-radius:999px;padding:6px 11px;font-size:13px;font-weight:600}
+.chip:hover{background:var(--dark4)}
+.timer{font-variant-numeric:tabular-nums;color:#94a3b8;font-size:13px}
+.cbar .sp{flex:1}
+.netw{color:var(--amber);font-size:13px;display:flex;gap:6px;align-items:center}
+.cmain{flex:1;display:flex;min-height:0;position:relative}
+.stagewrap{flex:1;display:flex;min-width:0;padding:6px 12px 8px;gap:10px}
+.grid{flex:1;display:grid;gap:10px;min-height:0;align-content:center;justify-content:center;grid-template-columns:1fr}
+.grid.n2{grid-template-columns:1fr 1fr}
+.grid.n3,.grid.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+.grid.n1 .tile{max-width:min(100%,calc((100vh - 150px) * 16 / 9));margin:auto;width:100%}
+.tile{position:relative;background:var(--dark2);border-radius:14px;overflow:hidden;min-height:0;min-width:0;aspect-ratio:16/9;width:100%;max-height:100%;justify-self:center;align-self:center;outline:3px solid transparent;transition:outline-color .15s}
+.grid.n3 .tile,.grid.n4 .tile,.grid.n2 .tile{height:auto}
+.tile.spk{outline-color:#22c55e}
+.tile video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;background:#000}
+.tile video.contain{object-fit:contain}
+.tile .av{position:absolute;inset:0;display:grid;place-items:center}
+.av b{width:84px;height:84px;border-radius:50%;display:grid;place-items:center;font-size:32px;font-weight:700;color:#fff}
+.tile .tag{position:absolute;left:10px;bottom:10px;display:flex;align-items:center;gap:6px;background:#0b1220b3;padding:5px 9px;border-radius:8px;font-size:13px;font-weight:600;max-width:calc(100% - 20px)}
+.tag .nm{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tag svg.i{width:15px;height:15px}
+.tag .mo{color:#f87171}
+.tile .hand{position:absolute;left:10px;top:10px;background:var(--amber);color:#111;border-radius:999px;padding:4px 10px;font-weight:700;font-size:14px}
+.tile .tr{position:absolute;right:8px;top:8px;display:flex;gap:6px}
+.tile .tb{border:0;background:#0b1220b3;color:#e2e8f0;border-radius:8px;width:32px;height:32px;display:grid;place-items:center;opacity:0;transition:opacity .15s}
+.tile:hover .tb,.tile .tb.on{opacity:1}
+.tile .st{position:absolute;inset:0;display:grid;place-items:center;background:#0b1220c0;font-size:14px;color:#cbd5e1}
+.tile .q{position:absolute;right:10px;bottom:10px;background:#0b1220b3;border-radius:7px;padding:4px 7px;font-size:12px;color:var(--amber)}
+.float{position:absolute;bottom:40px;font-size:42px;animation:fl 2.6s ease-out forwards;pointer-events:none}
+@keyframes fl{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1;transform:translateY(-10px) scale(1)}100%{transform:translateY(-140px);opacity:0}}
+.stage{flex:1;position:relative;background:#000;border-radius:14px;overflow:hidden;min-width:0}
+.stage video{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+#stageAv b{width:120px;height:120px;border-radius:50%;display:grid;place-items:center;font-size:44px;font-weight:700;color:#fff}
+.stage .tag{position:absolute;left:10px;bottom:10px;background:#0b1220b3;padding:5px 10px;border-radius:8px;font-size:13px;font-weight:600}
+.stagewrap.has-stage .grid{flex:0 0 230px;grid-template-columns:1fr!important;grid-template-rows:none!important;align-content:start;overflow:auto}
+.stagewrap.has-stage .grid .tile{height:auto}
+.side{width:340px;background:#fff;color:var(--ink);margin:6px 12px 8px 0;border-radius:14px;display:flex;flex-direction:column;min-height:0;overflow:hidden}
+.side header{display:flex;align-items:center;padding:14px 16px 8px;font-weight:700;font-size:16px}
+.side header button{margin-left:auto;border:0;background:none;color:var(--mut);padding:4px;border-radius:8px}
+.side .body{flex:1;overflow:auto;padding:4px 16px 14px}
+.msgs{display:flex;flex-direction:column;gap:12px;padding-bottom:6px}
+.msg .h{font-size:12px;color:var(--mut);margin:0 0 3px}.msg .h b{color:var(--ink);font-size:13px;margin-right:6px}
+.msg .t{font-size:14px;line-height:1.45;white-space:pre-wrap;word-wrap:break-word}
+.msg .t a{color:var(--blue)}
+.chatin{display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--line)}
+.chatin input{flex:1;border:1px solid #cbd5e1;border-radius:999px;padding:10px 14px;outline:none}
+.chatin button{border:0;background:var(--blue);color:#fff;border-radius:50%;width:42px;height:42px;display:grid;place-items:center}
+.chatin button:disabled{opacity:.4}
+.sec-t{font-size:12px;font-weight:700;color:var(--mut);text-transform:uppercase;letter-spacing:.04em;margin:14px 0 8px;display:flex;align-items:center;gap:8px}
+.sec-t button{margin-left:auto;text-transform:none;letter-spacing:0}
+.pp{display:flex;align-items:center;gap:10px;padding:7px 0}
+.pp .a{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:14px;flex:none}
+.pp .n{flex:1;min-width:0;font-size:14px}
+.pp .n div{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
+.pp .n small{color:var(--mut);font-size:12px}
+.pp .ic{display:flex;gap:4px;color:var(--mut)}
+.pp .ic svg.i{width:17px;height:17px}
+.pp .ic .r{color:var(--red)}
+.pp .hb{background:var(--amber);color:#111;border-radius:999px;padding:1px 7px;font-size:12px;font-weight:700}
+.pp .mb{border:0;background:none;color:var(--mut);border-radius:8px;width:30px;height:30px;display:grid;place-items:center}
+.pp .mb:hover{background:var(--bg)}
+.sbtn{border:0;border-radius:8px;padding:6px 10px;font-weight:600;font-size:13px}
+.sbtn.ok{background:var(--blue);color:#fff}.sbtn.no{background:var(--bg);color:var(--ink)}
+.tg{display:flex;align-items:center;gap:10px;padding:8px 0;font-size:14px;cursor:pointer}
+.tg span{flex:1}
+.tg input{display:none}
+.tg i{width:38px;height:22px;border-radius:999px;background:#cbd5e1;position:relative;flex:none;transition:background .15s}
+.tg i:after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:#fff;transition:left .15s}
+.tg input:checked+i{background:var(--blue)}
+.tg input:checked+i:after{left:19px}
+.ctrl{display:flex;align-items:center;justify-content:center;gap:10px;padding:10px 12px calc(14px + env(safe-area-inset-bottom));flex-wrap:wrap}
+.cb{position:relative;height:48px;min-width:48px;border-radius:999px;border:0;background:var(--dark3);color:#e2e8f0;display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:0 14px}
+.cb:hover{background:var(--dark4)}
+.cb.off{background:var(--red);color:#fff}
+.cb.on{background:#c7d7fe;color:#1e3a8a}
+.cb.lock{opacity:.55}
+.cb.leave{background:var(--red);color:#fff;padding:0 20px}
+.cb .bd{position:absolute;top:-3px;right:-3px;background:var(--amber);color:#111;border-radius:999px;font-size:11px;font-weight:800;min-width:19px;height:19px;display:grid;place-items:center;padding:0 5px}
+.cb .lb{font-size:13px;font-weight:600}
+.cgap{width:14px}
+.pop{position:fixed;z-index:50;background:#fff;color:var(--ink);border-radius:12px;box-shadow:0 12px 32px #0f172a40;padding:6px;min-width:220px}
+.pop button{display:flex;width:100%;align-items:center;gap:10px;border:0;background:none;padding:10px 12px;border-radius:8px;text-align:left;color:var(--ink);font-size:14px}
+.pop button:hover{background:var(--bg)}
+.pop button.dng{color:var(--red)}
+.pop .emo{display:flex;gap:2px;padding:2px}
+.pop .emo button{font-size:26px;padding:8px;justify-content:center;width:auto}
+.toasts{position:fixed;left:16px;bottom:90px;z-index:60;display:flex;flex-direction:column;gap:8px;max-width:min(380px,calc(100vw - 32px))}
+.toast{background:#1e293b;color:#f1f5f9;border-radius:12px;padding:12px 14px;font-size:14px;box-shadow:0 10px 26px #0006;display:flex;gap:10px;align-items:center;animation:ti .2s ease-out}
+.toast .tx{flex:1;line-height:1.4}
+.toast .acts{display:flex;gap:6px}
+@keyframes ti{from{opacity:0;transform:translateY(10px)}}
+.modal{position:fixed;inset:0;background:#0f172a99;z-index:70;display:grid;place-items:center;padding:16px}
+.mbox{background:#fff;color:var(--ink);border-radius:16px;padding:22px;width:min(440px,100%);max-height:90vh;overflow:auto}
+.mbox h3{margin:0 0 8px;font-size:19px}
+.mbox p{color:var(--mut);margin:0 0 14px;line-height:1.5;font-size:14px}
+.mbox .acts{display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;margin-top:16px}
+.banner{background:#fef3c7;color:#78350f;font-size:13px;padding:8px 14px;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.banner button{border:0;background:#78350f;color:#fff;border-radius:8px;padding:5px 10px;font-weight:600;font-size:13px}
+@media (max-width:800px){
+  .side{position:absolute;inset:0;margin:0;width:auto;border-radius:0;z-index:20}
+  .cb .lb{display:none}
+  .cb{min-width:44px;height:44px;padding:0 10px}
+  .cb.leave{padding:0 14px}
+  .ctrl{gap:6px;padding:8px 6px calc(10px + env(safe-area-inset-bottom));flex-wrap:nowrap}
+  .toasts{bottom:auto;top:58px;left:10px;right:10px;max-width:none}
+  .cgap{display:none}
+  .stagewrap{padding:4px 6px}
+  .grid.n2{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+  .stagewrap.has-stage{flex-direction:column}
+  .stagewrap.has-stage .grid{flex:0 0 auto;grid-template-columns:repeat(4,1fr)!important;overflow:visible}
+  .ctitle{max-width:34vw}
+  .hide-m{display:none!important}
+  .lob{padding-top:0}
+}
+@media (max-width:800px) and (orientation:portrait){
+  .grid{align-content:stretch}
+  .grid.n1{grid-template-rows:1fr}
+  .grid.n2{grid-template-columns:1fr;grid-template-rows:1fr 1fr}
+  .grid.n3,.grid.n4{grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr}
+  #grid .tile{aspect-ratio:auto;height:100%;max-height:none;max-width:none}
+  .grid.n3 .tile:first-child{grid-column:1 / -1}
+  .stagewrap.has-stage .grid{align-content:start}
+  .stagewrap.has-stage #grid .tile{aspect-ratio:16/9;height:auto;grid-column:auto!important}
+}
+</style>
+</head>
+<body>
+<div id="boot" class="scr"><div class="spin"></div><div id="bootMsg">Načítám hovor…</div></div>
+<div id="gate" class="scr center hide">
+  <div class="logo"><b>L</b>Leernio <small>Hovor</small></div>
+  <h1>Do Hovoru se přihlásíš přes IS Leernio</h1>
+  <p id="gateP">Otevři IS Leernio a v záložce Aplikace vyber Hovor.</p>
+  <a class="btn" id="gateGo" target="_top" rel="noopener" style="text-decoration:none;margin-top:10px">Otevřít IS Leernio</a>
+</div>
 
+<div id="lobby" class="scr hide">
+  <div class="top">
+    <div class="logo"><b>L</b>Leernio <small>Hovor</small></div>
+    <div class="who" id="lobWho"></div>
+  </div>
+  <div class="lob">
+    <div class="prev">
+      <div class="pv">
+        <video id="pvVid" autoplay playsinline muted class="mirror"></video>
+        <div class="off hide" id="pvOff">Kamera je vypnutá</div>
+        <div class="lvl" id="pvLvl"><i></i><i></i><i></i><i></i><i></i></div>
+        <div class="bar">
+          <button class="rb" id="pvMic" title="Mikrofon"></button>
+          <button class="rb" id="pvCam" title="Kamera"></button>
+          <button class="rb" id="pvBlur" title="Rozostřit pozadí"></button>
+        </div>
+      </div>
+      <div class="devs">
+        <select id="selCam" title="Kamera"></select>
+        <select id="selMic" title="Mikrofon"></select>
+        <select id="selSpk" title="Reproduktor" class="hide"></select>
+      </div>
+      <div class="err" id="mediaErr"></div>
+    </div>
+    <div class="card">
+      <div id="isNote" class="warn hide"></div>
+      <div id="createBox" class="hide">
+        <h1>Nový hovor</h1>
+        <label class="field"><span>Název (nepovinné)</span><input id="cTitle" maxlength="40" placeholder="např. Doučování ČJL"></label>
+        <button class="btn full" id="cGo">Založit hovor</button>
+        <div class="mine" id="mineList"></div>
+        <div class="sep">nebo se připoj</div>
+      </div>
+      <div id="joinBox">
+        <h1 id="joinH">Připojit se k hovoru</h1>
+        <p class="note" id="joinNote" style="margin:0 0 14px">Zadej PIN, který ti poslal učitel. Do hovoru tě pustí hostitel.</p>
+        <label class="field"><span>PIN hovoru</span><input id="jPin" class="pin-in" inputmode="numeric" maxlength="7" autocomplete="off" placeholder="••••••"></label>
+        <button class="btn full" id="jGo">Připojit se</button>
+      </div>
+      <div class="err" id="lobErr"></div>
+    </div>
+  </div>
+</div>
+
+<div id="wait" class="scr center hide">
+  <div class="wprev"><div class="pv"><video id="wVid" autoplay playsinline muted class="mirror"></video><div class="off hide" id="wOff">Kamera je vypnutá</div></div></div>
+  <div class="pulse"></div>
+  <h1>Čekáš na připuštění</h1>
+  <p id="wTxt">Hostitel tě brzy pustí do hovoru.</p>
+  <button class="btn ghost" id="wCancel">Zrušit</button>
+</div>
+
+<div id="end" class="scr center hide">
+  <div class="logo"><b>L</b>Leernio <small>Hovor</small></div>
+  <h1 id="endH">Hovor skončil</h1>
+  <p id="endP"></p>
+  <div style="display:flex;gap:10px;margin-top:10px">
+    <button class="btn" id="endAgain">Připojit znovu</button>
+    <button class="btn sec" id="endHome">Hlavní stránka</button>
+  </div>
+</div>
+
+<div id="call" class="scr hide">
+  <div id="banners"></div>
+  <div class="cbar">
+    <div class="ctitle" id="cTitleT"></div>
+    <button class="chip" id="pinChip" title="Zkopírovat pozvánku"></button>
+    <span class="timer" id="timerT"></span>
+    <span class="sp"></span>
+    <span class="netw hide" id="netW">Obnovuji spojení se serverem…</span>
+    <span class="chip hide" id="lockChip" title="Hovor je zamčený"></span>
+  </div>
+  <div class="cmain">
+    <div class="stagewrap" id="sw">
+      <div class="stage hide" id="stage"><video id="stageVid" autoplay playsinline muted></video><div class="av hide" id="stageAv" style="position:absolute;inset:0;display:grid;place-items:center"><b></b></div><div class="tag" id="stageTag"></div></div>
+      <div class="grid" id="grid"></div>
+    </div>
+    <aside class="side hide" id="side">
+      <header><span id="sideH"></span><button id="sideX" title="Zavřít"></button></header>
+      <div class="body" id="sideBody"></div>
+      <div class="chatin hide" id="chatIn"><input id="chatTxt" maxlength="1000" placeholder="Napiš zprávu všem"><button id="chatSend" title="Odeslat"></button></div>
+    </aside>
+  </div>
+  <div class="ctrl">
+    <button class="cb" id="bMic"></button>
+    <button class="cb" id="bCam"></button>
+    <button class="cb hide-m" id="bShare"></button>
+    <button class="cb" id="bHand"></button>
+    <button class="cb hide-m" id="bReact"></button>
+    <button class="cb" id="bMore"></button>
+    <span class="cgap"></span>
+    <button class="cb" id="bChat"></button>
+    <button class="cb" id="bPeople"></button>
+    <span class="cgap"></span>
+    <button class="cb leave" id="bLeave"></button>
+  </div>
+</div>
+<div class="toasts" id="toasts"></div>
+
+<script>
+"use strict";
+/* =====================================================================
+   Hovor – Leernio. Videohovor do 4 lidí: WebRTC přímo mezi prohlížeči,
+   server (Apps Script) jen pouští do místnosti a předává zprávy pro navázání spojení.
+   ===================================================================== */
+const CFG = Object.assign({ api: "", isOrigin: "https://leernio-cz.github.io", isUrl: "https://leernio-cz.github.io/", pageUrl: "",
+  mpBase: "https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1.1675465747/" }, window.HOVOR_CONFIG || {});
+if (!CFG.pageUrl) CFG.pageUrl = location.href.split(/[?#]/)[0];
+const Q = new URLSearchParams(location.search);
+const EMBED = Q.get("embed") === "is" || (window.parent !== window);
+const $ = id => document.getElementById(id);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+const esc = s => String(s == null ? "" : s).replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+const store = { get(k) { try { return JSON.parse(localStorage.getItem("hovor-" + k)); } catch (e) { return null; } }, set(k, v) { try { localStorage.setItem("hovor-" + k, JSON.stringify(v)); } catch (e) { } } };
+const sstore = { get(k) { try { return JSON.parse(sessionStorage.getItem("hovor-" + k)); } catch (e) { return null; } }, set(k, v) { try { if (v == null) sessionStorage.removeItem("hovor-" + k); else sessionStorage.setItem("hovor-" + k, JSON.stringify(v)); } catch (e) { } } };
+
+/* ---------- ikony ---------- */
+const IC = {
+  mic: '<path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><path d="M12 19v3"/>',
+  micOff: '<path d="M2 2l20 20"/><path d="M18.9 13.4A7 7 0 0 0 19 12v-2"/><path d="M5 10v2a7 7 0 0 0 12 5"/><path d="M15 9.3V5a3 3 0 0 0-5.7-1.3"/><path d="M9 9v3a3 3 0 0 0 5.1 2.1"/><path d="M12 19v3"/>',
+  cam: '<path d="M16 13l5.2 3.5a.5.5 0 0 0 .8-.4V7.9a.5.5 0 0 0-.8-.4L16 11"/><rect x="2" y="6" width="14" height="12" rx="2"/>',
+  camOff: '<path d="M2 2l20 20"/><path d="M10.7 6H14a2 2 0 0 1 2 2v3.3l1 1L22 7v10"/><path d="M16 16a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h2"/>',
+  share: '<rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M9 10l3-3 3 3M12 7v6"/>',
+  hand: '<path d="M18 11V6a2 2 0 0 0-4 0"/><path d="M14 10V4a2 2 0 0 0-4 0v2"/><path d="M10 10.5V6a2 2 0 0 0-4 0v8"/><path d="M18 8a2 2 0 1 1 4 0v6a8 8 0 0 1-8 8h-2c-2.8 0-4.5-.9-6-2.4l-3.6-3.6a2 2 0 0 1 2.8-2.8L7 15"/>',
+  smile: '<circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><path d="M9 9h.01M15 9h.01"/>',
+  chat: '<path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>',
+  users: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.9M16 3.1a4 4 0 0 1 0 7.8"/>',
+  more: '<circle cx="12" cy="12" r="1"/><circle cx="19" cy="12" r="1"/><circle cx="5" cy="12" r="1"/>',
+  phone: '<path d="M10.7 13.3a16 16 0 0 0 3.4 2.6l1.3-1.3a2 2 0 0 1 2.1-.5c.8.3 1.7.5 2.6.6A2 2 0 0 1 22 16.7v3a2 2 0 0 1-2.2 2A19.8 19.8 0 0 1 2.3 4.2 2 2 0 0 1 4.3 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.6a2 2 0 0 1-.4 2.1L8.1 9.7" transform="rotate(135 12 12)"/>',
+  blur: '<circle cx="12" cy="8" r="3.5"/><path d="M5.5 21a6.5 6.5 0 0 1 13 0"/><path d="M2 4h1M2 9h1M2 14h1M21 4h1M21 9h1M21 14h1" stroke-dasharray="1 2"/>',
+  gear: '<path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>',
+  copy: '<rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>',
+  lock: '<rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+  x: '<path d="M18 6L6 18M6 6l12 12"/>',
+  send: '<path d="M22 2L11 13"/><path d="M22 2l-7 20-4-9-9-4z"/>',
+  pin: '<path d="M12 17v5"/><path d="M9 10.8a2 2 0 0 1-1.1 1.8l-1.8.9A2 2 0 0 0 5 15.2V17h14v-1.8a2 2 0 0 0-1.1-1.8l-1.8-.9a2 2 0 0 1-1.1-1.8V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z"/>',
+  full: '<path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M3 16v3a2 2 0 0 0 2 2h3M16 21h3a2 2 0 0 0 2-2v-3"/>',
+  ext: '<path d="M15 3h6v6M10 14L21 3M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/>',
+  check: '<path d="M20 6L9 17l-5-5"/>',
+  crown: '<path d="M2 18h20M3 7l4 4 5-7 5 7 4-4-2 11H5z"/>',
+  kick: '<path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M17 8l5 5M22 8l-5 5"/>',
+  door: '<path d="M9 21V3h10v18"/><path d="M3 21h18"/><path d="M13 12h.01"/>',
+  bell: '<path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10.3 21a1.9 1.9 0 0 0 3.4 0"/>'
+};
+const ic = (n, cls) => '<svg class="i' + (cls ? " " + cls : "") + '" viewBox="0 0 24 24">' + IC[n] + "</svg>";
+const COLORS = ["#2563eb", "#0e7490", "#7c3aed", "#0f766e", "#b45309", "#be185d", "#4338ca", "#15803d", "#c2410c"];
+const colorOf = s => { let h = 0; for (const c of String(s)) h = (h * 31 + c.charCodeAt(0)) >>> 0; return COLORS[h % COLORS.length]; };
+const initials = n => String(n || "?").trim().split(/\s+/).slice(0, 2).map(x => x[0]).join("").toUpperCase();
+
+/* ---------- server ---------- */
+async function api(action, body, retries) {
+  retries = retries == null ? 2 : retries;
+  for (let i = 0; ; i++) {
+    try {
+      if (!CFG.api || /VLOŽ/.test(CFG.api)) { const e = new Error("Hovor ještě není nastavený (chybí adresa serveru v config.js)."); e.code = "config"; throw e; }
+      const r = await fetch(CFG.api, { method: "POST", body: JSON.stringify(Object.assign({ action }, body || {})), headers: { "Content-Type": "text/plain;charset=utf-8" }, redirect: "follow", cache: "no-store" });
+      const j = await r.json();
+      if (!j.ok) { const e = new Error(j.error || "Chyba serveru"); e.code = j.code || "server"; throw e; }
+      return j.data;
+    } catch (e) {
+      const net = !e.code;
+      if ((!net && e.code !== "busy") || i >= retries) { if (net) { e.code = "net"; e.message = "Nepodařilo se spojit se serverem. Zkontroluj připojení k internetu."; } throw e; }
+      await sleep(700 * (i + 1));
+    }
+  }
+}
+
+/* ---------- oznámení a zvuky ---------- */
+function toast(html, opts) {
+  opts = opts || {};
+  const t = document.createElement("div"); t.className = "toast";
+  t.innerHTML = '<div class="tx">' + html + "</div>";
+  if (opts.acts) { const a = document.createElement("div"); a.className = "acts"; opts.acts.forEach(x => { const b = document.createElement("button"); b.className = "sbtn " + (x.cls || "no"); b.textContent = x.t; b.onclick = () => { try { x.f(); } finally { t.remove(); } }; a.appendChild(b); }); t.appendChild(a); }
+  if (opts.key) { const old = document.querySelector('.toast[data-k="' + opts.key + '"]'); if (old) old.remove(); t.dataset.k = opts.key; }
+  $("toasts").appendChild(t);
+  const dur = opts.ms == null ? 4500 : opts.ms;
+  if (dur) setTimeout(() => t.remove(), dur);
+  while ($("toasts").children.length > 4) $("toasts").firstChild.remove();
+  return t;
+}
+let AC = null;
+function audioCtx() { if (!AC) { try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { } } if (AC && AC.state === "suspended") AC.resume().catch(() => { }); return AC; }
+function beep(kind) {
+  const ac = audioCtx(); if (!ac) return;
+  const notes = kind === "knock" ? [660, 880] : kind === "hand" ? [880, 990] : kind === "join" ? [520, 780] : kind === "leave" ? [700, 460] : [740];
+  notes.forEach((f, i) => { const o = ac.createOscillator(), g = ac.createGain(); o.frequency.value = f; o.type = "sine"; const t0 = ac.currentTime + i * 0.13; g.gain.setValueAtTime(0, t0); g.gain.linearRampToValueAtTime(0.12, t0 + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.25); o.connect(g).connect(ac.destination); o.start(t0); o.stop(t0 + 0.3); });
+}
+function modal(title, text, acts, body) {
+  const m = document.createElement("div"); m.className = "modal";
+  m.innerHTML = '<div class="mbox"><h3>' + esc(title) + "</h3>" + (text ? "<p>" + text + "</p>" : "") + '<div class="mb-body"></div><div class="acts"></div></div>';
+  if (body) m.querySelector(".mb-body").appendChild(body);
+  const close = () => m.remove();
+  (acts || [{ t: "Zavřít" }]).forEach(a => { const b = document.createElement("button"); b.className = "btn " + (a.cls || "sec"); b.textContent = a.t; b.onclick = () => { if (a.f && a.f() === false) return; close(); }; m.querySelector(".acts").appendChild(b); });
+  m.addEventListener("click", e => { if (e.target === m) close(); });
+  document.body.appendChild(m); return m;
+}
+function show(id) { ["boot", "gate", "lobby", "wait", "end", "call"].forEach(x => $(x).classList.toggle("hide", x !== id)); }
+
+function needIS(msg) { $("gateP").textContent = msg || "Otevři IS Leernio a v záložce Aplikace vyber Hovor."; $("gateGo").href = CFG.isUrl + "#hovor"; show("gate"); }
+/* =====================================================================
+   Přihlášení přes IS (stejně jako Učebna a Opakovačka)
+   ===================================================================== */
+let AUTH = null;      // {token, who:{u,name,role,staff}}
+let PING = null;
+function isTarget() { return EMBED ? window.parent : (window.opener || null); }
+function toIS(type, extra) { const t = isTarget(); if (!t) return; try { t.postMessage(Object.assign({ src: "hovor", v: 1, type }, extra || {}), CFG.isOrigin); } catch (e) { } }
+let authWaiter = null, authTries = 0, AUTHERR = "";
+window.addEventListener("message", e => {
+  if (e.origin !== CFG.isOrigin) return;
+  if (e.source !== window.parent && e.source !== window.opener) return;
+  const m = e.data || {};
+  if (m.type === "is:auth" && m.token) onToken(String(m.token));
+  else if (m.type === "is:logout") { AUTH = null; if (SESS) leaveCall("logout"); else needIS("Odhlásil(a) ses z IS Leernio."); }
+  else if (m.type === "is:hovor" && /^\d{6}$/.test(String(m.pin || ""))) { $("jPin").value = m.pin; }
+});
+async function onToken(token) {
+  try {
+    const who = await api("whoami", { token });
+    AUTH = { token, who };
+    toIS("hov:auth-ok", { u: who.u });
+    if (!authWaiter && !$("gate").classList.contains("hide") && !SESS) startLobby();   /* přihlášení dorazilo pozdě */
+  } catch (e) {
+    AUTH = null;
+    toIS("hov:auth-error", { code: e.code || "" });
+    if (++authTries < 2) return;   /* IS jednou zkusí nový klíč */
+    AUTHERR = e.message;
+  }
+  if (authWaiter) authWaiter();
+}
+
+/* =====================================================================
+   Média: kamera, mikrofon, rozostření pozadí, sdílení obrazovky
+   ===================================================================== */
+const L = {
+  mic: store.get("mic") !== false, cam: store.get("cam") !== false, blur: !!store.get("blur"), mirror: store.get("mirror") !== false,
+  micTrack: null, camTrack: null, outVideo: null, screen: null,
+  devs: { cam: store.get("devCam") || "", mic: store.get("devMic") || "", spk: store.get("devSpk") || "" },
+  blocked: false, err: ""
+};
+function vConstraints() { return { width: { ideal: 1280 }, height: { ideal: 720 }, frameRate: { ideal: 24, max: 30 }, deviceId: L.devs.cam ? { ideal: L.devs.cam } : undefined }; }
+function aConstraints() { return { echoCancellation: true, noiseSuppression: true, autoGainControl: true, deviceId: L.devs.mic ? { ideal: L.devs.mic } : undefined }; }
+function mediaErrText(e) {
+  const n = e && e.name;
+  if (n === "NotAllowedError" || n === "SecurityError") return EMBED ? "Prohlížeč v okně IS nepovolil kameru a mikrofon. Povol je v adresním řádku, nebo hovor po připojení otevři v samostatném okně." : "Prohlížeč nepovolil kameru a mikrofon. Povol je v adresním řádku (ikona zámku) a obnov stránku.";
+  if (n === "NotFoundError" || n === "OverconstrainedError") return "Kameru nebo mikrofon se nepodařilo najít.";
+  if (n === "NotReadableError") return "Kameru nebo mikrofon právě používá jiná aplikace.";
+  return "Kameru a mikrofon se nepodařilo zapnout" + (e && e.message ? " (" + e.message + ")" : "") + ".";
+}
+async function initMedia() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { L.err = "Tento prohlížeč nepodporuje videohovory. Použij aktuální Chrome, Edge, Firefox nebo Safari."; L.blocked = true; return; }
+  try {
+    const s = await navigator.mediaDevices.getUserMedia({ audio: aConstraints(), video: L.cam ? vConstraints() : false });
+    L.micTrack = s.getAudioTracks()[0] || null; L.camTrack = s.getVideoTracks()[0] || null;
+  } catch (e) {
+    L.err = mediaErrText(e);
+    try { const s = await navigator.mediaDevices.getUserMedia({ audio: aConstraints() }); L.micTrack = s.getAudioTracks()[0]; L.cam = false; }   /* aspoň zvuk */
+    catch (e2) { L.blocked = true; L.mic = false; L.cam = false; }
+  }
+  if (L.micTrack) L.micTrack.enabled = L.mic;
+  if (!L.camTrack) L.cam = false;
+  await refreshOutVideo();
+  listDevices();
+  if (navigator.mediaDevices.addEventListener) navigator.mediaDevices.addEventListener("devicechange", listDevices);
+  meterLocal();
+}
+async function listDevices() {
+  let ds = []; try { ds = await navigator.mediaDevices.enumerateDevices(); } catch (e) { }
+  const fill = (sel, kind, cur, none) => {
+    const list = ds.filter(d => d.kind === kind && d.deviceId);
+    sel.innerHTML = list.map((d, i) => '<option value="' + esc(d.deviceId) + '">' + esc(d.label || none + " " + (i + 1)) + "</option>").join("") || '<option value="">' + none + " – nenalezeno</option>";
+    const live = kind === "videoinput" ? L.camTrack : kind === "audioinput" ? L.micTrack : null;
+    const id = live && live.getSettings ? live.getSettings().deviceId : cur;
+    if (id && list.some(d => d.deviceId === id)) sel.value = id; else if (cur && list.some(d => d.deviceId === cur)) sel.value = cur;
+    return list.length;
+  };
+  fill($("selCam"), "videoinput", L.devs.cam, "Kamera");
+  fill($("selMic"), "audioinput", L.devs.mic, "Mikrofon");
+  const spk = "setSinkId" in HTMLMediaElement.prototype ? fill($("selSpk"), "audiooutput", L.devs.spk, "Reproduktor") : 0;
+  $("selSpk").classList.toggle("hide", !spk);
+}
+async function setMic(on, quiet) {
+  if (on && !L.micTrack) {
+    try { const s = await navigator.mediaDevices.getUserMedia({ audio: aConstraints() }); L.micTrack = s.getAudioTracks()[0]; Peers.setTrack(0, L.micTrack); meterLocal(); }
+    catch (e) { toast(esc(mediaErrText(e))); return; }
+  }
+  L.mic = !!on && !!L.micTrack;
+  if (L.micTrack) L.micTrack.enabled = L.mic;
+  store.set("mic", L.mic); stateChanged(); renderControls(); renderLobbyControls();
+}
+async function setCam(on) {
+  if (on) {
+    if (!L.camTrack || L.camTrack.readyState === "ended") {
+      try { const s = await navigator.mediaDevices.getUserMedia({ video: vConstraints() }); L.camTrack = s.getVideoTracks()[0]; }
+      catch (e) { toast(esc(mediaErrText(e))); L.cam = false; renderControls(); renderLobbyControls(); return; }
+    }
+    L.cam = true;
+  } else {
+    L.cam = false;
+    if (L.camTrack) { L.camTrack.stop(); L.camTrack = null; }   /* zhasne i kontrolka kamery */
+  }
+  store.set("cam", L.cam);
+  await refreshOutVideo(); stateChanged(); renderControls(); renderLobbyControls();
+}
+async function setBlur(on) {
+  L.blur = !!on; store.set("blur", L.blur);
+  await refreshOutVideo(); stateChanged(); renderControls(); renderLobbyControls();
+}
+async function refreshOutVideo() {
+  let out = null;
+  if (L.cam && L.camTrack) {
+    if (L.blur) { out = await Blur.start(L.camTrack); if (!out) { L.blur = false; store.set("blur", false); out = L.camTrack; } }
+    else { Blur.stop(); out = L.camTrack; }
+  } else Blur.stop();
+  L.outVideo = out;
+  Peers.setTrack(1, out);
+  const ms = out ? new MediaStream([out]) : null;
+  ["pvVid", "wVid"].forEach(id => { const v = $(id); if (v.srcObject !== ms) { v.srcObject = ms; v.play().catch(() => { }); } v.classList.toggle("mirror", L.mirror && !!out); });
+  $("pvOff").classList.toggle("hide", !!out); $("wOff").classList.toggle("hide", !!out);
+  if (SESS && SESS.status === "member") renderTiles();
+}
+async function switchDevice(kind, id) {
+  if (kind === "cam") {
+    L.devs.cam = id; store.set("devCam", id);
+    if (L.cam) { if (L.camTrack) L.camTrack.stop(); L.camTrack = null; await setCam(true); }
+  } else if (kind === "mic") {
+    L.devs.mic = id; store.set("devMic", id);
+    try {
+      const s = await navigator.mediaDevices.getUserMedia({ audio: aConstraints() });
+      if (L.micTrack) L.micTrack.stop();
+      L.micTrack = s.getAudioTracks()[0]; L.micTrack.enabled = L.mic; Peers.setTrack(0, L.micTrack); meterLocal();
+    } catch (e) { toast(esc(mediaErrText(e))); }
+  } else if (kind === "spk") {
+    L.devs.spk = id; store.set("devSpk", id);
+    document.querySelectorAll("audio").forEach(a => { if (a.setSinkId) a.setSinkId(id).catch(() => { }); });
+  }
+}
+async function startShare() {
+  if (!navigator.mediaDevices.getDisplayMedia) { toast("Tento prohlížeč neumí sdílet obrazovku."); return; }
+  if (SESS && !isHost() && ROOM && !ROOM.settings.share && !SESS.grant.share) { toast("Sdílení obrazovky hostitel vypnul."); return; }
+  try {
+    const s = await navigator.mediaDevices.getDisplayMedia({ video: { frameRate: { ideal: 15, max: 30 } }, audio: false });
+    const t = s.getVideoTracks()[0]; if (!t) return;
+    try { t.contentHint = "detail"; } catch (e) { }
+    t.onended = () => stopShare();
+    L.screen = t; Peers.setTrack(2, t);
+    stateChanged(); renderControls(); renderTiles();
+  } catch (e) { if (e && e.name !== "NotAllowedError" && e.name !== "AbortError") toast("Sdílení se nepodařilo spustit."); }
+}
+function stopShare() {
+  if (!L.screen) return;
+  try { L.screen.stop(); } catch (e) { }
+  L.screen = null; Peers.setTrack(2, null);
+  stateChanged(); renderControls(); renderTiles();
+}
+
+/* ---------- měření hlasitosti (kdo mluví, ukazatel v předsíni) ---------- */
+const Meters = new Map();   // klíč → {an, buf, src}
+function meterFor(key, track) {
+  const ac = audioCtx(); if (!ac || !track) return null;
+  const old = Meters.get(key); if (old && old.track === track) return old;
+  if (old) { try { old.src.disconnect(); } catch (e) { } }
+  try {
+    const src = ac.createMediaStreamSource(new MediaStream([track])), an = ac.createAnalyser(); an.fftSize = 512;
+    src.connect(an); const m = { an, buf: new Uint8Array(an.fftSize), src, track, lvl: 0, hold: 0 };
+    Meters.set(key, m); return m;
+  } catch (e) { return null; }
+}
+function level(m) { if (!m) return 0; m.an.getByteTimeDomainData(m.buf); let s = 0; for (let i = 0; i < m.buf.length; i++) { const v = (m.buf[i] - 128) / 128; s += v * v; } return Math.sqrt(s / m.buf.length); }
+function meterLocal() { if (L.micTrack) meterFor("me", L.micTrack); }
+let talkWarnAt = 0, talkMuted = 0;
+setInterval(() => {
+  const me = Meters.get("me"), lv = me && L.micTrack ? level(me) : 0;
+  const bars = $("pvLvl").children, on = L.mic ? lv : 0;
+  for (let i = 0; i < bars.length; i++) bars[i].style.height = (on > 0.02 + i * 0.03 ? 4 + i * 3 : 3) + "px";
+  if (!SESS || SESS.status !== "member") return;
+  /* mluvíš se ztlumeným mikrofonem */
+  if (!L.mic && L.micTrack && lv > 0.06) { talkMuted++; if (talkMuted > 6 && Date.now() - talkWarnAt > 30000) { talkWarnAt = Date.now(); toast("Mluvíš, ale máš vypnutý mikrofon.", { acts: [{ t: "Zapnout", cls: "ok", f: () => toggleMic() }] }); } } else talkMuted = 0;
+  Meters.forEach((m, k) => { const l = k === "me" ? (L.mic ? lv : 0) : level(m); m.lvl = l; if (l > 0.035) m.hold = 4; else if (m.hold > 0) m.hold--; });
+  document.querySelectorAll(".tile[data-pid]").forEach(t => { const m = Meters.get(t.dataset.pid === SESS.pid ? "me" : t.dataset.pid); t.classList.toggle("spk", !!(m && m.hold > 0)); });
+}, 160);
+
+/* ---------- rozostření pozadí (MediaPipe Selfie Segmentation, běží v prohlížeči) ---------- */
+const Blur = (() => {
+  let seg = null, loading = null, src = null, vid = null, out = null, octx = null, mask = null, mctx = null, small = null, sctx = null, tiny = null, tctx = null, person = null, pctx = null, worker = null, busy = false, track = null, alive = false, lastMask = 0, segAt = 0, segAvg = 0, segGap = 40, frAt = 0, frAvg = 0, frGap = 40, frN = 0, gaveUp = false;
+  function loadScript(u) { return new Promise((res, rej) => { const s = document.createElement("script"); s.src = u; s.crossOrigin = "anonymous"; s.onload = res; s.onerror = () => rej(new Error("load")); document.head.appendChild(s); }); }
+  async function load() {
+    if (seg) return seg;
+    if (!loading) loading = (async () => {
+      if (!window.SelfieSegmentation) await loadScript(CFG.mpBase + "selfie_segmentation.js");
+      const s = new window.SelfieSegmentation({ locateFile: f => CFG.mpBase + f });
+      s.setOptions({ modelSelection: 1, selfieMode: false });
+      s.onResults(r => {
+        mctx.globalCompositeOperation = "copy"; mctx.drawImage(r.segmentationMask, 0, 0, mask.width, mask.height); lastMask = Date.now();
+      });
+      await s.initialize();
+      seg = s; return s;
+    })();
+    try { return await loading; } catch (e) { loading = null; throw e; }
+  }
+  function canvases(w, h) {
+    if (!out) { out = document.createElement("canvas"); octx = out.getContext("2d"); }
+    if (!mask) { mask = document.createElement("canvas"); mask.width = 256; mask.height = 144; mctx = mask.getContext("2d"); }
+    if (!small) { small = document.createElement("canvas"); small.width = 256; small.height = 144; sctx = small.getContext("2d"); }
+    if (!tiny) { tiny = document.createElement("canvas"); tiny.width = 32; tiny.height = 18; tctx = tiny.getContext("2d"); }
+    if (!person) { person = document.createElement("canvas"); pctx = person.getContext("2d"); }
+    if (out.width !== w || out.height !== h) { out.width = person.width = w; out.height = person.height = h; }
+  }
+  async function frame() {
+    if (!alive || busy || !vid || vid.readyState < 2) return;
+    const t0 = performance.now();
+    if (t0 - frAt < frGap) return;   /* slabší počítač: méně snímků za sekundu, aby zbyl výkon na hovor */
+    busy = true; frAt = t0;
+    try {
+      const w = vid.videoWidth || 640, h = vid.videoHeight || 360, W = Math.min(w, 640), H = Math.round(h * W / w);
+      canvases(W, H);
+      /* segmentace je náročná: na slabším počítači ji děláme méně často a mezitím použijeme poslední masku */
+      const now = performance.now();
+      if (now - segAt >= segGap) {
+        segAt = now;
+        sctx.drawImage(vid, 0, 0, small.width, small.height);
+        await seg.send({ image: small });
+        const took = performance.now() - now;
+        segAvg = segAvg ? segAvg * 0.8 + took * 0.2 : took;
+        segGap = Math.max(80, Math.min(500, segAvg * 3));
+      }
+      /* pozadí: zmenšit na pár pixelů a zpět zvětšit = měkké rozmazání (funguje ve všech prohlížečích) */
+      tctx.drawImage(vid, 0, 0, tiny.width, tiny.height);
+      octx.imageSmoothingEnabled = true; octx.imageSmoothingQuality = "high";
+      octx.globalCompositeOperation = "copy"; octx.drawImage(tiny, 0, 0, W, H);
+      /* postava: maska → jen pixely člověka z původního obrazu */
+      pctx.globalCompositeOperation = "copy"; pctx.imageSmoothingEnabled = true; pctx.drawImage(mask, 0, 0, W, H);
+      pctx.globalCompositeOperation = "source-in"; pctx.drawImage(vid, 0, 0, W, H);
+      octx.globalCompositeOperation = "source-over"; octx.drawImage(person, 0, 0);
+      const took = performance.now() - t0;
+      frAvg = frAvg ? frAvg * 0.9 + took * 0.1 : took; frN++;
+      frGap = Math.max(40, Math.min(250, frAvg * 2.5));
+      if (frN > 40 && frAvg > 160 && !gaveUp) { gaveUp = true; setTimeout(() => { if (L.blur) { setBlur(false); toast("Rozostření pozadí je pro tento počítač příliš náročné, vypnul jsem ho."); } }, 0); }
+    } catch (e) { }
+    busy = false;
+  }
+  async function start(cam) {
+    try { await load(); } catch (e) { toast("Rozostření pozadí se nepodařilo načíst. Zkontroluj připojení k internetu."); return null; }
+    if (src === cam && track && track.readyState === "live") return track;
+    stop();
+    src = cam; alive = true; lastMask = 0;
+    vid = document.createElement("video"); vid.muted = true; vid.playsInline = true; vid.srcObject = new MediaStream([cam]);
+    await vid.play().catch(() => { });
+    const s = cam.getSettings ? cam.getSettings() : {};
+    canvases(Math.min(s.width || 640, 640), Math.round((s.height || 360) * Math.min(s.width || 640, 640) / (s.width || 640)));
+    frAvg = 0; frN = 0; frGap = 40; segAvg = 0; segGap = 40; gaveUp = false;
+    octx.fillStyle = "#000"; octx.fillRect(0, 0, out.width, out.height);
+    track = out.captureStream(24).getVideoTracks()[0];
+    /* hodiny ve workeru: běží i v pozadí, kde by requestAnimationFrame stál */
+    try { worker = new Worker(URL.createObjectURL(new Blob(["setInterval(()=>postMessage(0),42)"], { type: "text/javascript" }))); worker.onmessage = frame; }
+    catch (e) { worker = { iv: setInterval(frame, 42), terminate() { clearInterval(this.iv); } }; }
+    return track;
+  }
+  function stop() {
+    alive = false; src = null;
+    if (worker) { worker.terminate(); worker = null; }
+    if (track) { try { track.stop(); } catch (e) { } track = null; }
+    if (vid) { vid.srcObject = null; vid = null; }
+  }
+  return { start, stop, load, get ready() { return !!seg; }, get cost() { return Math.round(segAvg) + "/" + Math.round(frAvg); } };
+})();
+
+/* =====================================================================
+   Spojení mezi prohlížeči (WebRTC, každý s každým – do 4 lidí)
+   Každé spojení má pevně 3 kanály: 0 zvuk, 1 kamera, 2 obrazovka, a datový kanál.
+   Nabídku posílá vždy účastník s „menším“ pid, takže se nabídky nikdy nekříží.
+   Zapnutí/vypnutí kamery, rozostření i sdílení obrazovky jen vymění stopu (replaceTrack).
+   ===================================================================== */
+let ICE = [{ urls: ["stun:stun.cloudflare.com:3478", "stun:stun.l.google.com:19302"] }];
+const Peers = (() => {
+  const P = new Map();
+  const local = i => i === 0 ? L.micTrack : i === 1 ? L.outVideo : L.screen;
+  function bitrate(o) {
+    const n = Math.max(1, P.size), cam = o.tx[1] && o.tx[1].sender, scr = o.tx[2] && o.tx[2].sender;
+    const set = (snd, max, scale) => { if (!snd || !snd.getParameters) return; const p = snd.getParameters(); if (!p.encodings || !p.encodings.length) p.encodings = [{}]; p.encodings[0].maxBitrate = max; if (scale) p.encodings[0].scaleResolutionDownBy = scale; snd.setParameters(p).catch(() => { }); };
+    set(cam, n === 1 ? 1500000 : n === 2 ? 900000 : 650000, n >= 3 ? 1.5 : 1);
+    set(scr, 2500000);
+  }
+  function attach(o) { o.tx.forEach((t, i) => { if (t.sender) t.sender.replaceTrack(local(i) || null).catch(() => { }); }); }
+  function make(pid, initiator, gen) {
+    const pc = new RTCPeerConnection({ iceServers: ICE, bundlePolicy: "max-bundle" });
+    const o = { pid, pc, initiator, gen, tx: [], pend: [], tracks: {}, dc: null, at: Date.now(), state: "new", restarted: 0, relay: false };
+    if (initiator) { o.tx = [pc.addTransceiver("audio", { direction: "sendrecv" }), pc.addTransceiver("video", { direction: "sendrecv" }), pc.addTransceiver("video", { direction: "sendrecv" })]; attach(o); }
+    o.dc = pc.createDataChannel("hv", { negotiated: true, id: 0, ordered: true });
+    o.dc.onopen = () => { sendDc(o, { t: "st", st: myState() }); };
+    o.dc.onmessage = e => { try { onApp(pid, JSON.parse(e.data)); } catch (x) { } };
+    pc.onicecandidate = e => { if (e.candidate) signal(pid, "ice", { gen: o.gen, c: e.candidate.toJSON() }); };
+    pc.ontrack = e => {
+      const idx = pc.getTransceivers().indexOf(e.transceiver);
+      const k = idx === 0 ? "a" : idx === 1 ? "v" : "s";
+      o.tracks[k] = e.track;
+      e.track.onunmute = () => renderTiles(); e.track.onmute = () => renderTiles();
+      if (k === "a") meterFor(pid, e.track);
+      renderTiles();
+    };
+    pc.onconnectionstatechange = () => {
+      o.state = pc.connectionState;
+      if (o.state === "connected") { o.restarted = 0; bitrate(o); stats(o); }
+      if (o.state === "failed" && o.initiator && !o.restarted) { o.restarted = Date.now(); try { pc.restartIce(); } catch (e) { } }
+      renderTiles();
+    };
+    pc.onnegotiationneeded = async () => {
+      if (!o.initiator || o.closed) return;
+      try { o.making = true; await pc.setLocalDescription(); signal(pid, "offer", { gen: o.gen, sdp: pc.localDescription.sdp }); }
+      catch (e) { } finally { o.making = false; }
+    };
+    P.set(pid, o);
+    return o;
+  }
+  function close(pid) {
+    const o = P.get(pid); if (!o) return;
+    o.closed = true; try { o.pc.close(); } catch (e) { }
+    P.delete(pid); Meters.delete(pid);
+  }
+  function newGen() { return Math.random().toString(36).slice(2, 10); }
+  /* podle seznamu účastníků: založ chybějící spojení, zavři spojení s těmi, kdo odešli */
+  function sync(members) {
+    const ids = new Set(members.map(m => m.pid));
+    for (const pid of [...P.keys()]) if (!ids.has(pid)) close(pid);
+    members.forEach(m => {
+      if (m.pid === SESS.pid) return;
+      const o = P.get(m.pid);
+      if (SESS.pid < m.pid) {
+        if (!o) make(m.pid, true, newGen());
+        else if (o.state !== "connected" && o.initiator && Date.now() - Math.max(o.at, o.restarted) > 25000 && m.on) { close(m.pid); make(m.pid, true, newGen()); }   /* nespojilo se → znovu */
+      }
+    });
+    P.forEach(bitrate);
+  }
+  async function onSignal(from, t, d) {
+    let o = P.get(from);
+    if (t === "hi") {   /* protějšek začíná nanovo (obnovená stránka, nové okno) */
+      if (o) close(from);
+      if (SESS.pid < from) make(from, true, newGen());
+      return;
+    }
+    if (t === "offer") {
+      if (SESS.pid < from) return;   /* nabídky posílám já */
+      if (!o || o.gen !== d.gen) { if (o) close(from); o = make(from, false, d.gen); }
+      await o.pc.setRemoteDescription({ type: "offer", sdp: d.sdp });
+      if (!o.tx.length) { o.tx = o.pc.getTransceivers().slice(0, 3); o.tx.forEach(x => { try { x.direction = "sendrecv"; } catch (e) { } }); attach(o); }
+      await o.pc.setLocalDescription();
+      signal(from, "answer", { gen: o.gen, sdp: o.pc.localDescription.sdp });
+      for (const c of o.pend.splice(0)) await o.pc.addIceCandidate(c).catch(() => { });
+      return;
+    }
+    if (!o || o.gen !== d.gen) return;
+    if (t === "answer") {
+      if (o.pc.signalingState !== "have-local-offer") return;
+      await o.pc.setRemoteDescription({ type: "answer", sdp: d.sdp });
+      for (const c of o.pend.splice(0)) await o.pc.addIceCandidate(c).catch(() => { });
+    } else if (t === "ice") {
+      if (!o.pc.remoteDescription) o.pend.push(d.c); else await o.pc.addIceCandidate(d.c).catch(() => { });
+    }
+  }
+  function sendDc(o, m) { if (o.dc && o.dc.readyState === "open") { try { o.dc.send(JSON.stringify(m)); return true; } catch (e) { } } return false; }
+  /* zpráva všem: přímo datovým kanálem, kdo ho nemá otevřený, dostane ji přes server */
+  function broadcast(m, viaServer) {
+    (ROOM ? ROOM.members : []).forEach(x => { if (x.pid === SESS.pid) return; const o = P.get(x.pid); if (!(o && sendDc(o, m)) && viaServer) signal(x.pid, "app", m); });
+  }
+  function setTrack(i, track) { P.forEach(o => { const t = o.tx[i]; if (t && t.sender) t.sender.replaceTrack(track || null).catch(() => { }); }); }
+  async function stats(o) {
+    try {
+      const r = await o.pc.getStats(); let rtt = null, relay = false, loss = 0, recv = 0;
+      r.forEach(s => {
+        if (s.type === "candidate-pair" && s.state === "succeeded" && (s.nominated || s.selected)) { rtt = s.currentRoundTripTime; const lc = r.get(s.localCandidateId), rc = r.get(s.remoteCandidateId); relay = (lc && lc.candidateType === "relay") || (rc && rc.candidateType === "relay"); }
+        if (s.type === "inbound-rtp" && s.kind === "video") { loss += s.packetsLost || 0; recv += s.packetsReceived || 0; }
+      });
+      const lr = recv ? loss / (loss + recv) : 0, dl = loss - (o.lastLoss || 0), dr = recv - (o.lastRecv || 0);
+      o.lastLoss = loss; o.lastRecv = recv;
+      const recent = dr > 0 ? dl / (dl + dr) : lr;
+      o.relay = relay; o.q = rtt == null ? 0 : (rtt > 0.5 || recent > 0.08) ? 1 : (rtt > 0.25 || recent > 0.03) ? 2 : 3;
+    } catch (e) { }
+  }
+  setInterval(() => { P.forEach(o => { if (o.state === "connected") stats(o); }); }, 5000);
+  return { P, sync, onSignal, close, broadcast, setTrack, sendDc, closeAll() { [...P.keys()].forEach(close); }, worstQ() { let q = 3; P.forEach(o => { if (o.q) q = Math.min(q, o.q); }); return q; } };
+})();
+
+/* =====================================================================
+   Relace hovoru a dotazování serveru
+   ===================================================================== */
+let SESS = null;     // {pin, pid, pt, status, host, grant:{mic,cam,share}}
+let ROOM = null;     // poslední stav místnosti ze serveru
+const OUT = [];      // odchozí zprávy pro server
+const ACK = {};      // poslední zpracovaná zpráva od každého odesílatele "epocha:pořadí"
+const PEERST = {};   // stav ostatních (mikrofon, kamera, ruka…) – novější vyhrává
+let PH = "", ver = 1, hotUntil = 0, wake = null, pollBusy = false, fails = 0, running = false;
+function isHost() { return !!(SESS && SESS.host); }
+function myState() { return { mic: L.mic, cam: !!L.outVideo, hand: !!SESS && !!SESS.hand, ha: SESS ? SESS.ha || 0 : 0, sh: !!L.screen, blur: L.blur && !!L.outVideo, q: Peers.worstQ(), v: ver }; }
+function stateChanged() { ver++; if (SESS && SESS.status === "member") { Peers.broadcast({ t: "st", st: myState() }); kick(); } }
+function signal(to, t, d) { OUT.push({ to, t, d }); hotUntil = Date.now() + 8000; kick(); }
+function kick() { if (wake) { const w = wake; wake = null; w(); } }
+function saveSess() { if (SESS) sstore.set("sess", { pin: SESS.pin, pid: SESS.pid, pt: SESS.pt }); else sstore.set("sess", null); }
+
+async function enterSession(r, fresh) {
+  SESS = { pin: r.pin, pid: r.pid, pt: r.pt, status: r.status, host: false, grant: {}, hand: false, ha: 0, needHi: fresh === false };
+  for (const k in ACK) delete ACK[k];
+  saveSess();
+  audioCtx();
+  if (r.status === "waiting") showWait(); else await becameMember();
+  if (!running) loop();
+}
+async function becameMember() {
+  SESS.status = "member";
+  try { const x = await api("ice", { pin: SESS.pin, pid: SESS.pid, pt: SESS.pt }); if (x && x.iceServers && x.iceServers.length) ICE = x.iceServers; } catch (e) { }
+  show("call"); startTimer(); renderControls();
+  toIS("hov:call", { state: "start", pin: SESS.pin });
+}
+async function loop() {
+  running = true;
+  while (SESS) {
+    const t0 = Date.now();
+    await pollOnce();
+    if (!SESS) break;
+    const iv = Date.now() < hotUntil ? 350 : SESS.status === "waiting" ? 1500 : 2000;
+    const left = t0 + iv - Date.now();
+    if (left > 0 && !OUT.length) await new Promise(r => { wake = r; setTimeout(() => { if (wake === r) { wake = null; r(); } }, left); });
+    else await sleep(60);
+  }
+  running = false;
+}
+async function pollOnce() {
+  if (pollBusy || !SESS) return;
+  pollBusy = true; PH = "api";
+  const out = OUT.splice(0, 60);
+  let r;
+  try {
+    r = await api("poll", { pin: SESS.pin, pid: SESS.pid, pt: SESS.pt, st: myState(), ack: ACK, out }, 0);
+    fails = 0; $("netW").classList.add("hide");
+  } catch (e) {
+    OUT.unshift(...out); pollBusy = false; fails++;
+    if (fails >= 3) $("netW").classList.remove("hide");
+    if (e.code === "bad_input") leaveCall("left");
+    await sleep(Math.min(8000, 800 * fails));
+    return;
+  }
+  pollBusy = false;
+  if (!SESS) return;
+  const st = r.me.status;
+  if (st === "waiting") { updateWait(r.room); return; }
+  if (st !== "member") { leaveCall(st, true); return; }
+  const wasHost = SESS.host;
+  SESS.host = !!r.me.host;
+  const prev = ROOM; ROOM = r.room;
+  if (SESS.status !== "member") await becameMember();
+  if (wasHost !== SESS.host && SESS.host && prev) { toast("Jsi teď hostitel hovoru."); beep("join"); }
+  ROOM.members.forEach(m => { const p = PEERST[m.pid]; if (!p || m.v >= p.v) PEERST[m.pid] = { mic: m.mic, cam: m.cam, hand: m.hand, ha: m.ha, sh: m.sh, blur: m.blur, q: m.q, v: m.v }; });
+  diffRoom(prev, ROOM);
+  if (SESS.needHi) {   /* po obnovení stránky / v novém okně: ostatní zahodí stará spojení se mnou */
+    SESS.needHi = false;
+    ROOM.members.forEach(m => { if (m.pid !== SESS.pid) { Peers.close(m.pid); signal(m.pid, "hi", {}); } });
+  }
+  Peers.sync(ROOM.members);
+  PH = "msgs";
+  for (const m of r.msgs || []) {
+    PH = "msg:" + m.t;
+    const a = String(ACK[m.f] || "").split(":");
+    if (a[0] === m.e && m.s <= +a[1]) continue;
+    try { await handleMsg(m); } catch (e) { }
+    ACK[m.f] = m.e + ":" + m.s;
+    if (m.t !== "app" && m.t !== "cmd") hotUntil = Date.now() + 6000;
+  }
+  PH = "";
+  render();
+}
+async function handleMsg(m) {
+  if (m.f === "_s" && m.t === "cmd") return onCmd(m.d || {});
+  if (m.t === "app") return onApp(m.f, m.d || {});
+  if (["offer", "answer", "ice", "hi"].includes(m.t)) return Peers.onSignal(m.f, m.t, m.d || {});
+}
+/* změny v místnosti → oznámení */
+function diffRoom(a, b) {
+  if (!a) return;
+  const ids = new Set(a.members.map(m => m.pid));
+  b.members.forEach(m => { if (!ids.has(m.pid) && m.pid !== SESS.pid) { toast("<b>" + esc(m.name) + "</b> se připojil(a)."); beep("join"); } });
+  const now = new Set(b.members.map(m => m.pid));
+  a.members.forEach(m => { if (!now.has(m.pid) && m.pid !== SESS.pid) { toast("<b>" + esc(m.name) + "</b> odešel/odešla."); delete PEERST[m.pid]; } });
+  if (isHost()) {
+    const w0 = new Set((a.waiting || []).map(w => w.pid));
+    (b.waiting || []).forEach(w => {
+      if (w0.has(w.pid)) return;
+      beep("knock");
+      toast("<b>" + esc(w.name) + "</b>" + (w.verified ? " ✓" : "") + " chce do hovoru.", { ms: 0, key: "w" + w.pid, acts: [{ t: "Pustit", cls: "ok", f: () => hostCmd("admit", w.pid) }, { t: "Odmítnout", f: () => hostCmd("deny", w.pid) }] });
+    });
+    const wn = new Set((b.waiting || []).map(w => w.pid));
+    w0.forEach(p => { if (!wn.has(p)) { const t = document.querySelector('.toast[data-k="w' + p + '"]'); if (t) t.remove(); } });
+    b.members.forEach(m => { const o = (a.members.find(x => x.pid === m.pid) || {}); if (m.hand && !o.hand && m.pid !== SESS.pid) { beep("hand"); toast("✋ <b>" + esc(m.name) + "</b> se hlásí."); } });
+  }
+  if (a.settings.locked !== b.settings.locked) toast(b.settings.locked ? "Hostitel hovor zamkl." : "Hostitel hovor odemkl.");
+  if (!isHost() && a.settings.unmute && !b.settings.unmute) toast("Hostitel vypnul zapínání mikrofonu. Když chceš mluvit, přihlas se ✋.");
+  if (!isHost() && a.settings.chat && !b.settings.chat) toast("Hostitel vypnul chat.");
+}
+/* zprávy od ostatních: stav, chat, reakce */
+const seenApp = new Set();
+function onApp(from, m) {
+  if (!m || typeof m !== "object") return;
+  if (m.id) { if (seenApp.has(m.id)) return; seenApp.add(m.id); }
+  if (m.t === "st" && m.st) { const p = PEERST[from]; if (!p || m.st.v >= p.v) { PEERST[from] = m.st; render(); } }
+  else if (m.t === "chat") addChat(from, m);
+  else if (m.t === "react") floatReact(from, m.e);
+}
+/* příkazy hostitele (přicházejí přes server, takže je nejde podvrhnout) */
+function onCmd(d) {
+  if (d.c === "mute") { if (L.mic) { setMic(false); toast("Hostitel ti vypnul mikrofon."); } }
+  else if (d.c === "camOff") { if (L.cam) { setCam(false); toast("Hostitel ti vypnul kameru."); } }
+  else if (d.c === "lowerHand") { if (SESS.hand) { setHand(false); toast("Hostitel ti sklopil ruku."); } }
+  else if (d.c === "stopShare") { if (L.screen) { stopShare(); toast("Hostitel ukončil tvoje sdílení obrazovky."); } }
+  else if (d.c === "askUnmute") { beep(); modal("Hostitel tě žádá o zapnutí mikrofonu", "", [{ t: "Nechat vypnutý" }, { t: "Zapnout mikrofon", cls: "", f: () => { SESS.grant.mic = true; setMic(true); } }]); }
+  else if (d.c === "askCam") { beep(); modal("Hostitel tě žádá o zapnutí kamery", "", [{ t: "Nechat vypnutou" }, { t: "Zapnout kameru", cls: "", f: () => { SESS.grant.cam = true; setCam(true); } }]); }
+}
+async function hostCmd(cmd, target, extra) {
+  try {
+    const r = await api("host", Object.assign({ pin: SESS.pin, pid: SESS.pid, pt: SESS.pt, cmd, target }, extra || {}));
+    if (r && r.room) { const prev = ROOM; ROOM = Object.assign({}, r.room); diffRoom(prev, ROOM); Peers.sync(ROOM.members); render(); }
+    kick(); return r;
+  } catch (e) { toast(esc(e.message)); return null; }
+}
+async function leaveCall(reason, fromServer, opts) {
+  if (!SESS) return;
+  const s = SESS; SESS = null; kick();
+  if (!fromServer && reason !== "popout") { try { await api("leave", Object.assign({ pin: s.pin, pid: s.pid, pt: s.pt }, opts || {}), 0); } catch (e) { } }
+  sstore.set("sess", null);
+  Peers.closeAll(); stopShare(); stopTimer();
+  ROOM = null; OUT.length = 0;
+  tiles.forEach(t => t.el.remove()); tiles.clear(); PINNED = null; CHAT.length = 0; unread = 0; SIDE = null; $("side").classList.add("hide");
+  for (const k in PEERST) delete PEERST[k];
+  ["audioBan", "blkBan"].forEach(id => { const b = $(id); if (b) b.remove(); });
+  document.querySelectorAll(".toast[data-k]").forEach(t => t.remove());
+  toIS("hov:call", { state: "end" });
+  const T = {
+    left: ["Odešel(a) jsi z hovoru", "", true], ended: ["Hovor skončil", "Hostitel hovor ukončil.", false],
+    end: ["Hovor skončil", "Ukončil(a) jsi hovor pro všechny.", false],
+    kicked: ["Byl(a) jsi odebrán(a)", "Hostitel tě z hovoru odebral.", false], denied: ["Hostitel tě nepustil", "Do hovoru tě hostitel tentokrát nepustil.", true],
+    moved: ["Hovor pokračuje jinde", "K hovoru ses připojil(a) v jiném okně nebo zařízení.", false], popout: ["Hovor pokračuje v novém okně", "Toto okno můžeš zavřít.", false],
+    logout: ["Odhlášení", "Odhlásil(a) ses z IS Leernio.", false], cancel: ["Čekání zrušeno", "", true]
+  }[reason] || ["Hovor skončil", "", true];
+  $("endH").textContent = T[0]; $("endP").textContent = T[1];
+  $("endAgain").classList.toggle("hide", !T[2] || !AUTH); $("endAgain").dataset.pin = s.pin;
+  $("endHome").textContent = EMBED && AUTH ? "Zpět na začátek" : "Otevřít IS Leernio";
+  if (reason === "popout" || reason === "logout") { Blur.stop(); }
+  show("end");
+}
+window.addEventListener("pagehide", () => {
+  /* zavřené okno: server mě za 15 s odebere; obnovení stránky se stihne vrátit dřív */
+  if (!SESS || !CFG.api || !navigator.sendBeacon) return;
+  try { navigator.sendBeacon(CFG.api, new Blob([JSON.stringify({ action: "away", pin: SESS.pin, pid: SESS.pid, pt: SESS.pt })], { type: "text/plain" })); } catch (e) { }
+});
+document.addEventListener("pointerdown", () => { if (AC && AC.state === "suspended") AC.resume().catch(() => { }); }, true);
+
+/* ---------- čekárna ---------- */
+function showWait() { show("wait"); $("wTxt").textContent = "Hostitel tě brzy pustí do hovoru."; }
+function updateWait(room) {
+  if (!room) return;
+  $("wTxt").innerHTML = room.full ? "Hovor je teď plný (nejvýš 4 lidé). Počkej, až někdo odejde." : "Hostitel " + (room.host ? "<b>" + esc(room.host) + "</b> " : "") + "tě brzy pustí do hovoru „" + esc(room.title) + "“.";
+}
+
+/* =====================================================================
+   Vzhled hovoru
+   ===================================================================== */
+let tmr = null;
+function startTimer() { stopTimer(); const f = () => { if (!ROOM) return; const s = Math.max(0, Math.floor((Date.now() - ROOM.created) / 1000)), h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; $("timerT").textContent = (h ? h + ":" + String(m).padStart(2, "0") : m) + ":" + String(x).padStart(2, "0"); }; f(); tmr = setInterval(f, 1000); }
+function stopTimer() { if (tmr) clearInterval(tmr); tmr = null; }
+let renderQ = false;
+function render() { if (renderQ) return; renderQ = true; requestAnimationFrame(() => { renderQ = false; if (!SESS || SESS.status !== "member" || !ROOM) return; renderBar(); renderTiles(); renderControls(); renderSide(); }); }
+function renderBar() {
+  $("cTitleT").textContent = ROOM.title;
+  $("pinChip").innerHTML = ic("copy") + "PIN " + ROOM.pin.slice(0, 3) + " " + ROOM.pin.slice(3);
+  $("lockChip").classList.toggle("hide", !ROOM.settings.locked); $("lockChip").innerHTML = ic("lock") + "Zamčeno";
+}
+function stOf(pid) { if (pid === SESS.pid) return myState(); return PEERST[pid] || {}; }
+let PINNED = null;
+const tiles = new Map();
+function tileEl(pid) {
+  let t = tiles.get(pid);
+  if (t) return t;
+  const el = document.createElement("div"); el.className = "tile"; el.dataset.pid = pid;
+  el.innerHTML = '<video autoplay playsinline muted></video><div class="av"><b></b></div><div class="st hide"></div><div class="hand hide">✋</div><div class="tr"><button class="tb" data-a="pin" title="Připnout">' + ic("pin") + '</button></div><div class="tag"><span class="mo hide">' + ic("micOff") + '</span><span class="nm"></span></div><div class="q hide"></div>';
+  const audio = document.createElement("audio"); audio.autoplay = true;
+  t = { el, video: el.querySelector("video"), audio, av: el.querySelector(".av"), avb: el.querySelector(".av b"), st: el.querySelector(".st"), hand: el.querySelector(".hand"), mo: el.querySelector(".mo"), nm: el.querySelector(".nm"), q: el.querySelector(".q"), pinb: el.querySelector('[data-a="pin"]') };
+  t.pinb.onclick = e => { e.stopPropagation(); PINNED = PINNED === pid ? null : pid; renderTiles(); };
+  el.ondblclick = () => { PINNED = PINNED === pid ? null : pid; renderTiles(); };
+  if (pid !== SESS.pid) el.appendChild(audio);
+  tiles.set(pid, t); return t;
+}
+function setSrc(v, track) {
+  const cur = v.srcObject && v.srcObject.getTracks()[0];
+  if (cur === track) return;
+  v.srcObject = track ? new MediaStream([track]) : null;
+  if (track) v.play().catch(() => { });
+}
+let audioBlocked = false;
+function renderTiles() {
+  if (!SESS || !ROOM) return;
+  const grid = $("grid"), members = ROOM.members, ids = new Set(members.map(m => m.pid));
+  for (const [pid, t] of tiles) if (!ids.has(pid)) { t.el.remove(); tiles.delete(pid); }
+  /* hlavní plocha: sdílená obrazovka (poslední, kdo sdílí), jinak připnutý účastník */
+  let sharer = null;
+  members.forEach(m => { const st = stOf(m.pid), o = Peers.P.get(m.pid); if (m.pid === SESS.pid ? L.screen : (st.sh && o && o.tracks.s)) sharer = m; });
+  if (PINNED && (!ids.has(PINNED) || members.length < 2)) PINNED = null;
+  const stageV = $("stageVid");
+  let stageOn = false, stageTrack = null, stageLabel = "", stageAv = null, mirror = false;
+  if (sharer) { stageOn = true; stageTrack = sharer.pid === SESS.pid ? L.screen : Peers.P.get(sharer.pid).tracks.s; stageLabel = sharer.pid === SESS.pid ? "Sdílíš svou obrazovku" : esc(sharer.name) + " sdílí obrazovku"; }
+  else if (PINNED) {
+    const m = members.find(x => x.pid === PINNED), me = m.pid === SESS.pid, o = Peers.P.get(m.pid), st = stOf(m.pid);
+    const vt = me ? L.outVideo : (o && o.tracks.v), camOn = me ? !!L.outVideo : (!!st.cam && !!vt && !vt.muted);
+    stageOn = true; stageTrack = camOn ? vt : null; stageLabel = esc(me ? "Ty" : m.name) + " · připnuto"; stageAv = camOn ? null : m; mirror = me && L.mirror;
+  }
+  $("stage").classList.toggle("hide", !stageOn);
+  $("sw").classList.toggle("has-stage", stageOn);
+  setSrc(stageV, stageOn ? stageTrack : null);
+  stageV.classList.toggle("mirror", mirror); stageV.classList.toggle("hide", !stageTrack);
+  $("stageAv").classList.toggle("hide", !stageAv);
+  if (stageAv) { const bb = $("stageAv").firstChild; bb.textContent = initials(stageAv.name); bb.style.background = colorOf(stageAv.name); }
+  $("stageTag").innerHTML = stageLabel;
+  const order = members.slice();
+  grid.className = "grid n" + Math.min(4, order.length);
+  order.forEach((m, i) => {
+    const t = tileEl(m.pid), me = m.pid === SESS.pid, st = stOf(m.pid), o = Peers.P.get(m.pid);
+    if (t.el.parentNode !== grid || grid.children[i] !== t.el) grid.insertBefore(t.el, grid.children[i] || null);
+    const vt = me ? L.outVideo : (o && o.tracks.v);
+    const camOn = me ? !!L.outVideo : (!!st.cam && !!vt && !vt.muted);
+    setSrc(t.video, camOn ? vt : null);
+    t.video.classList.toggle("hide", !camOn);
+    t.video.classList.toggle("mirror", me && L.mirror);
+    t.av.classList.toggle("hide", camOn);
+    t.avb.textContent = initials(m.name); t.avb.style.background = colorOf(m.name);
+    t.nm.textContent = (me ? "Ty" : m.name) + (m.pid === ROOM.hostPid ? " · hostitel" : "");
+    t.mo.classList.toggle("hide", me ? L.mic : !!st.mic);
+    t.hand.classList.toggle("hide", !(me ? SESS.hand : st.hand));
+    if (!me) {
+      const at = o && o.tracks.a;
+      if (at && (!t.audio.srcObject || t.audio.srcObject.getTracks()[0] !== at)) {
+        t.audio.srcObject = new MediaStream([at]);
+        if (L.devs.spk && t.audio.setSinkId) t.audio.setSinkId(L.devs.spk).catch(() => { });
+        t.audio.play().catch(() => { audioBlocked = true; showAudioBanner(); });
+      }
+      const conn = o ? o.state : "new", online = m.on !== false;
+      const msg = !online ? "Bez spojení…" : (conn === "connected" ? "" : conn === "failed" ? "Spojení se nepodařilo, zkouším znovu…" : "Připojuji…");
+      t.st.textContent = msg; t.st.classList.toggle("hide", !msg || (conn === "connected"));
+      const q = o && o.state === "connected" ? o.q : 0;
+      t.q.classList.toggle("hide", !(q === 1)); t.q.textContent = "Slabé spojení";
+    } else { t.st.classList.add("hide"); t.q.classList.add("hide"); }
+    t.pinb.classList.toggle("on", PINNED === m.pid);
+    t.pinb.classList.toggle("hide", members.length < 2);
+  });
+}
+function showAudioBanner() {
+  if ($("audioBan")) return;
+  const b = document.createElement("div"); b.className = "banner"; b.id = "audioBan";
+  b.innerHTML = "Prohlížeč zastavil zvuk ostatních. <button>Zapnout zvuk</button>";
+  b.querySelector("button").onclick = () => { audioCtx(); document.querySelectorAll("audio").forEach(a => a.play().catch(() => { })); b.remove(); audioBlocked = false; };
+  $("banners").appendChild(b);
+}
+function showBlockedBanner() {
+  if ($("blkBan") || !EMBED) return;
+  const b = document.createElement("div"); b.className = "banner"; b.id = "blkBan";
+  b.innerHTML = "Kamera a mikrofon jsou v okně IS zablokované. <button>Otevřít hovor v samostatném okně</button>";
+  b.querySelector("button").onclick = popOut;
+  $("banners").appendChild(b);
+}
+function floatReact(pid, e) {
+  if (!["👍", "❤️", "😂", "😮", "👏", "🎉"].includes(e)) return;
+  const t = tiles.get(pid); if (!t) return;
+  const f = document.createElement("div"); f.className = "float"; f.textContent = e; f.style.left = (20 + Math.random() * 50) + "%";
+  t.el.appendChild(f); setTimeout(() => f.remove(), 2700);
+}
+
+/* ---------- ovládací lišta ---------- */
+function canMic() { return isHost() || !ROOM || ROOM.settings.unmute || SESS.grant.mic || L.mic; }
+function canCam() { return isHost() || !ROOM || ROOM.settings.video || SESS.grant.cam || L.cam; }
+function canShare() { return isHost() || !ROOM || ROOM.settings.share || !!L.screen; }
+function renderControls() {
+  if (!SESS) return;
+  const lab = (on, a, b) => '<span class="lb">' + (on ? a : b) + "</span>";
+  const b = $("bMic"); b.innerHTML = ic(L.mic ? "mic" : "micOff") + lab(L.mic, "Ztlumit", "Zapnout"); b.classList.toggle("off", !L.mic); b.classList.toggle("lock", !L.mic && !canMic()); b.title = (L.mic ? "Vypnout" : "Zapnout") + " mikrofon (M)";
+  const c = $("bCam"); c.innerHTML = ic(L.outVideo ? "cam" : "camOff") + lab(!!L.outVideo, "Kamera", "Kamera"); c.classList.toggle("off", !L.outVideo); c.classList.toggle("lock", !L.outVideo && !canCam()); c.title = (L.outVideo ? "Vypnout" : "Zapnout") + " kameru (V)";
+  const s = $("bShare"); s.innerHTML = ic("share") + lab(!!L.screen, "Ukončit sdílení", "Sdílet"); s.classList.toggle("on", !!L.screen); s.classList.toggle("lock", !L.screen && !canShare()); s.title = "Sdílet obrazovku";
+  const h = $("bHand"); h.innerHTML = ic("hand") + lab(SESS.hand, "Sklopit", "Hlásit se"); h.classList.toggle("on", !!SESS.hand); h.title = "Přihlásit se (H)";
+  $("bReact").innerHTML = ic("smile") + lab(1, "Reakce", ""); $("bReact").title = "Reakce"; $("bReact").classList.toggle("hide", !!(ROOM && !ROOM.settings.react && !isHost()));
+  $("bMore").innerHTML = ic("more"); $("bMore").title = "Další možnosti";
+  const ch = $("bChat"); ch.innerHTML = ic("chat") + lab(1, "Chat", "") + (unread ? '<span class="bd">' + unread + "</span>" : ""); ch.classList.toggle("on", SIDE === "chat"); ch.title = "Chat";
+  const nw = ROOM && ROOM.waiting ? ROOM.waiting.length : 0;
+  const pp = $("bPeople"); pp.innerHTML = ic("users") + lab(1, "Lidé" + (ROOM ? " (" + ROOM.members.length + ")" : ""), "") + (nw ? '<span class="bd">' + nw + "</span>" : ""); pp.classList.toggle("on", SIDE === "people"); pp.title = "Účastníci";
+  $("bLeave").innerHTML = ic("phone") + '<span class="lb">Odejít</span>'; $("bLeave").title = "Odejít z hovoru";
+  if (L.blocked && SESS.status === "member") showBlockedBanner();
+}
+async function toggleMic() {
+  if (!L.mic && !canMic()) { toast("Zapínání mikrofonu hostitel vypnul. Přihlas se ✋ a hostitel tě požádá o zapnutí."); return; }
+  await setMic(!L.mic);
+}
+async function toggleCam() {
+  if (!L.outVideo && !canCam()) { toast("Zapínání kamery hostitel vypnul."); return; }
+  await setCam(!L.outVideo);
+}
+function setHand(on) { SESS.hand = !!on; SESS.ha = on ? Date.now() : 0; stateChanged(); renderControls(); renderTiles(); renderSide(); }
+function popAt(btn, html, setup) {
+  closePop();
+  const p = document.createElement("div"); p.className = "pop"; p.id = "pop"; p.innerHTML = html;
+  document.body.appendChild(p);
+  const r = btn.getBoundingClientRect(), w = p.offsetWidth, hgt = p.offsetHeight;
+  let left = Math.min(window.innerWidth - w - 8, Math.max(8, r.left + r.width / 2 - w / 2)), top = r.top - hgt - 8;
+  if (top < 8) top = r.bottom + 8;
+  p.style.left = left + "px"; p.style.top = top + "px";
+  if (setup) setup(p);
+  setTimeout(() => document.addEventListener("click", closePopOut, { once: true }), 0);
+  return p;
+}
+function closePopOut(e) { const p = $("pop"); if (p && p.contains(e.target)) { document.addEventListener("click", closePopOut, { once: true }); return; } closePop(); }
+function closePop() { const p = $("pop"); if (p) p.remove(); }
+function moreMenu() {
+  const items = [
+    ["blur", L.blur ? "Vypnout rozostření pozadí" : "Rozostřit pozadí", () => { if (!L.cam) toast("Rozostření se projeví, až zapneš kameru."); setBlur(!L.blur); }],
+    ["share", L.screen ? "Ukončit sdílení obrazovky" : "Sdílet obrazovku", () => L.screen ? stopShare() : startShare(), "share-m"],
+    ["gear", "Nastavení zvuku a obrazu", devicesModal],
+    ["copy", "Zkopírovat pozvánku", copyInvite],
+    ["full", document.fullscreenElement ? "Ukončit celou obrazovku" : "Celá obrazovka", () => { if (document.fullscreenElement) document.exitFullscreen(); else if (document.documentElement.requestFullscreen) document.documentElement.requestFullscreen().catch(() => toast("Celou obrazovku tu prohlížeč nepovolil.")); }]
+  ];
+  if (window.innerWidth <= 800 && (!ROOM || ROOM.settings.react || isHost())) items.unshift(["smile", "Reakce", () => setTimeout(() => reactMenu($("bMore")), 0)]);
+  if (EMBED) items.push(["ext", "Otevřít v samostatném okně", popOut]);
+  const p = popAt($("bMore"), items.map((x, i) => '<button data-i="' + i + '"' + (x[3] ? ' class="' + x[3] + '"' : "") + ">" + ic(x[0]) + esc(x[1]) + "</button>").join(""));
+  p.querySelectorAll("button").forEach(b => b.onclick = () => { closePop(); items[+b.dataset.i][2](); });
+  if (window.innerWidth > 800) { const sm = p.querySelector(".share-m"); if (sm) sm.remove(); }
+}
+function reactMenu(anchor) {
+  const E = ["👍", "❤️", "😂", "😮", "👏", "🎉"];
+  const p = popAt(anchor && anchor.nodeType ? anchor : $("bReact"), '<div class="emo">' + E.map(e => "<button>" + e + "</button>").join("") + "</div>");
+  p.querySelectorAll("button").forEach(b => b.onclick = () => { closePop(); const m = { t: "react", e: b.textContent, id: rid() }; seenApp.add(m.id); Peers.broadcast(m, true); floatReact(SESS.pid, m.e); });
+}
+function rid() { return Math.random().toString(36).slice(2, 12); }
+async function copyInvite() {
+  const txt = "Připoj se k hovoru „" + ROOM.title + "“ v IS Leernio: Aplikace → Hovor, PIN " + ROOM.pin + "\n" + CFG.isUrl + "#hovor";
+  try { await navigator.clipboard.writeText(txt); toast("Pozvánka zkopírována."); }
+  catch (e) { const ta = document.createElement("textarea"); ta.value = txt; ta.style.cssText = "width:100%;height:110px;border:1px solid #cbd5e1;border-radius:10px;padding:10px;font:inherit;font-size:14px"; ta.readOnly = true; modal("Pozvánka do hovoru", "Zkopíruj text a pošli ho účastníkům.", null, ta); setTimeout(() => ta.select(), 50); }
+}
+async function popOut() {
+  try {
+    const r = await api("ticket", { pin: SESS.pin, pid: SESS.pid, pt: SESS.pt });
+    const url = CFG.pageUrl + "#tk=" + r.tk;
+    const w = window.open(url, "_blank");
+    if (w) { leaveCall("popout"); stopAllMedia(); }
+    else { const a = document.createElement("div"); a.innerHTML = '<p class="note">Prohlížeč nové okno zablokoval. Otevři tento odkaz (platí 2 minuty):</p><input readonly style="width:100%;padding:9px;border:1px solid #cbd5e1;border-radius:9px" value="' + esc(url) + '">'; modal("Otevřít v samostatném okně", "", null, a); }
+  } catch (e) { toast(esc(e.message)); }
+}
+function stopAllMedia() { Blur.stop(); [L.micTrack, L.camTrack, L.screen].forEach(t => { if (t) try { t.stop(); } catch (e) { } }); L.micTrack = L.camTrack = L.screen = L.outVideo = null; }
+function devicesModal() {
+  const box = document.createElement("div");
+  box.innerHTML = '<label class="field"><span>Kamera</span><select data-k="cam"></select></label><label class="field"><span>Mikrofon</span><select data-k="mic"></select></label><label class="field" data-spk><span>Reproduktor</span><select data-k="spk"></select></label>' +
+    '<label class="tg"><span>Rozostřit pozadí</span><input type="checkbox" data-t="blur"' + (L.blur ? " checked" : "") + '><i></i></label>' +
+    '<label class="tg"><span>Zrcadlit můj obraz (jen pro mě)</span><input type="checkbox" data-t="mirror"' + (L.mirror ? " checked" : "") + '><i></i></label>' +
+    '<p class="note" style="margin-top:12px">Zkratky: <b>M</b> mikrofon, <b>V</b> kamera, <b>H</b> hlásit se.</p>';
+  [["cam", "selCam"], ["mic", "selMic"], ["spk", "selSpk"]].forEach(([k, id]) => { const s = box.querySelector('[data-k="' + k + '"]'); s.innerHTML = $(id).innerHTML; s.value = $(id).value; s.onchange = () => { $(id).value = s.value; switchDevice(k, s.value); }; });
+  if ($("selSpk").classList.contains("hide")) box.querySelector("[data-spk]").remove();
+  box.querySelector('[data-t="blur"]').onchange = e => setBlur(e.target.checked);
+  box.querySelector('[data-t="mirror"]').onchange = e => { L.mirror = e.target.checked; store.set("mirror", L.mirror); refreshOutVideo(); };
+  modal("Nastavení zvuku a obrazu", "", null, box);
+}
+function leaveMenu() {
+  if (!isHost() || ROOM.members.length < 2) {
+    if (isHost()) { modal("Odejít z hovoru?", "Jsi v hovoru sám/sama. Hovor se ukončí.", [{ t: "Zrušit" }, { t: "Ukončit hovor", cls: "red", f: () => { leaveCall("end", false, { end: true }); } }]); return; }
+    leaveCall("left"); return;
+  }
+  const others = ROOM.members.filter(m => m.pid !== SESS.pid);
+  const box = document.createElement("div");
+  box.innerHTML = '<label class="field"><span>Kdo bude hostitel, když odejdeš</span><select>' + others.map(m => '<option value="' + m.pid + '">' + esc(m.name) + "</option>").join("") + "</select></label>";
+  modal("Odejít z hovoru", "Můžeš hovor ukončit pro všechny, nebo odejít a předat roli hostitele.", [
+    { t: "Zrušit" },
+    { t: "Odejít", f: () => { leaveCall("left", false, { next: box.querySelector("select").value }); } },
+    { t: "Ukončit pro všechny", cls: "red", f: () => { leaveCall("end", false, { end: true }); } }
+  ], box);
+}
+
+/* ---------- boční panel: chat a lidé ---------- */
+let SIDE = null, unread = 0, sideHtml = "";
+const CHAT = [];
+function openSide(k) { SIDE = SIDE === k ? null : k; sideHtml = ""; if (SIDE === "chat") unread = 0; $("side").classList.toggle("hide", !SIDE); renderSide(); renderControls(); if (SIDE === "chat") setTimeout(() => $("chatTxt").focus(), 50); }
+function linkify(t) { return esc(t).replace(/https?:\/\/[^\s<]+/g, u => '<a href="' + u + '" target="_blank" rel="noopener noreferrer">' + u + "</a>"); }
+function addChat(from, m) {
+  if (typeof m.text !== "string" || !m.text.trim()) return;
+  const mem = ROOM && ROOM.members.find(x => x.pid === from);
+  CHAT.push({ from, name: from === SESS.pid ? "Ty" : (mem ? mem.name : "Někdo"), text: m.text.slice(0, 1000), at: Date.now() });
+  if (SIDE !== "chat" && from !== SESS.pid) { unread++; beep(); toast("💬 <b>" + esc(mem ? mem.name : "Zpráva") + ":</b> " + esc(m.text.slice(0, 80)), { acts: [{ t: "Otevřít", cls: "ok", f: () => openSide("chat") }] }); }
+  renderSide(); renderControls();
+}
+function sendChat() {
+  const v = $("chatTxt").value.trim(); if (!v) return;
+  if (ROOM && !ROOM.settings.chat && !isHost()) { toast("Chat hostitel vypnul."); return; }
+  const m = { t: "chat", text: v.slice(0, 1000), id: rid() }; seenApp.add(m.id);
+  Peers.broadcast(m, true); addChat(SESS.pid, m); $("chatTxt").value = "";
+}
+function renderSide() {
+  if (!SIDE || !SESS || !ROOM) return;
+  $("sideX").innerHTML = ic("x");
+  const B = $("sideBody");
+  $("chatIn").classList.toggle("hide", SIDE !== "chat");
+  if (SIDE === "chat") {
+    $("sideH").textContent = "Chat";
+    const off = !ROOM.settings.chat && !isHost();
+    $("chatTxt").disabled = off; $("chatSend").disabled = off; $("chatTxt").placeholder = off ? "Chat hostitel vypnul" : "Napiš zprávu všem";
+    $("chatSend").innerHTML = ic("send");
+    const html = '<div class="msgs">' + (CHAT.length ? CHAT.map(m => '<div class="msg"><div class="h"><b>' + esc(m.name) + "</b>" + new Date(m.at).toLocaleTimeString("cs-CZ", { hour: "2-digit", minute: "2-digit" }) + '</div><div class="t">' + linkify(m.text) + "</div></div>").join("") : '<p class="note">Zprávy vidí jen ti, kdo jsou právě v hovoru. Po skončení hovoru se neukládají.</p>') + "</div>";
+    if (sideHtml !== html) { sideHtml = html; B.innerHTML = html; B.scrollTop = B.scrollHeight; }
+    return;
+  }
+  $("sideH").textContent = "Lidé (" + ROOM.members.length + "/" + ROOM.max + ")";
+  const host = isHost();
+  let h = "";
+  if (host && ROOM.waiting && ROOM.waiting.length) {
+    h += '<div class="sec-t">Čekárna (' + ROOM.waiting.length + ')' + (ROOM.waiting.length > 1 ? '<button class="sbtn ok" data-a="admitAll">Pustit všechny</button>' : "") + "</div>";
+    ROOM.waiting.forEach(w => { h += '<div class="pp"><div class="a" style="background:' + colorOf(w.name) + '">' + esc(initials(w.name)) + '</div><div class="n"><div>' + esc(w.name) + "</div><small>" + (w.verified ? "✓ přihlášen(a) přes Leernio" : "host bez účtu") + '</small></div><button class="sbtn no" data-a="deny" data-p="' + w.pid + '">Odmítnout</button><button class="sbtn ok" data-a="admit" data-p="' + w.pid + '">Pustit</button></div>'; });
+    if (ROOM.members.length >= ROOM.max) h += '<p class="note">Hovor je plný. Pustit někoho dalšího půjde, až někdo odejde.</p>';
+  }
+  const hands = ROOM.members.filter(m => stOf(m.pid).hand).sort((a, b) => (stOf(a.pid).ha || 0) - (stOf(b.pid).ha || 0)).map(m => m.pid);
+  h += '<div class="sec-t">V hovoru' + (host && ROOM.members.length > 1 ? '<button class="sbtn no" data-a="muteAll">Ztlumit všechny</button>' : "") + "</div>";
+  if (host && hands.length > 1) h += '<div style="margin:-2px 0 6px"><button class="sbtn no" data-a="lowerAll">Sklopit všechny ruce</button></div>';
+  ROOM.members.forEach(m => {
+    const me = m.pid === SESS.pid, st = stOf(m.pid), hi = hands.indexOf(m.pid);
+    h += '<div class="pp"><div class="a" style="background:' + colorOf(m.name) + '">' + esc(initials(m.name)) + '</div><div class="n"><div>' + esc(m.name) + (me ? " (ty)" : "") + "</div><small>" + (m.pid === ROOM.hostPid ? "Hostitel · " : "") + (m.verified ? "✓ Leernio" : "host") + (m.on === false ? " · bez spojení" : "") + "</small></div>" +
+      '<div class="ic">' + (hi >= 0 ? '<span class="hb">✋ ' + (hi + 1) + "</span>" : "") + (st.sh ? ic("share") : "") + ((me ? L.outVideo : st.cam) ? ic("cam") : ic("camOff", "r")) + ((me ? L.mic : st.mic) ? ic("mic") : ic("micOff", "r")) + "</div>" +
+      (host && !me ? '<button class="mb" data-a="menu" data-p="' + m.pid + '" title="Možnosti">' + ic("more") + "</button>" : "") + "</div>";
+  });
+  if (host) {
+    const S = ROOM.settings, tg = (k, t) => '<label class="tg"><span>' + t + '</span><input type="checkbox" data-s="' + k + '"' + (S[k] ? " checked" : "") + "><i></i></label>";
+    h += '<div class="sec-t">Nastavení hovoru</div>' + tg("locked", "Zamknout hovor (nikdo další se nepřipojí)") + tg("autoIS", "Přihlášené přes Leernio pouštět bez čekání") +
+      tg("unmute", "Účastníci si mohou zapnout mikrofon") + tg("video", "Účastníci si mohou zapnout kameru") + tg("share", "Účastníci mohou sdílet obrazovku") + tg("chat", "Chat") + tg("react", "Reakce") +
+      '<div style="margin-top:10px"><button class="sbtn no" data-a="rename">Přejmenovat hovor</button></div>';
+  } else h += '<p class="note" style="margin-top:14px">Pouštět lidi, ztlumit ostatní a měnit nastavení může jen hostitel.</p>';
+  if (sideHtml === h) return;   /* překreslit jen při změně (nezavírá rozdělané kliknutí) */
+  sideHtml = h; B.innerHTML = h;
+  B.querySelectorAll("[data-a]").forEach(b => b.onclick = e => {
+    const a = b.dataset.a, p = b.dataset.p;
+    if (a === "menu") return memberMenu(b, p);
+    if (a === "rename") { const i = document.createElement("input"); i.value = ROOM.title; i.maxLength = 40; i.style.cssText = "width:100%;padding:10px;border:1px solid #cbd5e1;border-radius:10px"; modal("Přejmenovat hovor", "", [{ t: "Zrušit" }, { t: "Uložit", cls: "", f: () => { hostCmd("title", "", { title: i.value }); } }], i); return; }
+    hostCmd(a, p);
+  });
+  B.querySelectorAll("[data-s]").forEach(i => i.onchange = () => { const s = {}; s[i.dataset.s] = i.checked; hostCmd("settings", "", { settings: s }); });
+}
+function memberMenu(btn, pid) {
+  const m = ROOM.members.find(x => x.pid === pid); if (!m) return;
+  const st = stOf(pid);
+  const items = [];
+  if (st.mic) items.push(["micOff", "Ztlumit", () => hostCmd("mute", pid)]); else items.push(["mic", "Požádat o zapnutí mikrofonu", () => hostCmd("askUnmute", pid)]);
+  if (st.cam) items.push(["camOff", "Vypnout kameru", () => hostCmd("camOff", pid)]); else items.push(["cam", "Požádat o zapnutí kamery", () => hostCmd("askCam", pid)]);
+  if (st.hand) items.push(["hand", "Sklopit ruku", () => hostCmd("lowerHand", pid)]);
+  if (st.sh) items.push(["share", "Ukončit sdílení obrazovky", () => hostCmd("stopShare", pid)]);
+  items.push(["crown", "Předat roli hostitele", () => modal("Předat roli hostitele?", esc(m.name) + " bude moct pouštět lidi, ztlumit ostatní a ukončit hovor.", [{ t: "Zrušit" }, { t: "Předat", cls: "", f: () => { hostCmd("makeHost", pid); } }])]);
+  items.push(["kick", "Odebrat z hovoru", () => modal("Odebrat " + m.name + "?", m.verified ? "Můžeš mu/jí také zakázat návrat do tohoto hovoru." : "Host bez účtu se může zkusit připojit znovu – můžeš hovor zamknout.", [{ t: "Zrušit" }].concat(m.verified ? [{ t: "Odebrat a zakázat návrat", cls: "red", f: () => { hostCmd("kick", pid, { ban: true }); } }] : []).concat([{ t: "Odebrat", cls: "red", f: () => { hostCmd("kick", pid); } }]))]);
+  const p = popAt(btn, items.map((x, i) => '<button data-i="' + i + '"' + (x[0] === "kick" ? ' class="dng"' : "") + ">" + ic(x[0]) + esc(x[1]) + "</button>").join(""));
+  p.querySelectorAll("button").forEach(b => b.onclick = () => { closePop(); items[+b.dataset.i][2](); });
+}
+
+/* =====================================================================
+   Předsíň
+   ===================================================================== */
+function renderLobbyControls() {
+  $("pvMic").innerHTML = ic(L.mic ? "mic" : "micOff"); $("pvMic").classList.toggle("off", !L.mic); $("pvMic").title = L.mic ? "Vypnout mikrofon" : "Zapnout mikrofon";
+  $("pvCam").innerHTML = ic(L.cam ? "cam" : "camOff"); $("pvCam").classList.toggle("off", !L.cam); $("pvCam").title = L.cam ? "Vypnout kameru" : "Zapnout kameru";
+  $("pvBlur").innerHTML = ic("blur"); $("pvBlur").classList.toggle("on2", L.blur); $("pvBlur").title = L.blur ? "Vypnout rozostření pozadí" : "Rozostřit pozadí";
+  $("mediaErr").textContent = L.err || "";
+}
+async function renderLobby() {
+  show("lobby"); renderLobbyControls();
+  const who = AUTH && AUTH.who;
+  $("lobWho").innerHTML = who ? '<span style="width:28px;height:28px;border-radius:50%;display:grid;place-items:center;color:#fff;font-weight:700;font-size:12px;background:' + colorOf(who.name) + '">' + esc(initials(who.name)) + "</span>" + esc(who.name) : "";
+  $("createBox").classList.toggle("hide", !(who && who.staff));
+  $("joinH").textContent = who && who.staff ? "Připojit se k hovoru" : "Připojit se k hovoru";
+  if (who && who.staff) {
+    try {
+      const r = await api("mine", { token: AUTH.token });
+      $("mineList").innerHTML = r.rooms.length ? '<div class="sec-t" style="margin:16px 0 2px">Tvoje probíhající hovory</div>' + r.rooms.map(x => '<button data-pin="' + x.pin + '"><span style="flex:1"><b>' + esc(x.title) + "</b><small>PIN " + x.pin + " · " + x.people + (x.people === 1 ? " člověk" : x.people > 1 && x.people < 5 ? " lidé" : " lidí") + "</small></span>Vrátit se</button>").join("") : "";
+      $("mineList").querySelectorAll("button").forEach(b => b.onclick = () => doJoin(b.dataset.pin));
+    } catch (e) { }
+  }
+}
+function lobErr(t) { $("lobErr").textContent = t || ""; }
+function busy(btn, on) { btn.disabled = on; if (on) { btn.dataset.t = btn.textContent; btn.textContent = "Chvilku…"; } else if (btn.dataset.t) btn.textContent = btn.dataset.t; }
+async function doCreate() {
+  lobErr();
+  if (!AUTH) { needIS(); return; }
+  const btn = $("cGo"); busy(btn, true);
+  try {
+    const r = await api("create", { token: AUTH.token, title: $("cTitle").value });
+    await enterSession(r);
+    toast("Hovor je založený. PIN <b>" + r.pin + "</b> pošli účastníkům.", { ms: 9000, acts: [{ t: "Zkopírovat pozvánku", cls: "ok", f: () => setTimeout(copyInvite, 300) }] });
+  } catch (e) { lobErr(e.message); } finally { busy(btn, false); }
+}
+async function doJoin(pinArg) {
+  lobErr("");
+  const pin = String(pinArg || $("jPin").value).replace(/\D/g, "");
+  if (pin.length !== 6) { lobErr("PIN má 6 číslic."); return; }
+  if (!AUTH) { needIS(); return; }
+  const btn = $("jGo"); busy(btn, true);
+  try {
+    const r = await api("join", { pin, token: AUTH.token });
+    await enterSession(r);
+  } catch (e) { lobErr(e.message); } finally { busy(btn, false); }
+}
+
+/* ---------- ovládání ---------- */
+function bind() {
+  $("pvMic").onclick = () => setMic(!L.mic);
+  $("pvCam").onclick = () => setCam(!L.cam);
+  $("pvBlur").onclick = () => { if (!L.cam) toast("Rozostření se projeví, až zapneš kameru."); setBlur(!L.blur); };
+  $("selCam").onchange = e => switchDevice("cam", e.target.value);
+  $("selMic").onchange = e => switchDevice("mic", e.target.value);
+  $("selSpk").onchange = e => switchDevice("spk", e.target.value);
+  $("cGo").onclick = () => doCreate();
+  $("jGo").onclick = () => doJoin();
+  $("jPin").addEventListener("input", e => { const d = e.target.value.replace(/\D/g, "").slice(0, 6); e.target.value = d; });
+  $("jPin").addEventListener("keydown", e => { if (e.key === "Enter") doJoin(); });
+  $("wCancel").onclick = () => leaveCall("cancel");
+  $("endAgain").onclick = () => { if (!AUTH) { needIS(); return; } renderLobby(); $("jPin").value = $("endAgain").dataset.pin || ""; if (!L.micTrack && !L.camTrack && !L.blocked) initMedia().then(renderLobbyControls); };
+  $("endHome").onclick = () => { if (EMBED && AUTH) { renderLobby(); if (!L.micTrack && !L.camTrack) initMedia().then(renderLobbyControls); } else { try { window.top.location.href = CFG.isUrl; } catch (e) { location.href = CFG.isUrl; } } };
+  $("bMic").onclick = toggleMic; $("bCam").onclick = toggleCam;
+  $("bShare").onclick = () => L.screen ? stopShare() : (canShare() ? startShare() : toast("Sdílení obrazovky hostitel vypnul."));
+  $("bHand").onclick = () => setHand(!SESS.hand);
+  $("bReact").onclick = e => { e.stopPropagation(); reactMenu(); };
+  $("bMore").onclick = e => { e.stopPropagation(); moreMenu(); };
+  $("bChat").onclick = () => openSide("chat");
+  $("bPeople").onclick = () => openSide("people");
+  $("bLeave").onclick = leaveMenu;
+  $("sideX").onclick = () => openSide(SIDE);
+  $("chatSend").onclick = sendChat;
+  $("chatTxt").addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); sendChat(); } });
+  $("pinChip").onclick = copyInvite;
+  document.addEventListener("keydown", e => {
+    if (!SESS || SESS.status !== "member" || e.ctrlKey || e.metaKey || e.altKey) return;
+    if (/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName || "")) return;
+    const k = e.key.toLowerCase();
+    if (k === "m") toggleMic(); else if (k === "v") toggleCam(); else if (k === "h") setHand(!SESS.hand);
+  });
+  window.addEventListener("resize", closePop);
+}
+
+/* =====================================================================
+   Start
+   ===================================================================== */
+async function boot() {
+  bind();
+  if (EMBED) document.querySelector("#lobby .top").classList.add("hide");   /* v IS je nahoře lišta IS se jménem */
+  if (Q.get("pin")) $("jPin").value = Q.get("pin").replace(/\D/g, "").slice(0, 6);
+  /* přenos z okna IS do samostatného okna */
+  const tk = /#tk=([A-Za-z0-9]+)/.exec(location.hash);
+  if (tk) {
+    history.replaceState(null, "", location.pathname + location.search);
+    try {
+      const r = await api("redeem", { tk: tk[1] });
+      $("bootMsg").innerHTML = '<button class="btn" id="contBtn">Pokračovat v hovoru</button>';
+      await new Promise(res => $("contBtn").onclick = res);
+      $("bootMsg").textContent = "Zapínám kameru a mikrofon…";
+      await initMedia();
+      await enterSession(Object.assign(r, { status: "member" }), false);
+      return;
+    } catch (e) { $("bootMsg").textContent = e.message; }
+  }
+  try { PING = await api("ping", {}, 1); } catch (e) { $("bootMsg").textContent = e.message; if (e.code === "config") return; }
+  /* obnovená stránka uprostřed hovoru */
+  const old = sstore.get("sess");
+  if (old && old.pid) {
+    try {
+      const r = await api("poll", { pin: old.pin, pid: old.pid, pt: old.pt, st: {} }, 0);
+      if (r.me.status === "member" || r.me.status === "waiting") {
+        $("bootMsg").innerHTML = '<button class="btn" id="contBtn">Vrátit se do hovoru</button>';
+        await new Promise(res => $("contBtn").onclick = res);
+        await initMedia();
+        await enterSession(Object.assign({}, old, { status: r.me.status }), false);
+        return;
+      }
+    } catch (e) { }
+    sstore.set("sess", null);
+  }
+  /* přihlášení jen přes IS: okno v IS dostane klíč zprávou is:auth */
+  if (!EMBED && !window.opener) { needIS(); return; }
+  toIS("hov:ready");
+  $("bootMsg").textContent = "Ověřuji přihlášení z IS…";
+  await Promise.race([new Promise(r => authWaiter = r), sleep(25000)]);
+  authWaiter = null;
+  if (!AUTH) { needIS(AUTHERR ? "Přihlášení z IS se nepodařilo ověřit: " + AUTHERR : "Přihlášení z IS nedorazilo. Zkus IS obnovit a Hovor otevřít znovu."); return; }
+  await startLobby();
+}
+let lobbyStarted = false;
+async function startLobby() {
+  await renderLobby();
+  if (!lobbyStarted) { lobbyStarted = true; await initMedia(); }
+  renderLobbyControls();
+  if ($("jPin").value.length === 6 && !AUTH.who.staff) $("jGo").focus();
+}
+boot();
+</script>
+</body>
+</html>
