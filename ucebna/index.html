@@ -166,7 +166,7 @@ details.menu summary{list-style:none}details.menu summary::-webkit-details-marke
 .atts{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:10px;margin:12px 0}
 .att{display:flex;align-items:center;gap:10px;border:1px solid var(--line);border-radius:10px;padding:8px 10px;cursor:pointer;background:#fff;min-width:0;text-decoration:none;color:var(--ink)}
 .att:hover{border-color:var(--b2);background:#fafcff}
-.upl{cursor:default;background:#f8fbff}.bar{height:6px;border-radius:3px;background:var(--b1);overflow:hidden;margin:5px 0 3px}.bar i{display:block;height:100%;background:var(--b6);transition:width .2s}
+.upl{cursor:default;background:#f8fbff}.uerr{background:#fef2f2;border-color:#fecaca}.bar{height:6px;border-radius:3px;background:var(--b1);overflow:hidden;margin:5px 0 3px}.bar i{display:block;height:100%;background:var(--b6);transition:width .2s}
 .ext{width:42px;height:42px;border-radius:8px;display:grid;place-items:center;font-size:10px;font-weight:700;color:#fff;flex:none;letter-spacing:.03em}
 .testbox{border:1px solid #ddd6fe;background:#faf5ff;border-radius:10px;padding:14px;margin:12px 0}
 .graded{background:var(--b0);border-radius:10px;padding:14px;margin:12px 0}
@@ -232,6 +232,7 @@ const CONFIG = {
   isUrl: UC.isUrl || 'https://leernio-cz.github.io/#ucebna',
   maxFile: 300 * 1024 * 1024,
   part: 4 * 1024 * 1024,
+  single: 20 * 1024 * 1024,   // do 20 MB jedním požadavkem (jako fotky)
   pollMs: 30000
 };
 /* Předměty, které Leernio vyučuje (kód = kód v Seznamu studentů / učitelů) */
@@ -467,7 +468,7 @@ function logPushOld(lines,src){ if(!lines.length) return; S.log = S.log||[]; S.l
 function render(){
   const u = cur();
   if(!u){ $('#app').innerHTML = lockScreen(); return; }
-  $('#app').innerHTML = topbar(u) + `<div class="layout ${ui.sidebar?'':'collapsed'}">${sidebar(u)}<main class="main">${mainView(u)}</main></div>`;
+  $('#app').innerHTML = topbar(u) + oldSrvBar(u) + `<div class="layout ${ui.sidebar?'':'collapsed'}">${sidebar(u)}<main class="main">${mainView(u)}</main></div>`;
 }
 function lockScreen(){
   const st = !CONFIG.api ? (window.parent!==window ? 'noconfig' : 'outside') : bridge.state;
@@ -475,6 +476,7 @@ function lockScreen(){
   const d = st==='error' ? (bridge.err || 'Zkus Učebnu v IS zavřít a otevřít znovu.') : st==='outside' ? 'Učebna funguje jen v okně IS Leernio. Přihlas se do IS a otevři Aplikace → Učebna.' : st==='noconfig' ? 'Chybí adresa serveru Učebny v souboru config.js.' : 'Přihlášení se převezme z IS automaticky.';
   return `<div style="min-height:100vh;display:grid;place-items:center;padding:24px"><div class="card pad" style="max-width:420px;text-align:center;padding:36px 28px"><div style="display:flex;justify-content:center;margin-bottom:14px">${LOGO.replace('width="38" height="38"','width="64" height="64"')}</div><h2 style="color:var(--b8)">${t}</h2><p class="mut">${esc(d)}</p>${st==='outside'||st==='error'?`<a class="btn pri" href="${CONFIG.isUrl}" target="_top" rel="noopener">Otevřít IS Leernio</a>`:''}</div></div>`;
 }
+function oldSrvBar(u){ return u && u.role!=='student' && SRVV && SRVV < SRV_NEED ? `<div style="background:#fef3c7;border-bottom:1px solid #fde68a;color:#92400e;padding:8px 16px;font-size:13px;font-weight:600">Server Učebny běží ve starší verzi (${esc(SRVV)}, potřeba ${SRV_NEED}). Některé funkce (např. nahrávání větších souborů) nebudou fungovat. V Apps Scriptu dejte Nasadit → Spravovat nasazení → tužka → Verze: Nová verze → Nasadit.</div>` : ''; }
 function topbar(u){
   let crumb = '';
   if(['room','item','studentcard'].includes(ui.view) && R(ui.roomId)){ const r = R(ui.roomId); crumb = `<div class="crumb">${ic('chev',16)}<b data-act="open-room" data-id="${r.id}">${esc(r.name)}</b><span class="hide-sm ell">${esc(r.section||'')}</span></div>`; }
@@ -783,7 +785,7 @@ function openModal(title,body,o={}){
   $('#modal-root').innerHTML = `<div class="mback" data-act="modal-bg"><form class="modal ${o.wide?'wide':''}" data-form="modal" ${o.k?`data-k="${o.k}"`:''} novalidate><div class="mh"><h3>${title}</h3><button type="button" class="iconbtn" data-act="modal-close">${ic('x')}</button></div><div class="mb">${body}</div><div class="mf">${o.extra||''}<span class="spacer"></span><button type="button" class="btn" data-act="modal-close">${o.onSubmit?'Zrušit':'Zavřít'}</button>${o.onSubmit?`<button class="btn pri ${o.danger?'dangerbg':''}" data-lbl="${esc(o.submit||'Uložit')}">${o.submit||'Uložit'}</button>`:''}</div></form></div>`;
   const f = $('#modal-root input:not([type=hidden]):not([type=file]),#modal-root textarea'); if(f && !o.noFocus) setTimeout(()=>f.focus(),30);
 }
-function closeModal(){ $('#modal-root').innerHTML=''; M=null; PEND=[]; MSESS++; }
+function closeModal(){ $('#modal-root').innerHTML=''; M=null; PEND=[]; MSESS++; UPLOADS = UPLOADS.filter(u => !(u.ctx==='pend' && u.err)); }
 function confirmBox(text,fn,btn='Smazat'){ openModal('Opravdu?',`<p style="margin:0">${text}</p>`,{submit:btn,danger:true,noFocus:true,onSubmit:()=>{fn();return true;}}); }
 let MSESS = 0;
 const pendHtml = () => (attList(PEND,'pend-del') + uplHtml('pend')) || '<p class="mut xs" style="margin:0">Zatím žádné soubory</p>';
@@ -931,17 +933,21 @@ function findAtt(id){ for(const list of [PEND,...S.items.map(i=>i.attachments||[
    do 4 MB jedním požadavkem, větší po částech (server je posílá rovnou na Disk); průběh se ukazuje u formuláře
    a dokud nahrávání neskončí, nejde formulář odeslat ani úkol odevzdat */
 let UPLOADS = [];
-const uplBusy = ctx => UPLOADS.some(u => u.ctx===ctx);
-function uplHtml(ctx){ return UPLOADS.filter(u=>u.ctx===ctx).map(u=>{ const e=extInfo(u.name); return `<div class="att upl"><div class="ext" style="background:${e.c}">${e.l}</div><div class="grow"><div class="ell">${esc(u.name)}</div><div class="bar"><i style="width:${u.pct}%"></i></div><div class="mut xs">Nahrávám… ${u.pct} % z ${fsize(u.size)}</div></div></div>`; }).join(''); }
+const uplBusy = ctx => UPLOADS.some(u => u.ctx===ctx && !u.err);
+function uplHtml(ctx){ return UPLOADS.filter(u=>u.ctx===ctx).map(u=>{ const e=extInfo(u.name);
+  if(u.err) return `<div class="att upl uerr"><div class="ext" style="background:#dc2626">!</div><div class="grow"><div class="ell">${esc(u.name)}</div><div class="xs" style="color:#b91c1c">Nenahráno: ${esc(u.err)}</div></div><button type="button" class="iconbtn s" data-act="upl-x" data-id="${u.key}" title="Zavřít">${ic('x',14)}</button></div>`;
+  return `<div class="att upl"><div class="ext" style="background:${e.c}">${e.l}</div><div class="grow"><div class="ell">${esc(u.name)}</div><div class="bar"><i style="width:${u.pct}%"></i></div><div class="mut xs">Nahrávám… ${u.pct} % z ${fsize(u.size)}</div></div></div>`; }).join(''); }
 function uplPaint(ctx){
   if(ctx==='pend'){ const el=$('#pend'); if(el) el.innerHTML=pendHtml(); const b=document.querySelector('.modal .mf button.pri'); if(b){ b.disabled=uplBusy('pend'); b.textContent = uplBusy('pend') ? 'Nahrávám soubory…' : (b.dataset.lbl||b.textContent); } }
   else { const el=document.getElementById('upl-'+ctx); if(el) el.innerHTML=uplHtml(ctx); const b=document.querySelector(`button[data-act="sub-submit"][data-id="${ctx}"]`); if(b) b.disabled=uplBusy(ctx); }
 }
 const b64Of = blob => new Promise((res,rej)=>{ const fr=new FileReader(); fr.onload=()=>res(String(fr.result).split(',')[1]||''); fr.onerror=()=>rej(new Error('Soubor nejde přečíst.')); fr.readAsDataURL(blob); });
-async function uploadOne(f, onPct){
-  const type = f.type || 'application/octet-stream';
-  if(f.size <= CONFIG.part){ const b64 = await b64Of(f); onPct(60); const m = await api('upload',{name:f.name,type,b64}); onPct(100); return m; }
-  const st = await api('upStart',{name:f.name,type,size:f.size}); let off = 0, tries = 0;
+async function uploadSingle(f, type, onPct){ const b64 = await b64Of(f); onPct(50); const m = await api('upload',{name:f.name,type,b64}); onPct(100); return m; }
+async function uploadChunked(f, type, onPct){
+  let st;
+  try { st = await api('upStart',{name:f.name,type,size:f.size}); }
+  catch(e){ if(e.code==='bad_action') throw new Error('Server Učebny je zastaralý – nasaďte nový Code.gs (Nasadit → Spravovat nasazení → Nová verze).'); throw e; }
+  let off = 0, tries = 0;
   while(off < f.size){
     try {
       const r = await api('upChunk',{uid:st.uid,offset:off,b64:await b64Of(f.slice(off, off+st.part))});
@@ -950,6 +956,14 @@ async function uploadOne(f, onPct){
     } catch(e){ if(e.code==='net' && ++tries <= 3){ await new Promise(r=>setTimeout(r,2000*tries)); continue; } throw e; }
   }
   throw new Error('Nahrávání se nedokončilo.');
+}
+async function uploadOne(f, onPct){
+  const type = f.type || 'application/octet-stream';
+  if(f.size <= CONFIG.single){
+    try { return await uploadSingle(f, type, onPct); }
+    catch(e){ if(e.code==='too_large' && f.size > CONFIG.part) return await uploadChunked(f, type, onPct); throw e; }   /* starší server bere jedním požadavkem jen menší soubory */
+  }
+  return await uploadChunked(f, type, onPct);
 }
 async function readFiles(files, ctx, onEach){
   const out = [], sess = MSESS;
@@ -960,8 +974,8 @@ async function readFiles(files, ctx, onEach){
     try { const meta = await uploadOne(u.f, p => { u.pct = p; uplPaint(ctx); }); FILECACHE[meta.id] = URL.createObjectURL(u.f); out.push(meta);
       UPLOADS = UPLOADS.filter(x => x!==u);
       if(onEach && !(ctx==='pend' && sess !== MSESS)) onEach(meta);   /* hotový soubor se ukáže hned, ne až po všech */ }
-    catch(err){ toast(`${u.name}: ${err.message}`); }
-    finally { UPLOADS = UPLOADS.filter(x => x!==u); uplPaint(ctx); }
+    catch(err){ u.err = err.message || 'chyba'; toast(`${u.name}: nenahráno`); }
+    finally { if(!u.err) UPLOADS = UPLOADS.filter(x => x!==u); uplPaint(ctx); }
   }
   if(ctx==='pend' && sess !== MSESS) return [];   /* formulář mezitím zavřený */
   if(out.length) toast(out.length===1?'Soubor nahrán':`Nahráno souborů: ${out.length}`);
@@ -971,7 +985,7 @@ async function readFiles(files, ctx, onEach){
 /* ---------- IS bridge ---------- */
 function send(type,payload={}){ if(window.parent===window) return; try { window.parent.postMessage(Object.assign({src:'ucebna',v:1,type:'uceb:'+type},payload), CONFIG.isOrigin); } catch(e){} }
 /* ---------- server Učebny ---------- */
-let TOKEN = null;
+let TOKEN = null, SRVV = '';
 async function api(action,payload={}){
   if(!CONFIG.api) throw new Error('Učebna není nastavená.');
   let r;
@@ -981,7 +995,7 @@ async function api(action,payload={}){
   if(!j.ok){ const er = new Error(j.error||'Chyba serveru.'); er.code=j.code||''; if(er.code==='auth' && bridge.authed){ bridge.authed=false; TOKEN=null; send('auth-error',{error:er.message}); } throw er; }
   return j.data;
 }
-const SRV_NEED = '2026-11-13c';
+const SRV_NEED = '2026-11-13d';
 const COLMAP = {users:'users',rooms:'rooms',chapters:'chapters',items:'items',posts:'posts',grades:'grades',submissions:'subs',testResults:'results'};
 const ORDER = ['users','rooms','chapters','items','posts','grades','submissions','testResults'];
 let SNAP = {}, saving = false, dirty = false, saveTimer = null, lastViewJSON = '';
@@ -991,7 +1005,7 @@ function applyView(v){
   S = {subjects:v.subjects||[],users:v.users||[],rooms:v.rooms||[],chapters:v.chapters||[],items:v.items||[],submissions:v.subs||[],grades:v.grades||[],posts:v.posts||[],testResults:v.results||[],tests:v.tests||[],log:v.log||[]};
   SNAP = snapOf(S);
   if(v.me){ me = v.me.u; }
-  if(v.me && v.me.role!=='student' && String(v.v||'') < SRV_NEED && !applyView.warned){ applyView.warned = true; setTimeout(()=>toast(`Server Učebny je starší verze (${v.v||'?'}) – nasaďte nový Code.gs (Nová verze).`), 800); }
+  SRVV = String(v.v||'');
 }
 function diffOps(){
   const cur = snapOf(S), sets = [], dels = [];
@@ -1160,6 +1174,7 @@ const ACT = {
   'ch-up':id=>moveCh(id,-1), 'ch-down':id=>moveCh(id,1),
   'ch-toggle':id=>{ ui.closed[id]=!ui.closed[id]; render(); },
   'preview':id=>{ if(document.querySelector('.modal[data-k]')){ toast('Náhled souboru otevřete po uložení.'); return; } previewAtt(id); },
+  'upl-x':key=>{ const u=UPLOADS.find(x=>x.key===key); UPLOADS=UPLOADS.filter(x=>x.key!==key); if(u) uplPaint(u.ctx); },
   'pend-del':idx=>{ PEND.splice(+idx,1); $('#pend').innerHTML=pendHtml(); },
   'sub-att-del':id=>{ const [iid,idx]=id.split('|'); const s=subOf(iid,me); if(s){ s.attachments.splice(+idx,1); changed(); } },
   'sub-submit':id=>{ if(uplBusy(id)){ toast('Počkejte, až se soubory nahrají.'); return; } const s=getSub(id,me); const ta=document.querySelector(`textarea[data-change="sub-text"][data-id="${id}"]`); if(ta) s.text=ta.value; s.status='submitted'; s.submittedAt=Date.now(); changed(); toast('Odevzdáno'); },
